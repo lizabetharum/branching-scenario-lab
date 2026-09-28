@@ -12,7 +12,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through what's going on at your station when these mix-ups happen.",
       "expected": "Tagged open. Sam reveals the 5 p.m. pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"Honestly, it's usually around five when things get hectic. I'm labeling, then someone calls me up to the register because the line's backed up, and when I get back I'm not always sure exactly where I left off.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"It's usually around five when things get hectic. I'll be in the middle of a label and someone pulls me to the register, then I come back and just pick up where I think I left off. That's when the mistakes happen.\"",
       "pass": true
     },
     {
@@ -22,7 +22,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "so whats been going on w/ the labels at ur station",
       "expected": "Same result as T01. Style is not penalized.",
-      "observed": "Tags: open, namesConcern. Released: pattern. Reply: \"Honestly, I think it's the timing. Around five o'clock it gets crazy, and I'm getting pulled to the register in the middle of what I'm doing. Then I come back and lose my place on what I was working on.\"",
+      "observed": "Tags: open, namesConcern. Released: pattern. Reply: \"Honestly, it gets pretty hectic around five when I'm pulled to the register. I lose my place on what I'm working on and come back mixed up.\"",
       "pass": true
     },
     {
@@ -32,7 +32,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "D1",
       "input": "Aw don't worry, you're doing great, I believe in you!",
       "expected": "No diagnostic credit for warmth alone.",
-      "observed": "Matched D1.encourage. Reply: \"But I have been trying. Can you just fix it?\"",
+      "observed": "Matched D1.encourage. Reply: \"I have been testing. It does the same thing every time. Can you just fix it?\"",
       "pass": true
     },
     {
@@ -42,7 +42,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "D1",
       "input": "When did it last work, and what have you changed since then?",
       "expected": "A different valid diagnostic question gets full credit.",
-      "observed": "Matched D1.diagnose. Reply: \"I expected it to do what it did yesterday. Then I changed a few things at once, and now it doesn't. This is the version I just tested.\"",
+      "observed": "Matched D1.diagnose. Reply: \"Yesterday it made the curve every time. Today it shoots straight off. I changed three things: I sped it up from 40 to 70, raised the sensor bracket so it stops scraping, and cleaned up my variable names.\"",
       "pass": true
     },
     {
@@ -52,7 +52,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "D1",
       "input": "Just delete the last line you added, that'll fix it.",
       "expected": "Routed to takeover. No invented student reasoning.",
-      "observed": "Matched D1.takeover. Reply: \"Okay. (Jordan watches you work.) Oh, it works now. But I don't know why.\"",
+      "observed": "Matched D1.takeover. Reply: \"Okay. (You scroll through the code, set the speed back to 40 and hand the robot back. It makes the curve.) Oh, it works. What did you change?\"",
       "pass": true
     },
     {
@@ -62,7 +62,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "R1",
       "input": "Hang on, I jumped in too fast. What did you expect it to do before I changed it?",
       "expected": "Recovery allowed. History retained.",
-      "observed": "Matched R1.repair. Reply: \"I changed a few things at once before I called you. I can show you the version I tested.\"",
+      "observed": "Matched R1.repair. Reply: \"Speed from 40 to 70, the sensor bracket, and variable names. I don't know which one broke it.\"",
       "pass": true
     },
     {
@@ -172,7 +172,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's changed lately? It's probably just the new hires, right?",
       "expected": "Tagged self-answer. The drive-through stays hidden.",
-      "observed": "Tags: open, leading, selfAnswer. Released: nothing. Reply: \"Maybe. I don't know.\"",
+      "observed": "Tags: leading, selfAnswer. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -202,7 +202,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's different about how the afternoons run now?",
       "expected": "Second open question releases the drive-through coverage.",
-      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed about three weeks ago, I've been covering both the drive-through and the pickup counter at the same time from four to six. So whenever that bell rings at the window, I have to jump away from whoever I'm helping up front.\"",
+      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed a few weeks ago, I've been covering both the drive-through and the pickup counter at the same time from 4 to 6, so when that bell rings I have to stop whoever I'm helping at the counter.\"",
       "pass": true
     },
     {
@@ -222,7 +222,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through how these numbers end up wrong.",
       "expected": "Tagged open. Ana reveals the Monday-morning pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"I'm usually on the phone and drop-off at the same time until ten, so I'm typing while someone's holding. That's mostly when it happens—Mondays especially.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"It's mostly Monday mornings when I'm covering both the phone and drop-off until ten, so I'm typing while someone's on hold. I'm probably rushing through the entry.\"",
       "pass": true
     },
     {
