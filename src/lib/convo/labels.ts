@@ -56,13 +56,15 @@ export function makeLabelsEvaluate(o: { name: string; cause: string; surface: st
 
   const P4 = "Agreed on a specific next step and check-in";
   const plan = planTrace(turns);
+  // What the character actually offered when asked, even if it wasn't a formal proposal.
+  const offeredAt = plan.askAt >= 0 ? turns.findIndex((t, i) => i >= plan.askAt && (t.released.includes("surfaceIdea") || t.released.includes("idea"))) : -1;
   const p4 =
     plan.confirmAt >= 0
       ? cr("P4", P4, "demonstrated", supportAt(turns, plan.confirmAt), `${proposedQ(o.name, turns[plan.proposeAt])} ${confirmedQ(turns[plan.confirmAt])}`, "Keep closing with who does what, and when you'll check.")
       : plan.proposeAt >= 0
         ? cr("P4", P4, "partial", supportAt(turns, plan.proposeAt), `${proposedQ(o.name, turns[plan.proposeAt])} You never confirmed it, so nothing was agreed.`, "When a step and a time are proposed, confirm them or adjust them out loud.")
         : plan.askAt >= 0
-          ? cr("P4", P4, "partial", supportAt(turns, plan.askAt), `You asked for a next step, but ${o.name} never proposed one. ${q(turns[plan.askAt])}`, `${o.name} can only commit once there's an idea on the table. Ask for ideas first, then for the first step.`)
+          ? cr("P4", P4, "partial", supportAt(turns, plan.askAt), offeredAt >= 0 ? `${o.name} offered: "${turns[offeredAt].reply}" ${turns[offeredAt].released.includes("surfaceIdea") ? `That targets ${o.surface}, not ${o.cause},` : "That was an idea,"} and you never confirmed a specific step and time. ${q(turns[plan.askAt])}` : `You asked for a next step, but ${o.name} never offered one. ${q(turns[plan.askAt])}`, `${o.name} can only commit once there's an idea on the table. Ask for ideas first, then for the first step.`)
           : cr("P4", P4, "not_observed", "n/a", "The conversation ended without anyone proposing a next step.", `Ask what ${o.name} will do first and when you'll follow up.`);
 
   return [p1, p2, p3, p4];

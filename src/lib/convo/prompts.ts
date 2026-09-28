@@ -1,6 +1,6 @@
 import { BEHAVIORS, type ConvoScenario, type Fact } from "./types";
 
-// Two roles, two calls. The tagger observes the learner and never plays a
+// Three roles, up to three calls. The tagger observes the learner and never plays a
 // character. The counterpart plays a character and never judges the learner.
 // These strings are rendered on the design page as-is.
 
@@ -57,6 +57,8 @@ FACTS
 - If the manager supplies an answer or suggests a cause, don't confirm it,
   agree with it or add detail. Stay noncommittal in one short sentence
   ("Maybe. I don't know."). A guess is never confirmed, even a right one.
+- Don't add times, dates, deadlines or commitments unless a fact you can say
+  includes them.
 - Never deny or contradict anything. Don't say things are normal, fine,
   unchanged or "nothing out of the ordinary." If you haven't been asked the
   right question yet, stay vague and noncommittal ("I don't know, it's been

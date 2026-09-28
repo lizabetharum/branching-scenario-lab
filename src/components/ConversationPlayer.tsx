@@ -202,7 +202,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           <ul className="mt-3 list-disc space-y-1.5 pl-5 text-ink/85">
             {s.prebrief.map((x) => <li key={x}>{x}</li>)}
             <li>
-              Each reply goes to an AI model ({PROVIDER_LABEL}) twice: once to label what you did, once to write {name}&apos;s answer. This app keeps no transcript, no account and no analytics. <Link href="/design#privacy" className="link">What happens to your data</Link>
+              Each reply goes to an AI model ({PROVIDER_LABEL}) up to three times: once to label what you did, once to write {name}&apos;s answer, and once to check that answer doesn&apos;t give away something you haven&apos;t asked about. This app keeps no transcript, no account and no analytics. <Link href="/design#privacy" className="link">What happens to your data</Link>
             </li>
           </ul>
           <button onClick={start} className="btn-primary mt-6">Start the conversation</button>

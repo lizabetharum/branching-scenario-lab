@@ -16,7 +16,9 @@ export function attemptSummary(s: ConvoScenario, turns: ConvoTurn[]) {
   const missing: string[] = [];
   if (key && !released.includes(key.id)) missing.push(`The cause. ${name} knew something you couldn't see, and no question reached it.`);
   if (key && released.includes(key.id) && !ownIdea) missing.push(`${name}'s own idea for fixing it.`);
-  if (plan.proposeAt < 0) missing.push(`A specific next step and check-in proposed by ${name}.`);
+  const surfaceOffered = released.includes("surfaceIdea") && !ownIdea;
+  if (plan.proposeAt < 0 && surfaceOffered) missing.push(`A plan that addresses the cause. ${name}'s suggestion targets the surface problem, and no specific step and time was confirmed.`);
+  else if (plan.proposeAt < 0) missing.push(`A specific next step and check-in proposed by ${name}.`);
   else if (plan.confirmAt < 0) missing.push(`Your confirmation of the step ${name} proposed.`);
   else if (plan.kind === "commitManager") missing.push(`A plan from ${name}. The one agreed came from you.`);
   return {

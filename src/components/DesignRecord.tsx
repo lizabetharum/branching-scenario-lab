@@ -7,7 +7,7 @@ import { DEFAULT_MODEL } from "@/lib/model-info";
 // Tables that describe the map are generated from the scenario data, so they
 // can't drift from what runs.
 
-export const VERSION = "v2.4";
+export const VERSION = "v2.5";
 export const VERSION_DATE = "2026-09-28";
 
 const BRIEF = {
@@ -98,6 +98,8 @@ const REVISIONS = [
   ["RV-25", "Second outside review: P1 gave full credit for three open questions including a general usefulness question and a premature planning question.", "Major", "Question count stood in for investigative quality", "P1 counts only open questions about the problem, and full credit needs one that builds on what the character revealed. Priya's Q2 counts only questions about the problem. Evidence shows both counts.", "C4, check-maps REVIEW 2 FINDING 3, P1 follow-up checks"],
   ["RV-26", "Second outside review asked whether a human would reach the same conclusions from the transcript. The review page showed the AI's scores first, which anchors a reviewer.", "Major", "No independent comparison was possible", "Blind rating mode: the reviewer rates from the transcript alone, then reveals the AI's scores and agreement per criterion.", "Headless Chrome check of blind and revealed states"],
   ["RV-27", "A blind-mode screenshot showed P4 and Q4 anchors still describing the old rule (\"a next step or a check-in, not both\").", "Major", "Anchors weren't updated when agreement became propose then confirm", "Rewrote both anchors to match the scoring. A blind rater now reads the same rule the app applies.", "Visual check"],
+  ["RV-28", "Third outside review: Sam offered to slow down, double-check and review next week, but the debrief said \"Sam never proposed one.\"", "Minor", "Feedback only recognized a formal proposal. The character also added a time the fact didn't contain.", "P4 and Q4 feedback now quote what was offered and say it didn't address the cause and wasn't confirmed. The debrief summary says the same. Characters may no longer add times or commitments a fact doesn't include.", "check-maps REVIEW 3"],
+  ["RV-29", "Third outside review: the prebrief said each reply goes to the AI twice, while the design page described a third leak-check call.", "Minor", "Disclosure not updated when the leak check was added", "Prebrief, design table and privacy table now say up to three calls and list what each receives.", "Manual check"],
 ] as const;
 
 const RATINGS: [string, string, string, string, string, string][] = [
