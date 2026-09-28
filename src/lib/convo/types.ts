@@ -9,7 +9,7 @@ export const BEHAVIORS = {
   closed: "Asks a yes/no or single-fact question.",
   leading: "Asks a question that suggests its own answer or proposes a cause for the other person to confirm (\"Don't you think...\", \"Is it because...\", \"Wouldn't X fix it?\").",
   selfAnswer: "Asks a question and then answers it in the same turn, or immediately offers the likely answer.",
-  interpretation: "States a cause, judgment or conclusion about the person or the situation.",
+  interpretation: "States a new cause, judgment or conclusion about the person or the situation. Restating, summarizing or checking something the other person already said is not interpretation. Label that acknowledge (or closed, if it is a yes/no check).",
   instruction: "Tells the person what to do, or supplies the plan or solution.",
   askOptions: "Asks the person for their ideas, options or what they think would work.",
   wayForward: "Asks for or agrees on a specific next step and who will do it.",

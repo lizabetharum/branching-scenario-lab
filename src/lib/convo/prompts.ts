@@ -13,6 +13,10 @@ LABEL
 - Assign every behavior that applies, or none. Judge what the learner did, not
   the words used. Accept casual, short or imperfect wording.
 - Warmth or politeness alone is not an open question.
+- Checking back something the other person already said is acknowledge (and
+  closed, if yes/no), never interpretation. Example: after the person says it
+  mostly happens on Mondays, "So it's mostly Monday mornings?" is closed and
+  acknowledge. Interpretation means adding a cause or judgment they didn't give.
 - A question followed by the learner's own guess at the answer gets both
   "open" (if it was open) and "selfAnswer".
 - If you are unsure a behavior occurred, leave it out.
