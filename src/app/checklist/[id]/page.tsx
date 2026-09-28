@@ -27,7 +27,8 @@ export default async function Page(props: PageProps<"/checklist/[id]">) {
         For a colleague observing {c.role === "Classroom teacher" ? "a teacher" : "a manager"} in a real conversation. Mark only what you see or hear. If there was no chance for a behavior, mark it &ldquo;no chance,&rdquo; not &ldquo;not seen.&rdquo;
       </p>
       <p className="mt-3 rounded-lg bg-paper p-3 text-sm"><b>Counts as a conversation to observe:</b> {c.eligible}</p>
-      <table className="mt-5 w-full border-collapse text-sm">
+      <div className="mt-5 overflow-x-auto">
+      <table className="w-full min-w-[560px] border-collapse text-sm">
         <thead>
           <tr className="border-b-2 border-ink text-left">
             <th className="p-2">Behavior and what to look for</th>
@@ -45,6 +46,7 @@ export default async function Page(props: PageProps<"/checklist/[id]">) {
           ))}
         </tbody>
       </table>
+      </div>
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-ink/30 p-3 text-sm"><b>Notes (describe the situation, not the person):</b><div className="h-24" /></div>
         <div className="rounded-lg border border-ink/30 p-3 text-sm">
