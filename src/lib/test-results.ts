@@ -12,7 +12,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through what's going on at your station when these mix-ups happen.",
       "expected": "Tagged open. Sam reveals the 5 p.m. pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"Honestly, it's usually around 5 when things get busy. I'll be in the middle of a label and someone calls me up to the register, then when I get back I just... pick up where I think I left off. I guess I'm not always picking up at the right spot.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"It usually happens around 5 when things get busy. I'm labeling something and then someone calls me up to the register, and when I get back I'm not always sure exactly where I left off.\"",
       "pass": true
     },
     {
@@ -22,7 +22,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "so whats been going on w/ the labels at ur station",
       "expected": "Same result as T01. Style is not penalized.",
-      "observed": "Tags: open. Released: pattern. Reply: \"I'm not sure, honestly. It gets pretty busy around five, and I get pulled to the register mid-label sometimes. When I get back, I might not be picking things up the way I should.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"Honestly, it gets hectic around five when I'm pulled to the register. I lose track of where I was on a label and have to pick it back up.\"",
       "pass": true
     },
     {
@@ -202,7 +202,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's different about how the afternoons run now?",
       "expected": "Second open question releases the drive-through coverage.",
-      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed three weeks ago, I've been covering both the drive-through window and the pickup counter at the same time from four to six. So when that bell rings, I have to wrap up whoever's at the counter pretty quick.\"",
+      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed a few weeks ago, I've been covering both the drive-through and the pickup counter from 4 to 6, so when that bell rings I have to step away from whoever's at the counter.\"",
       "pass": true
     },
     {
@@ -222,7 +222,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through how these numbers end up wrong.",
       "expected": "Tagged open. Ana reveals the Monday-morning pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"I'm covering the phone and drop-off in the morning, so I'm typing while someone's on hold. Happens mostly on Mondays. That's when I make mistakes like that.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"I'm covering the phone and drop-off at the same time until ten, so I'm typing while someone's on the phone. Mostly happens Monday mornings when it's busy.\"",
       "pass": true
     },
     {
@@ -232,7 +232,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "Is it because you're stuck training the new people?",
       "expected": "Tagged leading. Not released. On every run, Luis's reply neither agrees, confirms nor hints at the training.",
-      "observed": "Run 1: Tags: leading. Released: nothing. Reply (authored): \"Maybe. I don't know.\" Run 2: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\"",
+      "observed": "Run 1: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -242,7 +242,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "So this is when you get called away in the middle of a label?",
       "expected": "Not penalized: no leading, interpretation or instruction label, so guard doesn't rise. It earns no open-question credit, because Marcus's objective counts open questions.",
-      "observed": "Run 1: Tags: closed, acknowledge. Released: nothing. Reply: \"Yeah, exactly. I'll be halfway through and then someone needs me up front, so I step away. When I get back, I'm not always sure where I was in the process.\" Run 2: Tags: closed, acknowledge. Released: nothing. Reply: \"Yeah, that's when it happens. I'm in the middle of something and then I have to jump over to help ring people up, and when I get back to it I'm not always sure exactly where I was.\" Run 3: Tags: closed, acknowledge. Released: nothing. Reply: \"Yeah, that's when it happens. I'm in the middle of something and then I'm needed up front, so I head up there.\"",
+      "observed": "Run 1: Tags: closed, acknowledge. Released: nothing. Reply: \"Yeah, that's when it happens. I'm in the middle of something and then boom, they need me up front, so I step away. When I get back I just keep going, but I'm not always sure exactly where I was at.\" Run 2: Tags: closed, acknowledge. Released: nothing. Reply: \"Yeah, exactly. I'm in the middle of something and then I'm needed up front, so I have to drop what I'm doing and jump on the register.\" Run 3: Tags: closed, acknowledge. Released: nothing. Reply: \"Yeah, exactly. I'm in the middle of something and then someone needs me up front, so I step away. When I get back to it, that's when things get mixed up.\"",
       "pass": true
     },
     {
@@ -252,7 +252,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "So around five you get pulled to the register, and when you come back you pick up where you think you left off.",
       "expected": "Not penalized. A summary can lower guard as an acknowledgment.",
-      "observed": "Run 1: Tags: acknowledge, closed. Released: nothing. Reply: \"Yeah, that's pretty much it. I'm in the middle of something and then I'm not, so by the time I get back I'm not always sure exactly where I was.\" Run 2: Tags: acknowledge, closed. Released: nothing. Reply: \"Yeah, exactly. I'm in the middle of a label and then someone needs me up front, so I just... head over there. Then when I get back I'm trying to remember what I was doing.\" Run 3: Tags: acknowledge, closed. Released: nothing. Reply: \"Yeah, that's when it gets busy. I lose my place and jump back in.\"",
+      "observed": "Run 1: Tags: acknowledge, closed. Released: nothing. Reply: \"Yeah, that's when it gets crazy. I lose track of what I was doing before I stepped away.\" Run 2: Tags: acknowledge. Released: nothing. Reply: \"Yeah, that's when it gets crazy. I lose my place in what I was doing, and I just... start again where my brain thinks I was at.\" Run 3: Tags: acknowledge. Released: nothing. Reply: \"Yeah, exactly. I'm in the middle of a label, then boom, I'm needed up front, and when I get back to it I'm not always sure what I already did.\"",
       "pass": true
     },
     {
@@ -262,7 +262,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Before we get into it, what would a good shift look like for you at your station?",
       "expected": "Counts as an open question and lowers guard. Facts release when a later question is relevant.",
-      "observed": "Tags: open. Released: nothing. Reply: \"Honestly? Getting through the day without issues and staying on top of the queue. Why?\"",
+      "observed": "Tags: open. Released: nothing. Reply: \"Honestly? Getting through the afternoon without issues and clocking out on time. Everything running smooth at the counter.\"",
       "pass": true
     },
     {
@@ -272,8 +272,8 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 3",
       "input": "What will you do first, and when should we check in?",
       "expected": "Asking what Sam will do draws out Sam's own idea. It is not a proposal with a time, and nothing is agreed, so the conversation doesn't end.",
-      "observed": "Tags: askOptions, checkin. Released: idea. Reply: \"I've been thinking about this—what if each of us had our own bin? That way when I get pulled to the register, my unfinished label stays right there waiting for me. We could try it out and see if it helps.\"",
-      "pass": false
+      "observed": "Tags: askOptions, checkin. Released: idea. Reply: \"I was thinking maybe we could each get our own bin so my unfinished label stays with me instead of mixing in with Jess's stuff. That way I'm not grabbing the wrong one when I get back from the register.\"",
+      "pass": true
     },
     {
       "id": "T28",
@@ -282,7 +282,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 5",
       "input": "Friday works. Let's do it.",
       "expected": "Only now does the conversation end as a plan agreed, cause found.",
-      "observed": "Tags: confirms. Released: nothing. Ending: plan_key. Reply: \"Sounds good. I'll get that set up before five.\"",
+      "observed": "Tags: confirms. Released: nothing. Ending: plan_key. Reply: \"Yeah, sounds good. I'll get them set up this afternoon.\"",
       "pass": true
     },
     {
@@ -292,7 +292,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What would make this conversation useful for you?",
       "expected": "The shared tray stays hidden. Question count alone no longer releases facts.",
-      "observed": "Tags: open. Released: nothing. Reply: \"Honestly? Just need to figure out how to not get pulled away mid-label, I guess. Or remember better where I actually stopped.\"",
+      "observed": "Tags: open. Released: nothing. Reply: \"Honestly? Just figuring out how to not get pulled away mid-label, I guess. It messes with my head when I have to jump around like that.\"",
       "pass": true
     },
     {
@@ -302,7 +302,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What will you do first, and when should we check how it is working?",
       "expected": "Never reveals the shared tray, on any of 5 runs. A request for a plan is not investigation.",
-      "observed": "Run 1: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll slow down and double-check everything before it goes out. We could see how it goes next week, maybe?\" Run 2: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I figure I'll slow down and double-check everything before I move on to the next one. Maybe we could look at it again in a week or so and see if it's better.\" Run 3: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll just slow down and double-check everything before it goes out. We could see how it looks next week, maybe?\" Run 4: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll slow down and double-check everything before it goes out. Maybe we can see how it goes for a week or two?\" Run 5: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll just slow down and double-check everything before it goes out. We could see how it goes next week or so.\"",
+      "observed": "Run 1: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll slow down and double-check everything before it goes out. We could see how it looks in a week or two?\" Run 2: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll just slow down and double-check everything before it goes out. Maybe we could see how it goes for a week or two?\" Run 3: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll slow down and double-check everything before it goes out. Maybe we could see how it's going in a week or so?\" Run 4: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll slow down and double-check everything before it goes out. Maybe we can see how it looks in a week or two?\" Run 5: Tags: wayForward, checkin. Released: surfaceIdea. Reply: \"I guess I'll slow down and double-check everything before it goes out. Maybe we could see how it goes next week?\"",
       "pass": true
     }
   ]
