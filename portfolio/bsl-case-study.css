@@ -1,0 +1,264 @@
+/* Branching Scenario Lab case study
+   Every rule is scoped under .bsl so the WordPress theme can't leak in and
+   these styles can't leak out. Colors match the live site.
+   Text contrast (measured): body #1d2433 on #fbf8f2 is 14.7:1. Muted text uses
+   rgba(29,36,51,.78), 7.1 to 7.6:1 on cream, white and paper. Labels #0b5953 on white are 8.2:1. Every button label is 6.4:1 or higher. */
+
+.bsl {
+  --bsl-ink: #1d2433;
+  --bsl-muted: rgba(29, 36, 51, 0.78);
+  --bsl-cream: #fbf8f2;
+  --bsl-paper: #f6f1e7;
+  --bsl-teal: #0f766e;
+  --bsl-teal-dark: #0b5953;
+  --bsl-coral: #e0704f;
+  --bsl-coral-dark: #a8391f;
+  --bsl-mustard: #e3a83b;
+  --bsl-line: rgba(29, 36, 51, 0.12);
+  --bsl-sans: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bsl-serif: "Source Serif 4", Georgia, serif;
+  --bsl-mono: "Roboto Mono", ui-monospace, monospace;
+
+  font-family: var(--bsl-sans);
+  color: var(--bsl-ink);
+  background: var(--bsl-cream);
+  line-height: 1.6;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Specificity plan. Themes style content with rules like ".entry-content p"
+   (0,1,1). The reset below uses ".bsl.bsl p" (0,2,1) to beat those. Component
+   rules use ".bsl.bsl .bsl-x" (0,3,0) to beat the reset. No !important needed,
+   except on button text color, which some themes force on every link. */
+
+/* Reset theme defaults inside the block */
+.bsl *,
+.bsl *::before,
+.bsl *::after { box-sizing: border-box; }
+.bsl.bsl h1, .bsl.bsl h2, .bsl.bsl h3, .bsl.bsl p, .bsl.bsl ul, .bsl.bsl li { margin: 0; padding: 0; line-height: inherit; font-family: inherit; }
+.bsl.bsl ul { list-style: none; }
+.bsl a { color: var(--bsl-teal-dark); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.bsl a:hover { color: var(--bsl-ink); }
+.bsl a:focus-visible { outline: 3px solid var(--bsl-mustard); outline-offset: 3px; border-radius: 4px; }
+
+/* Hero */
+.bsl.bsl .bsl-hero {
+  background: var(--bsl-ink);
+  color: #fff;
+  border-radius: 20px;
+  padding: 64px 28px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bsl.bsl .bsl-hero-inner { max-width: 820px; margin: 0 auto; position: relative; z-index: 1; }
+.bsl.bsl .bsl-eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bsl-mustard);
+}
+.bsl.bsl .bsl-title {
+  margin-top: 14px;
+  font-family: var(--bsl-sans);
+  font-weight: 800;
+  font-size: clamp(36px, 6vw, 60px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.bsl.bsl .bsl-sub {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--bsl-serif);
+  font-weight: 600;
+  font-size: clamp(20px, 3vw, 28px);
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.86);
+}
+.bsl.bsl .bsl-desc {
+  margin-top: 22px;
+  line-height: 1.6;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.86);
+  max-width: 700px;
+}
+.bsl.bsl .bsl-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+.bsl.bsl .bsl-tag {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+.bsl.bsl .bsl-rule {
+  height: 6px;
+  margin: 36px auto 0;
+  max-width: 120px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--bsl-teal) 0 33%, var(--bsl-coral) 33% 66%, var(--bsl-mustard) 66%);
+}
+
+/* Sections */
+.bsl.bsl .bsl-section { padding: 40px 0; }
+.bsl.bsl .bsl-section--tight { padding: 20px 0; }
+.bsl.bsl .bsl-inner { max-width: 1100px; margin: 0 auto; }
+
+/* Scenario cards */
+.bsl.bsl .bsl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.bsl.bsl .bsl-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--bsl-line);
+  border-top: 6px solid var(--bsl-teal);
+  border-radius: 16px;
+  padding: 26px 24px;
+  box-shadow: 0 8px 24px -14px rgba(29, 36, 51, 0.25);
+}
+.bsl.bsl .bsl-card--coral { border-top-color: var(--bsl-coral); }
+.bsl.bsl .bsl-card--mustard { border-top-color: var(--bsl-mustard); }
+.bsl.bsl .bsl-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bsl-teal-dark);
+}
+.bsl.bsl .bsl-card-title {
+  margin-top: 10px;
+  font-family: var(--bsl-serif);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--bsl-ink);
+}
+.bsl.bsl .bsl-card p { margin-top: 12px; font-size: 16px; color: var(--bsl-muted); }
+.bsl.bsl .bsl-features { margin-top: 16px; display: grid; gap: 8px; }
+.bsl.bsl .bsl-features li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 15px;
+  color: var(--bsl-ink);
+}
+.bsl.bsl .bsl-features li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bsl-teal);
+}
+.bsl.bsl .bsl-card--coral .bsl-features li::before { background: var(--bsl-coral); }
+.bsl.bsl .bsl-card--mustard .bsl-features li::before { background: var(--bsl-mustard); }
+
+.bsl.bsl .bsl-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--bsl-teal-dark);
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none !important;
+  transition: background 0.2s ease;
+}
+.bsl.bsl .bsl-features + .bsl-cta { margin-top: 22px; }
+.bsl.bsl .bsl-cta svg { width: 18px; height: 18px; }
+.bsl.bsl .bsl-cta:hover { background: var(--bsl-ink); }
+.bsl.bsl .bsl-cta--coral { background: var(--bsl-coral-dark); }
+.bsl.bsl .bsl-cta--ink { background: var(--bsl-ink); }
+.bsl.bsl .bsl-cta--ink:hover { background: var(--bsl-teal-dark); }
+
+/* Stats */
+.bsl.bsl .bsl-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  background: var(--bsl-paper);
+  border-radius: 16px;
+  padding: 26px 20px;
+}
+.bsl.bsl .bsl-stat { text-align: center; }
+.bsl.bsl .bsl-stat-num {
+  display: block;
+  font-family: var(--bsl-mono);
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1;
+  color: var(--bsl-ink);
+}
+.bsl.bsl .bsl-stat-label {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bsl-muted);
+}
+
+/* Context and role */
+.bsl.bsl .bsl-context { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 40px; align-items: start; }
+.bsl.bsl .bsl-heading {
+  font-family: var(--bsl-serif);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.25;
+  margin-top: 34px;
+  color: var(--bsl-ink);
+}
+.bsl.bsl .bsl-heading:first-child { margin-top: 0; }
+.bsl.bsl .bsl-context p { margin-top: 12px; font-size: 17px; color: var(--bsl-ink); }
+
+.bsl.bsl .bsl-role {
+  position: sticky;
+  top: 24px;
+  background: #fff;
+  border: 1px solid var(--bsl-line);
+  border-left: 6px solid var(--bsl-teal);
+  border-radius: 14px;
+  padding: 22px;
+}
+.bsl.bsl .bsl-label--spaced { margin-top: 22px; }
+.bsl.bsl .bsl-role-items { display: grid; gap: 8px; margin-top: 12px; }
+.bsl.bsl .bsl-role-item {
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--bsl-paper);
+  font-weight: 700;
+  font-size: 15px;
+}
+.bsl.bsl .bsl-links { margin-top: 10px; display: grid; gap: 6px; }
+.bsl.bsl .bsl-links a { font-weight: 700; font-size: 15px; }
+
+/* Tablet */
+@media (max-width: 960px) {
+  .bsl.bsl .bsl-grid { grid-template-columns: minmax(0, 1fr); }
+  .bsl.bsl .bsl-context { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .bsl.bsl .bsl-role { position: static; }
+}
+
+/* Phone */
+@media (max-width: 600px) {
+  .bsl { font-size: 16px; }
+  .bsl.bsl .bsl-hero { padding: 44px 20px; border-radius: 14px; }
+  .bsl.bsl .bsl-desc { font-size: 17px; }
+  .bsl.bsl .bsl-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 24px; }
+  .bsl.bsl .bsl-stat-num { font-size: 38px; }
+  .bsl.bsl .bsl-card { padding: 22px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bsl.bsl .bsl-cta { transition: none; }
+}
