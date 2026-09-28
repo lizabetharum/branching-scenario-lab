@@ -1,0 +1,72 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,600&family=Roboto+Mono:wght@500;700&display=swap">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1500px; height: 900px; }
+  .card {
+    position: relative; width: 1500px; height: 900px; overflow: hidden;
+    background:
+      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 60px 60px,
+      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 60px 60px,
+      radial-gradient(ellipse at 70% 40%, #25304a 0%, #1d2433 60%, #161c28 100%);
+    color: #fff; font-family: Montserrat, sans-serif;
+  }
+  .text { position: absolute; left: 80px; top: 78px; width: 690px; }
+  .eyebrow { font-family: "Roboto Mono", monospace; font-weight: 700; font-size: 25px; letter-spacing: .08em; color: #e3a83b; text-transform: uppercase; line-height: 1.35; }
+  h1 { margin-top: 26px; font-weight: 800; font-size: 96px; line-height: 1; letter-spacing: -.025em; }
+  .sub { margin-top: 26px; font-family: "Source Serif 4", serif; font-weight: 600; font-size: 44px; color: #7fd1c6; }
+  .desc { margin-top: 30px; font-size: 29px; line-height: 1.45; color: rgba(255,255,255,.88); font-weight: 500; }
+  .desc b { color: #fff; font-weight: 800; }
+  svg.map { position: absolute; right: 0; top: 0; width: 760px; height: 720px; }
+  .stats { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(10,14,22,.55); border-top: 1px solid rgba(255,255,255,.12); }
+  .stat { display: flex; align-items: center; justify-content: center; gap: 18px; border-left: 1px solid rgba(255,255,255,.14); }
+  .stat:first-child { border-left: 0; }
+  .num { font-family: "Roboto Mono", monospace; font-weight: 700; font-size: 58px; }
+  .lab { font-weight: 800; font-size: 19px; letter-spacing: .12em; line-height: 1.25; color: rgba(255,255,255,.88); text-transform: uppercase; }
+</style></head>
+<body>
+<div class="card">
+  <div class="text">
+    <div class="eyebrow">Instructional Design · AI Practice</div>
+    <h1>Branching<br>Scenario Lab</h1>
+    <div class="sub">Practice the conversation<br>before it counts</div>
+    <p class="desc"><b>Characters who answer only what you ask.</b> Learners talk freely. Each fact surfaces only when their questions earn it.</p>
+  </div>
+
+  <svg class="map" viewBox="0 0 760 720" aria-hidden="true">
+
+    <!-- weaker branch: telling -->
+    <path d="M 150 420 C 260 420, 280 560, 400 560" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="400" cy="560" r="17" fill="#1d2433" stroke="#e0704f" stroke-width="7"/>
+    <text x="428" y="552" font-family="Roboto Mono" font-weight="700" font-size="22" fill="#f0a488">TELL</text>
+    <text x="428" y="580" font-family="Roboto Mono" font-weight="500" font-size="19" fill="rgba(255,255,255,.7)">guard +1</text>
+    <!-- stronger branch: asking -->
+    <path d="M 150 420 C 250 420, 250 280, 350 280" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/>
+    <path d="M 350 280 C 440 280, 470 170, 590 170" fill="none" stroke="#2bb3a3" stroke-width="7" stroke-linecap="round"/>
+    <!-- nodes -->
+    <rect x="128" y="398" width="44" height="44" rx="8" fill="#fff"/>
+    <text x="118" y="480" font-family="Roboto Mono" font-weight="500" font-size="19" fill="rgba(255,255,255,.75)">START</text>
+    <circle cx="350" cy="280" r="17" fill="#1d2433" stroke="#fff" stroke-width="7"/>
+    <text x="300" y="332" font-family="Roboto Mono" font-weight="700" font-size="22" fill="#fff">ASK</text>
+    <text x="300" y="358" font-family="Roboto Mono" font-weight="500" font-size="19" fill="rgba(255,255,255,.7)">open question</text>
+    <circle cx="590" cy="170" r="15" fill="#e3a83b"/>
+    <text x="470" y="126" font-family="Roboto Mono" font-weight="700" font-size="22" fill="#e3a83b">FACT RELEASED</text>
+    <text x="470" y="152" font-family="Roboto Mono" font-weight="500" font-size="19" fill="rgba(255,255,255,.7)">"the shared tray"</text>
+    <!-- speech bubble at start -->
+    <g transform="translate(30 236)">
+      <rect width="206" height="80" rx="18" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
+      <path d="M 100 80 L 118 140 L 132 80" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
+      <text x="20" y="35" font-family="Montserrat" font-weight="700" font-size="18" fill="#fff">"If this is about</text>
+      <text x="20" y="60" font-family="Montserrat" font-weight="700" font-size="18" fill="#fff">the labels, I know."</text>
+    </g>
+  </svg>
+
+  <div class="stats">
+    <div class="stat"><span class="num">3</span><span class="lab">Scenarios</span></div>
+    <div class="stat"><span class="num">2</span><span class="lab">Formats</span></div>
+    <div class="stat"><span class="num">23</span><span class="lab">AI<br>Tests</span></div>
+    <div class="stat"><span class="num">15</span><span class="lab">Logged<br>Revisions</span></div>
+  </div>
+</div>
+</body></html>

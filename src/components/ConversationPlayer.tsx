@@ -168,23 +168,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           ))}
           <span className="text-ink/70">Same skill, different facts. A second case shows whether the skill carries over.</span>
         </nav>
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-          <div className="card">
-            <h2 className="h2">Intake: the three questions asked before building</h2>
-            <p className="mt-1 text-sm text-ink/70">These were answered before any dialogue was written. Each answer set a design limit.</p>
-            <dl className="mt-4 space-y-4">
-              {[
-                ["How long should this be?", s.intake.duration],
-                ["When does the skill break down?", s.intake.situation],
-                ["What's the learner's experience level?", s.intake.experience],
-              ].map(([q, a]) => (
-                <div key={q}>
-                  <dt className="font-bold">{q}</dt>
-                  <dd className="mt-1 text-ink/80">{a}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+        <div className="mt-8">
           <div className="card">
             <h2 className="h2">You are {p.name}</h2>
             <p className="mt-2 text-sm text-ink/80">{p.summary}</p>
@@ -222,6 +206,23 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           </ul>
           <button onClick={start} className="btn-primary mt-6">Start the conversation</button>
         </div>
+
+        <details className="mt-6 rounded-2xl border border-ink/15 bg-white/60 p-5">
+          <summary className="cursor-pointer font-bold text-ink/80">For designers: how this scenario was scoped</summary>
+          <p className="mt-3 text-sm text-ink/80">Three questions came before any dialogue: how long the practice should take, the moment the skill breaks down on the job, and what learners already know. Each answer set a limit on what the scenario tries to do.</p>
+          <dl className="mt-4 space-y-4">
+              {[
+                ["How long should this be?", s.intake.duration],
+                ["When does the skill break down?", s.intake.situation],
+                ["What's the learner's experience level?", s.intake.experience],
+              ].map(([q, a]) => (
+                <div key={q}>
+                  <dt className="font-bold">{q}</dt>
+                  <dd className="mt-1 text-ink/80">{a}</dd>
+                </div>
+              ))}
+            </dl>
+        </details>
       </section>
     );
   }
