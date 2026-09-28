@@ -47,7 +47,7 @@ export const BOUNDARY_MESSAGES: Record<BoundaryKind, string> = {
   rule_override:
     "Requests to change the rules, reveal the rubric or award a pass don't change the scenario or your results. The app, not the AI, controls scoring.",
   unclear:
-    "The AI couldn't match your reply to a response this scenario recognizes, so it didn't guess. Try saying it another way, or pick a scripted option.",
+    "I couldn't match your reply to a response this scenario recognizes, so I didn't guess. Try saying it another way, or pick a scripted option.",
   too_long: `Keep replies under ${MAX_INPUT} characters. In a real conversation this would be several turns.`,
   rate_limited: "Too many messages in a short time. Wait a minute, or continue with the scripted options.",
 };
