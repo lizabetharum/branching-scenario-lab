@@ -6,7 +6,8 @@ import { casesFor, convoScenarios } from "@/lib/convo";
 import type { Behavior, ConvoEnding, ConvoTurn } from "@/lib/convo/types";
 import { TAG_LABEL } from "@/lib/convo/tags";
 import { encodeAttempt } from "@/lib/convo/share";
-import { endingFor, hintFor, moodFor, replay } from "@/lib/convo/engine";
+import { endingFor, endingText, hintFor, moodFor, replay } from "@/lib/convo/engine";
+import { attemptSummary } from "@/lib/convo/summary";
 import type { ConverseResponse } from "@/app/api/converse/route";
 import { BOUNDARY_MESSAGES, MAX_INPUT, detectPersonalInfo } from "@/lib/guardrails";
 import { applyInterruption } from "@/lib/eval-helpers";
@@ -108,7 +109,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
         addBoundary(d.boundary, d.message);
         return;
       }
-      const turn: ConvoTurn = { learner: text, reply: d.reply, tags: d.tags, released: d.released, hintBefore: hintShown, guardAfter: d.guard };
+      const turn: ConvoTurn = { learner: text, reply: d.reply, tags: d.tags, addresses: d.addresses, released: d.released, hintBefore: hintShown, guardAfter: d.guard };
       const next = [...turns, turn];
       setTurns(next);
       setDraft("");
@@ -229,6 +230,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
 
   if (phase === "debrief" && ending) {
     const e = s.endings[ending];
+    const sum = attemptSummary(s, turns);
     const results = applyInterruption(s.evaluate(turns, st.released), interrupted);
     const summary = [
       `${s.title} (${s.caseLabel}) · ${p.name}`,
@@ -244,7 +246,21 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           <Scene scene="pharmacy" who={s.who} mood={ending === "plan_key" ? "proud" : "neutral"} label={`${name} at the end of the conversation.`} />
           <div className="card">
             <h2 className="h2">What happened</h2>
-            <p className="mt-2 text-ink/85">{e.text}</p>
+            <p className="mt-2 text-ink/85">{endingText(s, ending, st.released)}</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-teal-dark">What you uncovered</h3>
+                {sum.found.length ? (
+                  <ul className="mt-1 space-y-1 text-sm">{sum.found.map((f) => <li key={f.label}>✓ {f.label}{f.key ? " (the cause)" : ""}</li>)}</ul>
+                ) : <p className="mt-1 text-sm text-ink/80">Nothing beyond what you could already see.</p>}
+              </div>
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-coral-dark">Still missing</h3>
+                {sum.missing.length ? (
+                  <ul className="mt-1 space-y-1 text-sm">{sum.missing.map((m) => <li key={m}>– {m}</li>)}</ul>
+                ) : <p className="mt-1 text-sm text-ink/80">Nothing. The plan was {name}&apos;s, and you confirmed it.</p>}
+              </div>
+            </div>
             <p className="mt-4 text-sm text-ink/70">The AI labeled each of your turns. Code turned those labels into what the character revealed, how the conversation ended and these scores, so a wrong label means a wrong score. Check the labels below and flag any you disagree with.</p>
             {interrupted && <p className="mt-3 rounded-lg bg-coral/10 p-3 text-sm"><b>Interrupted attempt.</b> A system failure is not a learner failure. Unfinished criteria are marked not evaluable.</p>}
           </div>

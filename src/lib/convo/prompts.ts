@@ -27,7 +27,8 @@ LABEL
 RELEVANCE
 - addresses: list the ids of the TOPICS below that the message is genuinely
   about. A question counts only if it asks about that topic. A general
-  question ("What would make this useful for you?") addresses none.
+  question ("What would make this useful for you?") addresses none. A
+  question asking for a plan, next step, check-in or ideas addresses none.
   If unsure, leave it out.
 
 BOUNDARY (use instead of behaviors when it applies)

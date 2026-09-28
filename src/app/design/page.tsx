@@ -186,7 +186,7 @@ export default function Design() {
           <li>The browser blocks obvious personal information before sending.</li>
           <li>The server repeats that check and blocks rule overrides and clinical questions before any model sees them.</li>
           <li><b>Tagger</b> (<code>{DEFAULT_MODEL}</code>) labels your message with behaviors, or a boundary, and marks which topics it is genuinely about. It never plays the character.</li>
-          <li><b>Engine</b> (code) updates the character&apos;s guard level and releases at most one fact whose rule is now met. A fact with a topic releases only if the question was about that topic. Counting questions is not enough.</li>
+          <li><b>Engine</b> (code) updates the character&apos;s guard level and releases at most one fact whose rule is now met. A fact with a topic releases only if the question was about that topic. Counting questions is not enough. A turn that asks for a plan, a check-in or ideas never reveals a hidden cause, whatever topic the AI assigns.</li>
           <li><b>Counterpart</b> (<code>{COUNTERPART_DEFAULT}</code>, chosen for speed) replies in character using only released facts. A newly released fact must be conveyed.</li>
           <li><b>Checks</b> (code): if the reply names an unreleased fact, skips the new fact, or fails the leak and clinical filters, the authored line is used instead.</li>
           <li><b>Leak check</b> (<code>{DEFAULT_MODEL}</code>): a third call sees the hidden facts the character never saw and asks whether the reply reveals or confirms one. It must quote the exact words, and code confirms the quote is really in the reply. A reveal, or any error, means the authored line is used. You never lose a fact you earned, and you never get one by guessing.</li>
@@ -359,7 +359,10 @@ export default function Design() {
           The rubric requires a way to examine and challenge model judgments before scored use. In the conversations, the AI&apos;s labels feed the scores, so they need human review. After a conversation, the learner can make a review link and send it to a facilitator. The facilitator sees every turn, what the character revealed, the learner&apos;s flags and the AI&apos;s labels. The facilitator can change any label, and the scores recompute beside the originals. Facts already revealed stay as they happened.
         </p>
         <p>
-          The same page measures agreement: how many turns the facilitator left unchanged. Collected across reviews, that is the tagger-agreement evidence for rubric criterion A2. The review page saves nothing. The facilitator copies a summary into their own log. No reviewer is assigned yet, which still blocks scored use.
+          <b>Blind rating comes first.</b> The review page opens with the AI&apos;s labels, scores and ending hidden. The facilitator rates each criterion from the transcript alone, using the rubric anchors, and only then reveals the AI&apos;s scores beside theirs. Agreement per criterion, collected across reviewers, answers the question an outside reviewer asked: would a human reach the same conclusions using only the transcript? No blind ratings have been collected yet, so that question is still open.
+        </p>
+        <p>
+          After the reveal, the same page measures label agreement: how many turns the facilitator left unchanged. Collected across reviews, that is the tagger-agreement evidence for rubric criterion A2. The review page saves nothing. The facilitator copies a summary into their own log. No reviewer is assigned yet, which still blocks scored use.
         </p>
         <p><Link href="/review" className="link">Open the review page</Link></p>
 
@@ -443,6 +446,7 @@ export default function Design() {
           <li>AI output is not stable ground truth. The same reply can be classified or tagged differently on different runs. In the conversations, a mistagged turn can release a fact or change guard, so the flag control matters.</li>
           <li>The leak check is itself an AI judgment. It caught both confirmed leaks in its probe set and let four correct replies through, but that is seven examples, not a measured error rate. Facilitator review of sampled transcripts is still the backstop.</li>
           <li>How the teacher handles Maya in the classroom scenario is deliberately unscored: the objective targets Jordan&apos;s learning, triage is out of scope, and one scripted choice is too little evidence to judge it, so its cost appears in the debrief instead.</li>
+          <li>P1&apos;s follow-up requirement (a question that builds on what the character revealed) is inferred from the AI&apos;s topic labels. It rewards pursuing the next thread. It can&apos;t judge whether the follow-up was the most useful question to ask.</li>
           <li>Whether a question is relevant to a hidden fact is an AI judgment too. It stops question counting from unlocking facts, but it can misjudge. Labels also vary between runs: the same question can draw out a surface idea on one run and nothing on another. The full-conversation tests accept either where both are defensible, and pin the outcomes that matter.</li>
           <li>The pharmacy criteria measure the practice constraint in each persona&apos;s objective, such as Marcus&apos;s two open questions before interpreting and no leading questions. They are not a validated measure of effective coaching, which can take other forms. Relevant closed clarifications and accurate summaries aren&apos;t penalized (T24, T25), but they earn no open-question credit.</li>
           <li>A guess that earns nothing now gets a short noncommittal reply, usually &ldquo;Maybe. I don&apos;t know.&rdquo; That is safe but repetitive when a learner guesses several times in a row.</li>

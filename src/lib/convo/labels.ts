@@ -1,5 +1,5 @@
 import type { ConvoScenario, ConvoTurn } from "./types";
-import { confirmedQ, cr, idx, planTrace, proposedQ, q, supportAt, validOpenIdx } from "./eval";
+import { confirmedQ, cr, idx, investigative, isFollowUp, planTrace, proposedQ, q, supportAt, validOpenIdx } from "./eval";
 
 // Marcus Delgado: execution gap. He tells instead of asks.
 // Fact packet, release rules and dialogue are original and untested.
@@ -21,17 +21,22 @@ export function makeLabelsEvaluate(o: { name: string; cause: string; surface: st
   return function evaluate(turns: ConvoTurn[], released: string[]) {
   const firstInterp = turns.findIndex((t) => t.tags.some((x) => x === "interpretation" || x === "instruction" || x === "leading"));
   const opens = validOpenIdx(turns);
-  const before = opens.filter((i) => firstInterp === -1 || i < firstInterp);
+  const inv = turns.map((t, i) => (investigative(t) ? i : -1)).filter((i) => i >= 0);
+  const invBefore = inv.filter((i) => firstInterp === -1 || i < firstInterp);
+  const follow = invBefore.find((i) => isFollowUp(turns, i));
   const leading = idx(turns, "leading");
   const instr = idx(turns, "instruction");
+  const counts = `${invBefore.length} open question(s) about the problem before any interpretation, out of ${opens.length} open question(s) in total.`;
 
-  const P1 = "Asked two or more open questions before any interpretation";
+  const P1 = `Asked two or more open questions about the problem before any interpretation, building on what ${o.name} revealed`;
   const p1 =
-    before.length >= 2
-      ? cr("P1", P1, "demonstrated", supportAt(turns, before[1]), `${before.length} open questions before any interpretation. ${q(turns[before[1]])}`, "Keep exploring before you name a cause.")
-      : opens.length >= 2 || before.length === 1
-        ? cr("P1", P1, "partial", opens.length >= 2 ? "after_recovery" : supportAt(turns, before[0]), `${before.length} open question(s) came before your first interpretation. ${q(turns[firstInterp])}`, `Hold your interpretation until ${o.name} has answered two open questions.`)
-        : cr("P1", P1, "not_observed", "n/a", `No open question was left for ${o.name} to answer.`, `Start with a question ${o.name} has to describe, such as what happens at the station.`);
+    invBefore.length >= 2 && follow !== undefined
+      ? cr("P1", P1, "demonstrated", supportAt(turns, follow), `${counts} Your follow-up: ${q(turns[follow]).replace("You said: ", "")} ${q(turns[invBefore[0]])}`, "Keep exploring before you name a cause, and keep building on each answer.")
+      : invBefore.length >= 2
+        ? cr("P1", P1, "partial", supportAt(turns, invBefore[1]), `${counts} None built on what ${o.name} had just revealed. ${q(turns[invBefore[1]])}`, `When ${o.name} tells you something, ask about that next.`)
+        : inv.length >= 2 || invBefore.length === 1
+          ? cr("P1", P1, "partial", inv.length >= 2 && invBefore.length < 2 ? "after_recovery" : supportAt(turns, invBefore[0]), `${counts} ${firstInterp >= 0 ? q(turns[firstInterp]) : q(turns[inv[0]])}`, `Hold your interpretation until ${o.name} has answered two questions about the problem.`)
+          : cr("P1", P1, "not_observed", "n/a", `${counts} No question about the problem was left for ${o.name} to answer.`, `Start with a question ${o.name} has to describe, such as what happens at the station.`);
 
   const p2 =
     leading === -1 && opens.length === 0
@@ -216,15 +221,15 @@ export const labels: ConvoScenario = {
   endings: {
     plan_key: { id: "plan_key", title: "Plan agreed, cause found", text: "Sam heads back with a plan aimed at the shared tray. Check the criteria below. Reaching a plan doesn't mean every criterion was met." },
     plan_surface: { id: "plan_surface", title: "Plan agreed, cause missed", text: "You and Sam agreed on a plan, but it isn't built on the cause. Either the shared tray never came up, or the plan came from you instead of Sam. The next rush will likely look the same." },
-    unconfirmed: { id: "unconfirmed", title: "Plan proposed, not confirmed", text: "Sam proposed a step and a time, but the conversation ended before you confirmed it. Sam heads back unsure whether the plan is on." },
-    closed: { id: "closed", title: "Ended without a plan", text: "Sam goes back to the counter. Nothing in the conversation targets why the errors happen." },
-    time: { id: "time", title: "Out of time", text: "The five o'clock line starts to build and Sam has to go. The conversation stopped before a plan." },
+    unconfirmed: { id: "unconfirmed", title: "Plan proposed, not confirmed", text: "Sam proposed a step and a time, but the conversation ended before you confirmed it. Sam heads back unsure whether the plan is on.", textWithCause: "You found the cause: Sam's unfinished labels go into a tray Jess shares, and Sam proposed a step and a time. You never confirmed it, so Sam doesn't know whether the plan is on." },
+    closed: { id: "closed", title: "Ended without a plan", text: "Sam goes back to the counter. Nothing in the conversation targets why the errors happen.", textWithCause: "You found the cause: Sam's unfinished labels go into a tray Jess shares. The conversation ended before Sam proposed a fix and you agreed on it, so nothing changes yet." },
+    time: { id: "time", title: "Out of time", text: "The five o'clock line starts to build and Sam has to go. The conversation stopped before a plan.", textWithCause: "You found the cause: Sam's unfinished labels go into a tray Jess shares. The rush pulled Sam away before you agreed on a next step." },
   },
   criteria: [
-    { id: "P1", label: "Asked two or more open questions before any interpretation", anchors: ["No open question before the first interpretation, leading question or instruction", "One open question first, or two only after an interpretation", "Two or more open questions before any interpretation"] },
+    { id: "P1", label: "Asked two or more open questions about the problem before any interpretation, building on what Sam revealed", anchors: ["No open question about the problem before the first interpretation, leading question or instruction", "One question about the problem first, two only after an interpretation, or two that didn't build on what Sam revealed", "Two or more open questions about the problem before any interpretation, at least one building on what Sam revealed"] },
     { id: "P2", label: "Asked no leading questions", anchors: ["One or more leading questions", "Not used. The objective requires zero leading questions.", "No leading questions"] },
     { id: "P3", label: "Sam generated the option, after the cause surfaced", anchors: ["Marcus supplied the plan, or options never came up", "Asked for options before the cause surfaced, so Sam's idea targets the wrong thing", "Asked for options after the cause surfaced, and Sam proposed the fix"] },
-    { id: "P4", label: "Agreed on a specific next step and check-in", anchors: ["No next step or check-in", "A next step or a check-in, not both", "A specific next step and a check-in"] },
+    { id: "P4", label: "Agreed on a specific next step and check-in", anchors: ["Never asked for a next step, and none was proposed", "Asked, but Sam never proposed a specific step and time, or Sam proposed one and it was never confirmed", "Sam proposed a specific step and time, and Marcus confirmed it on a later turn"] },
   ],
   evaluate: makeLabelsEvaluate({ name: "Sam", cause: "the shared tray", surface: "rushing" }),
   framework: GROW,

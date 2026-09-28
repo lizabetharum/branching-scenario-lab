@@ -69,9 +69,19 @@ export interface ConvoTurn {
   learner: string;
   reply: string;
   tags: Behavior[];
+  /** Topics the tagger said the message was about. Optional for older review links. */
+  addresses?: string[];
   released: string[];
   hintBefore: boolean;
   guardAfter: number;
+}
+
+export interface ConvoEndingText {
+  id: ConvoEnding["id"];
+  title: string;
+  text: string;
+  /** Used instead of text when the learner uncovered the key fact. */
+  textWithCause?: string;
 }
 
 export interface ConvoEnding {
@@ -109,7 +119,7 @@ export interface ConvoScenario {
   guessLine?: string;
   facts: Fact[];
   maxTurns: number;
-  endings: Record<ConvoEnding["id"], Omit<ConvoEnding, "kind">>;
+  endings: Record<ConvoEnding["id"], ConvoEndingText>;
   criteria: { id: string; label: string; anchors: [string, string, string] }[];
   evaluate: (turns: ConvoTurn[], released: string[]) => CriterionResult[];
   framework?: import("../types").Framework;

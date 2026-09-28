@@ -7,7 +7,7 @@ import { DEFAULT_MODEL } from "@/lib/model-info";
 // Tables that describe the map are generated from the scenario data, so they
 // can't drift from what runs.
 
-export const VERSION = "v2.3";
+export const VERSION = "v2.4";
 export const VERSION_DATE = "2026-09-28";
 
 const BRIEF = {
@@ -42,7 +42,7 @@ const BRIEF = {
 
 const ALIGN = {
   labels: [
-    ["B1", "Asks two or more open, exploratory questions before stating any interpretation", "Any turn. Facts: pattern, tray", "P1", "Count of open questions before the first interpretation in a real coaching conversation"],
+    ["B1", "Asks two or more open questions about the problem before stating any interpretation, at least one building on what the technician revealed", "Any turn. Facts: pattern, tray", "P1", "Count of open questions before the first interpretation in a real coaching conversation"],
     ["B2", "Asks no leading questions", "Any turn", "P2", "Count of leading questions in the same observed conversation"],
     ["B3", "Asks for options after the cause is known", "Fact: idea (needs tray)", "P3", "Observer notes who proposed the adopted option"],
     ["B4", "Closes with a specific next step and a check-in", "Any turn after an option exists", "P4", "Written plan or observer note with owner and date"],
@@ -93,6 +93,11 @@ const REVISIONS = [
   ["RV-20", "Outside review: \"the app scores, not the AI\" understated how much AI labels drive results.", "Major", "Wording claimed more independence than the design has", "Rewrote the claim on the home page, design page and both debriefs. Added full-conversation tests and an evidence rule: every demonstrated rating must quote a completed behavior.", "Evidence checks, C1 to C5"],
   ["RV-21", "The first full-conversation run showed a pass for C4 while every turn had been rate-limited, so nothing happened and the expected \"nothing released\" matched.", "Major", "The tests treated a blocked turn as a normal result, and the app's own rate limiter throttled local test traffic", "A blocked or rate-limited turn now fails any test. The limiter exempts only loopback addresses, which no request through Vercel can have.", "Conversation tests rerun"],
   ["RV-22", "CI caught T24 failing: a relevant clarifying question (\"So this is when you get called away in the middle of a label?\") was labeled an interpretation, raising Sam's guard. It passed locally, then failed in 2 of 5 repeated local runs.", "Major", "The interpretation definition didn't exclude checking back what the other person said", "Narrowed the definition and added a worked example with a different sentence than the test. Three clarifying phrasings then passed 15 of 15 runs. T24 and T25 now repeat three times per run.", "T24, T25, 15-run measurement"],
+  ["RV-23", "Second outside review: \"What will you do first, and when should we check how it is working?\" revealed the shared tray. Reproduced live in 2 of 5 runs: the AI sometimes judged the planning question relevant to the tray.", "Major", "Relevance was left entirely to an AI judgment", "Code rule: a turn asking for a plan, check-in or ideas never reveals an investigation fact. The tagger is also told planning questions address no topic.", "T30 (5 runs), check-maps REVIEW 2 FINDING 1"],
+  ["RV-24", "Second outside review: endings said \"Nothing in the conversation targets why the errors happen\" after the learner had found the cause.", "Major", "Fixed ending texts didn't depend on what the learner uncovered", "Cause-found versions of three endings. The debrief now opens with what the learner uncovered and what is still missing, built from the transcript.", "C6, check-maps REVIEW 2 FINDING 2"],
+  ["RV-25", "Second outside review: P1 gave full credit for three open questions including a general usefulness question and a premature planning question.", "Major", "Question count stood in for investigative quality", "P1 counts only open questions about the problem, and full credit needs one that builds on what the character revealed. Priya's Q2 counts only questions about the problem. Evidence shows both counts.", "C4, check-maps REVIEW 2 FINDING 3, P1 follow-up checks"],
+  ["RV-26", "Second outside review asked whether a human would reach the same conclusions from the transcript. The review page showed the AI's scores first, which anchors a reviewer.", "Major", "No independent comparison was possible", "Blind rating mode: the reviewer rates from the transcript alone, then reveals the AI's scores and agreement per criterion.", "Headless Chrome check of blind and revealed states"],
+  ["RV-27", "A blind-mode screenshot showed P4 and Q4 anchors still describing the old rule (\"a next step or a check-in, not both\").", "Major", "Anchors weren't updated when agreement became propose then confirm", "Rewrote both anchors to match the scoring. A blind rater now reads the same rule the app applies.", "Visual check"],
 ] as const;
 
 const RATINGS: [string, string, string, string, string, string][] = [
@@ -289,7 +294,7 @@ export function DesignRecord() {
 
       <h2 id="review">Review and release decision</h2>
       <p>
-        <b>This is a designer self-review, plus one outside review.</b> A colleague reviewed one complete pharmacy conversation, its debrief, the prebrief and this documentation. Four findings came from that review (RV-17 to RV-20). Both behavioral findings were reproduced in the engine before fixing. The rubric asks for independent reviewers who compare ratings. Treat these ratings as the designer&apos;s starting position for that review. Ratings are not averaged. One major gap blocks learner use, however strong the rest is.
+        <b>This is a designer self-review, plus two outside reviews.</b> A colleague reviewed one complete pharmacy conversation, its debrief, the prebrief and this documentation (RV-17 to RV-20), then retested two conversations after the fixes (RV-23 to RV-26). Each behavioral finding was reproduced before fixing. The rubric asks for independent reviewers who compare ratings. Treat these ratings as the designer&apos;s starting position for that review. Ratings are not averaged. One major gap blocks learner use, however strong the rest is.
       </p>
       <table>
         <thead><tr><th>Criterion</th><th>Rating</th><th>Evidence</th><th>Finding</th><th>Severity</th><th>Action</th></tr></thead>

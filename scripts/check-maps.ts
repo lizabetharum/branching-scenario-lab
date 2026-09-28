@@ -40,7 +40,7 @@ for (const s of Object.values(scenarios)) {
 // Each step is a list of labels. By default a step is treated as relevant to
 // every topic. Use { tags, addr } to say which topics a message addresses.
 import { convoScenarios } from "../src/lib/convo";
-import { replay, step, endingFor } from "../src/lib/convo/engine";
+import { replay, step, endingFor, endingText } from "../src/lib/convo/engine";
 import type { Behavior, ConvoTurn } from "../src/lib/convo/types";
 type Step = Behavior[] | { tags: Behavior[]; addr: string[] };
 function run(id: string, seq: Step[], opts: { forceEnd?: boolean } = {}) {
@@ -50,14 +50,14 @@ function run(id: string, seq: Step[], opts: { forceEnd?: boolean } = {}) {
     const tags = Array.isArray(x) ? x : x.tags; const addr = Array.isArray(x) ? all : x.addr;
     const st = replay(s, turns); const { guard, fact } = step(s, st, tags, addr);
     const released = fact ? [...st.released, fact.id] : st.released;
-    turns.push({ learner: `[${tags.join("+")}]`, reply: fact ? fact.says : "(no new fact)", tags, released: fact ? [fact.id] : [], hintBefore: false, guardAfter: guard });
+    turns.push({ learner: `[${tags.join("+")}]`, reply: fact ? fact.says : "(no new fact)", tags, addresses: addr, released: fact ? [fact.id] : [], hintBefore: false, guardAfter: guard });
     ending = endingFor(s, st.released, released, tags, turns.length, false);
     if (ending) break;
   }
   const st = replay(s, turns);
   if (!ending && opts.forceEnd) ending = endingFor(s, st.released, st.released, [], st.turns, true);
   const results = s.evaluate(turns, st.released);
-  return { released: st.released, guard: st.guard, ending, scores: results.map((c) => c.status), results };
+  return { released: st.released, guard: st.guard, ending, scores: results.map((c) => c.status), results, text: ending ? endingText(s, ending as never, st.released) : "" };
 }
 const P = (r: ReturnType<typeof run>, id: string) => r.results.find((c) => c.id === id)?.status;
 const cases: [string, string, Step[], (r: ReturnType<typeof run>) => boolean, { forceEnd?: boolean }?][] = [
@@ -68,6 +68,12 @@ const cases: [string, string, Step[], (r: ReturnType<typeof run>) => boolean, { 
   ["REVIEW FINDING 2: an off-topic open question does not release the tray", "labels", [["open"], { tags: ["open"], addr: [] }], (r) => r.released.includes("pattern") && !r.released.includes("tray")],
   ["a relevant second question does release the tray", "labels", [["open"], { tags: ["open"], addr: ["tray"] }], (r) => r.released.includes("tray")],
   ["manager-imposed plan, accepted, ends plan agreed cause missed", "labels", [["open"], ["open"], ["instruction"], ["checkin"], ["confirms"]], (r) => r.ending === "plan_surface" && P(r, "P3") === "not_observed" && P(r, "P4") === "demonstrated"],
+  ["REVIEW 2, FINDING 1: a planning question marked relevant to the tray still doesn't reveal it", "labels", [{ tags: ["open"], addr: ["pattern"] }, { tags: ["open", "wayForward", "checkin"], addr: ["tray"] }], (r) => r.released.includes("pattern") && !r.released.includes("tray")],
+  ["REVIEW 2, FINDING 3: generic and planning questions don't count toward P1", "labels", [{ tags: ["open"], addr: ["pattern"] }, { tags: ["open"], addr: [] }, { tags: ["open", "wayForward", "checkin"], addr: [] }], (r) => P(r, "P1") === "partial"],
+  ["P1 full credit: two questions about the problem, the second building on what Sam revealed", "labels", [{ tags: ["open"], addr: ["pattern"] }, { tags: ["open"], addr: ["tray"] }], (r) => P(r, "P1") === "demonstrated"],
+  ["P1 partial: two questions about the problem that never build on an answer", "labels", [{ tags: ["open"], addr: ["history"] }, { tags: ["open"], addr: ["history"] }], (r) => r.released.length === 0 && P(r, "P1") === "partial"],
+  ["REVIEW 2, FINDING 2: Ana's case, cause found without a plan, ending acknowledges the diagnosis", "labels-b", [{ tags: ["open"], addr: ["pattern"] }, { tags: ["open"], addr: ["form"] }], (r) => r.released.includes("form") && r.ending === "closed" && r.text.startsWith("You found the cause"), { forceEnd: true }],
+  ["an ending without the cause keeps the no-cause text", "labels", [{ tags: ["open"], addr: ["pattern"] }], (r) => r.ending === "closed" && !r.text.startsWith("You found the cause"), { forceEnd: true }],
   ["labels telling shuts Sam down: nothing released", "labels", [["interpretation", "instruction"], ["leading"]], (r) => r.guard === 3 && r.released.length === 0],
   ["labels repair reopens: acknowledge + open releases pattern", "labels", [["interpretation"], ["acknowledge", "open"]], (r) => r.released.includes("pattern")],
   ["labels early options give the surface idea, not the real one", "labels", [["open"], ["askOptions"], ["wayForward"], ["confirms"]], (r) => r.released.includes("surfaceIdea") && !r.released.includes("idea") && r.ending === "plan_surface"],

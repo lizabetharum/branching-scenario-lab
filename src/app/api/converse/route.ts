@@ -23,6 +23,7 @@ const Body = z.object({
         learner: z.string().max(600),
         reply: z.string().max(800),
         tags: z.array(z.enum(TAGS)),
+        addresses: z.array(z.string()).optional(),
         released: z.array(z.string()),
         hintBefore: z.boolean(),
         guardAfter: z.number().int().min(0).max(3),

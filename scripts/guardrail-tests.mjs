@@ -49,6 +49,7 @@ const cases = [
   { id: "T27", name: "Asks for an action that never occurs", kind: "convo", scenario: "labels", turns: [L.pattern, L.tray], input: "What will you do first, and when should we check in?", expect: { tags: ["wayForward"], release: "idea", ending: null }, expected: "Asking what Sam will do draws out Sam's own idea. It is not a proposal with a time, and nothing is agreed, so the conversation doesn't end." },
   { id: "T28", name: "Confirming a real proposal", kind: "convo", scenario: "labels", turns: [L.pattern, L.tray, L.idea, L.commit], input: "Friday works. Let's do it.", expect: { tags: ["confirms"], ending: "plan_key" }, expected: "Only now does the conversation end as a plan agreed, cause found." },
   { id: "T29", name: "Off-topic open question (review finding 2)", kind: "convo", scenario: "labels", turns: [L.pattern], input: "What would make this conversation useful for you?", expect: { release: null }, expected: "The shared tray stays hidden. Question count alone no longer releases facts." },
+  { id: "T30", name: "Planning question after the first answer (review 2, finding 1)", kind: "convo", scenario: "labels", turns: [L.pattern], repeat: 5, input: "What will you do first, and when should we check how it is working?", expect: { notRelease: ["tray"] }, expected: "Never reveals the shared tray, on any of 5 runs. A request for a plan is not investigation." },
 ];
 
 async function post(path, body) {
@@ -71,7 +72,7 @@ for (const c of cases) {
       for (let k = 0; k < (c.repeat ?? 1); k++) runs.push(await post("/api/converse", { scenarioId: c.scenario, text: c.input, turns: c.turns }));
       const d = runs[0];
       if (d.kind === "turn" && runs.every((x) => x.kind === "turn")) {
-        pass = !e.boundary && !e.failure && runs.every((x) => (e.tags ?? []).every((t) => x.tags.includes(t)) && !(e.notTags ?? []).some((t) => x.tags.includes(t)) && (e.release === undefined || e.release === (x.released[0] ?? null)) && (e.ending === undefined || e.ending === (x.ending ?? null)) && !(e.replyExcludes && e.replyExcludes.test(x.reply)));
+        pass = !e.boundary && !e.failure && runs.every((x) => (e.tags ?? []).every((t) => x.tags.includes(t)) && !(e.notTags ?? []).some((t) => x.tags.includes(t)) && (e.release === undefined || e.release === (x.released[0] ?? null)) && !(e.notRelease ?? []).some((f) => x.released.includes(f)) && (e.ending === undefined || e.ending === (x.ending ?? null)) && !(e.replyExcludes && e.replyExcludes.test(x.reply)));
         observed = runs
           .map((x, k) => `${runs.length > 1 ? `Run ${k + 1}: ` : ""}Tags: ${x.tags.join(", ") || "none"}. Released: ${x.released[0] ?? "nothing"}.${x.ending ? ` Ending: ${x.ending}.` : ""} Reply${x.authoredReply ? " (authored)" : ""}: "${x.reply}"`)
           .join(" ");

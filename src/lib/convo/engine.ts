@@ -6,6 +6,7 @@ import type { Behavior, ConvoEnding, ConvoScenario, ConvoTurn, Fact } from "./ty
 // labels are the input, so a wrong label produces a wrong outcome.
 
 const RAISES_GUARD: Behavior[] = ["leading", "interpretation", "instruction"];
+export const PLANNING: Behavior[] = ["wayForward", "checkin", "askOptions"];
 const LOWERS_GUARD: Behavior[] = ["acknowledge"];
 
 /** An open question only counts if it isn't leading or answered by the asker. */
@@ -61,13 +62,16 @@ export function step(s: ConvoScenario, st: ConvoState, tags: Behavior[], address
   const concernNamed = st.concernNamed || tags.includes("namesConcern");
   const instructed = st.seen.has("instruction") || tags.includes("instruction");
   const hasCommitment = Boolean(commitmentReleased(s, st.released));
+  // Asking for a plan, a check-in or ideas is not investigation. Whatever topic
+  // the AI assigns, these turns never reveal a hidden cause.
+  const planning = PLANNING.some((t) => tags.includes(t));
   let fact: Fact | undefined;
   if (guard < 3) {
     fact = s.facts.find(
       (f) =>
         !st.released.includes(f.id) &&
         f.release.anyOf.some((b) => eff.includes(b)) &&
-        (!f.probe || addresses.includes(f.id)) &&
+        (!f.probe || (addresses.includes(f.id) && !planning)) &&
         (f.release.requires ?? []).every((r) => st.released.includes(r)) &&
         validOpens >= (f.release.minValidOpens ?? 0) &&
         (!f.release.needsConcern || concernNamed) &&
@@ -120,4 +124,11 @@ export function moodFor(guard: number, lastReleased?: Fact): import("../types").
   if (lastReleased?.idea) return "proud";
   if (lastReleased?.key) return "thinking";
   return (["engaged", "neutral", "guarded", "guarded"] as const)[guard];
+}
+
+/** Ending text that reflects what happened: finding the cause changes what the ending says. */
+export function endingText(s: ConvoScenario, id: ConvoEnding["id"], released: string[]): string {
+  const e = s.endings[id];
+  const key = s.facts.find((f) => f.key);
+  return key && released.includes(key.id) && e.textWithCause ? e.textWithCause : e.text;
 }

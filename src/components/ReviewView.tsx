@@ -24,6 +24,9 @@ export function ReviewView() {
   const [edits, setEdits] = useState<Record<number, Behavior[]>>({});
   const [notes, setNotes] = useState<Record<number, string>>({});
   const [copied, setCopied] = useState(false);
+  // Blind rating: the reviewer rates from the transcript alone, then reveals the AI's scores.
+  const [ratings, setRatings] = useState<Record<string, string>>({});
+  const [revealed, setRevealed] = useState(false);
 
   async function load(code: string) {
     try {
@@ -33,6 +36,8 @@ export function ReviewView() {
       setAttempt(a);
       setEdits({});
       setNotes({});
+      setRatings({});
+      setRevealed(false);
     } catch (e) {
       setError(e instanceof Error && e.message.startsWith("This") ? e.message : "That link or code couldn't be read. Ask the learner to make a new one.");
     }
@@ -75,10 +80,15 @@ export function ReviewView() {
   const agreement = attempt.turns.length ? Math.round(((attempt.turns.length - changedTurns) / attempt.turns.length) * 100) : 0;
   const scoreChanges = corrected.filter((c, i) => c.status !== original[i]?.status).length;
 
+  const blind = !revealed;
+  const allRated = s.criteria.every((c) => ratings[c.id]);
+  const blindMatches = s.criteria.filter((c) => ratings[c.id] === SCORE[original.find((o) => o.id === c.id)!.status]).length;
   const summary = [
     `Facilitator review: ${s.title} (${s.caseLabel}), ${s.persona.name} with ${s.counterpart.name}`,
     `Ending: ${s.endings[attempt.ending as keyof typeof s.endings]?.title ?? attempt.ending}${attempt.interrupted ? " (interrupted)" : ""}`,
     `Turns: ${attempt.turns.length}. Learner-flagged turns: ${attempt.flagged.map((i) => i + 1).join(", ") || "none"}.`,
+    `Blind ratings (transcript only, before seeing the AI): ${s.criteria.map((c) => `${c.id} ${ratings[c.id] ?? "not rated"}`).join(", ")}.`,
+    `Blind agreement with the AI's scores: ${blindMatches} of ${s.criteria.length} criteria.`,
     `Tag agreement with the AI: ${attempt.turns.length - changedTurns} of ${attempt.turns.length} turns (${agreement}%).`,
     ...corrected.map((c, i) => `${c.id} ${c.label}: AI tags ${SCORE[original[i].status]}, reviewed ${SCORE[c.status]}`),
     ...Object.entries(edits).map(([i, t]) => `Turn ${Number(i) + 1} tags changed to: ${t.map((x) => TAG_LABEL[x]).join(", ") || "none"}`),
@@ -90,11 +100,13 @@ export function ReviewView() {
       <p className="eyebrow">Facilitator review · {s.caseLabel}</p>
       <h1 className="mt-1 text-3xl font-extrabold">{s.title}: {s.persona.name} with {s.counterpart.name}</h1>
       <p className="mt-2 text-ink/80">
-        Ending: <b>{s.endings[attempt.ending as keyof typeof s.endings]?.title ?? attempt.ending}</b>
+        Ending: <b>{blind ? "hidden until you rate" : s.endings[attempt.ending as keyof typeof s.endings]?.title ?? attempt.ending}</b>
         {attempt.interrupted && " · interrupted by a system failure"} · {attempt.turns.length} turns · hints requested {attempt.hints.requested}, automatic {attempt.hints.auto}
       </p>
       <p className="mt-2 text-sm text-ink/70">
-        Check each turn&apos;s labels. Change any that are wrong. Scores recompute from your labels. Facts the character already revealed stay as they happened.
+        {blind
+          ? "Step 1: rate each criterion from the transcript alone. The AI's labels, scores and ending are hidden until you finish, so your judgment is independent."
+          : "Step 2: compare, then check each turn's labels. Change any that are wrong. Scores recompute from your labels. Facts the character already revealed stay as they happened."}
       </p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -107,8 +119,8 @@ export function ReviewView() {
                 <p className="text-xs font-bold text-ink/70">Turn {i + 1}{flagged ? " · flagged by the learner" : ""}{t.hintBefore ? " · after a hint" : ""}</p>
                 <p className="mt-1"><b>Learner:</b> {t.learner}</p>
                 <p className="mt-1 text-ink/75"><b>{s.counterpart.name}:</b> {t.reply}</p>
-                {t.released.length > 0 && <p className="mt-1 text-xs text-teal-dark">Revealed: {t.released.map((id) => s.facts.find((f) => f.id === id)?.label ?? id).join("; ")}</p>}
-                <fieldset className="mt-3">
+                {!blind && t.released.length > 0 && <p className="mt-1 text-xs text-teal-dark">Revealed: {t.released.map((id) => s.facts.find((f) => f.id === id)?.label ?? id).join("; ")}</p>}
+                {!blind && <fieldset className="mt-3">
                   <legend className="text-xs font-bold text-ink/70">Labels {edits[i] ? "(edited)" : "(from the AI)"}</legend>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     {ALL.map((b) => {
@@ -121,7 +133,7 @@ export function ReviewView() {
                       );
                     })}
                   </div>
-                </fieldset>
+                </fieldset>}
                 <label className="mt-2 block text-xs font-semibold text-ink/70">
                   Note
                   <input value={notes[i] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [i]: e.target.value }))} className="mt-1 w-full rounded-lg border border-ink/20 px-2 py-1 text-sm font-normal" />
@@ -132,6 +144,55 @@ export function ReviewView() {
         </ol>
 
         <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+          {blind ? (
+            <div className="card !p-4">
+              <h2 className="h2">Your ratings</h2>
+              <p className="mt-1 text-xs text-ink/70">2 demonstrated, 1 partial, 0 not demonstrated despite the chance, NE not evaluable.</p>
+              <ul className="mt-3 space-y-4">
+                {s.criteria.map((c) => (
+                  <li key={c.id}>
+                    <fieldset>
+                      <legend className="text-sm font-bold">{c.id}. {c.label}</legend>
+                      <ul className="mt-1 space-y-0.5 text-xs text-ink/80">
+                        {c.anchors.map((a, k) => <li key={k}><b>{k}:</b> {a}</li>)}
+                      </ul>
+                      <div className="mt-2 flex gap-2">
+                        {["2", "1", "0", "NE"].map((v) => (
+                          <label key={v} className={`cursor-pointer rounded-full border-2 px-3 py-0.5 text-sm font-bold ${ratings[c.id] === v ? "border-ink bg-ink text-white" : "border-ink/20"}`}>
+                            <input type="radio" name={`rate-${c.id}`} value={v} checked={ratings[c.id] === v} onChange={() => setRatings((r) => ({ ...r, [c.id]: v }))} className="sr-only" />
+                            {v}
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn-primary mt-4 w-full" disabled={!allRated} onClick={() => setRevealed(true)}>{allRated ? "Reveal the AI's scores" : "Rate every criterion to continue"}</button>
+            </div>
+          ) : (
+          <>
+          <div className="card !p-4">
+            <h2 className="h2">Your blind ratings vs the AI</h2>
+            <table className="mt-2 w-full text-sm">
+              <thead><tr className="text-left text-xs text-ink/70"><th className="py-1">Criterion</th><th>You</th><th>AI</th><th></th></tr></thead>
+              <tbody>
+                {s.criteria.map((c) => {
+                  const ai = SCORE[original.find((o) => o.id === c.id)!.status];
+                  const same = ratings[c.id] === ai;
+                  return (
+                    <tr key={c.id} className="border-t border-ink/10">
+                      <td className="py-1.5"><b>{c.id}</b></td>
+                      <td>{ratings[c.id]}</td>
+                      <td>{ai}</td>
+                      <td className={same ? "text-teal-dark" : "font-bold text-coral-dark"}>{same ? "✓ agree" : "✗ differ"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p className="mt-2 text-sm"><b>{blindMatches} of {s.criteria.length}</b> criteria match. Where you differ, check the labels on the turns involved.</p>
+          </div>
           <div className="card !p-4">
             <h2 className="h2">Scores</h2>
             <table className="mt-2 w-full text-sm">
@@ -159,7 +220,9 @@ export function ReviewView() {
               <p className="mt-2 text-xs text-ink/65">Score against the objective: {s.persona.objective}</p>
             </div>
           )}
-          <button className="btn-primary w-full" onClick={async () => { await navigator.clipboard.writeText(summary); setCopied(true); }}>{copied ? "Copied" : "Copy review summary"}</button>
+          </>
+          )}
+          <button className="btn-primary w-full" disabled={blind} onClick={async () => { await navigator.clipboard.writeText(summary); setCopied(true); }}>{copied ? "Copied" : "Copy review summary"}</button>
           <p className="text-xs text-ink/70">Nothing on this page is saved. <Link href="/design#review-route" className="link">How review works</Link></p>
         </aside>
       </div>

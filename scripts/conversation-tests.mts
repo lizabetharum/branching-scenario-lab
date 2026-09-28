@@ -5,14 +5,14 @@
 //   npx tsx scripts/conversation-tests.mts <url> [--write]
 import { writeFileSync } from "node:fs";
 import { convoScenarios } from "../src/lib/convo";
-import { replay, endingFor } from "../src/lib/convo/engine";
+import { replay, endingFor, endingText } from "../src/lib/convo/engine";
 import type { ConvoTurn } from "../src/lib/convo/types";
 import type { CriterionStatus } from "../src/lib/types";
 
 const target = process.argv[2] ?? "http://localhost:3000";
 const write = process.argv.includes("--write");
 
-interface Conv { id: string; name: string; scenario: string; lines: string[]; endAfter?: boolean; ending: string[]; expect: Record<string, CriterionStatus[]>; note: string }
+interface Conv { id: string; name: string; scenario: string; lines: string[]; endAfter?: boolean; ending: string[]; expect: Record<string, CriterionStatus[]>; note: string; causeText?: boolean }
 const conversations: Conv[] = [
   {
     id: "C1", name: "Marcus, strong conversation", scenario: "labels",
@@ -51,8 +51,17 @@ const conversations: Conv[] = [
       "Walk me through what's been happening at your station when these mix-ups happen.",
       "What would make this conversation useful for you?",
     ],
-    ending: ["closed"], expect: { P3: ["not_observed"], P4: ["not_observed"] },
-    note: "The shared tray must stay hidden after a question that isn't about it.",
+    ending: ["closed"], expect: { P1: ["partial"], P3: ["not_observed"], P4: ["not_observed"] },
+    note: "The shared tray must stay hidden after a question that isn't about it, and the general question earns no P1 credit.",
+  },
+  {
+    id: "C6", name: "Ana: cause found, no plan (review 2, finding 2)", scenario: "labels-b", endAfter: true,
+    lines: [
+      "Walk me through how these wrong numbers end up in the system.",
+      "When you're typing a number in, what are you looking at on the screen?",
+    ],
+    ending: ["closed"], causeText: true, expect: { P1: ["demonstrated"], P4: ["not_observed"] },
+    note: "The ending must acknowledge the diagnosis (the form layout) and name the missing agreement, not say nothing targeted the cause.",
   },
   {
     id: "C5", name: "Priya, strong conversation", scenario: "pickup",
@@ -89,8 +98,10 @@ for (const c of conversations) {
   const scores = Object.fromEntries(s.evaluate(turns, st.released).map((x) => [x.id, x.status]));
   const endOk = ending !== null && c.ending.includes(ending);
   const scoreOk = Object.entries(c.expect).every(([k, allowed]) => allowed.includes(scores[k]));
-  const pass = endOk && scoreOk && !blocked;
-  results.push({ id: c.id, name: c.name, scenario: c.scenario, ending, expectedEnding: c.ending.join(" or "), scores, expected: c.expect, note: c.note, transcript: log, pass });
+  const text = ending ? endingText(s, ending as never, st.released) : "";
+  const textOk = c.causeText === undefined || c.causeText === text.startsWith("You found the cause");
+  const pass = endOk && scoreOk && !blocked && textOk;
+  results.push({ id: c.id, name: c.name, scenario: c.scenario, ending, endingText: text, expectedEnding: c.ending.join(" or "), scores, expected: c.expect, note: c.note, transcript: log, pass });
   console.log(`${pass ? "✓" : "✗"} ${c.id} ${c.name}: ending ${ending} (expected ${c.ending.join("/")}), ${Object.entries(scores).map(([k, v]) => `${k}=${v}`).join(" ")}`);
   if (!pass) for (const l of log) console.log(`    ${l}`);
 }

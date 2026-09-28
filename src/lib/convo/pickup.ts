@@ -1,5 +1,5 @@
 import type { ConvoScenario, ConvoTurn } from "./types";
-import { confirmedQ, cr, idx, planTrace, proposedQ, q, supportAt, validOpenIdx } from "./eval";
+import { confirmedQ, cr, idx, investigative, planTrace, proposedQ, q, supportAt, validOpenIdx } from "./eval";
 import { GROW } from "./labels";
 
 // Priya Nair: conceptual gap. She doesn't believe she can ask without already
@@ -13,7 +13,9 @@ export function makePickupEvaluate(o: { name: string; keyId: string; stepId: str
   return function evaluate(turns: ConvoTurn[], released: string[]) {
   const named = idx(turns, "namesConcern");
   const soft = named >= 0 && turns[named].tags.includes("overSoften");
-  const opens = validOpenIdx(turns);
+  const allOpens = validOpenIdx(turns).length;
+  // Only questions about the problem count. General or planning questions don't.
+  const opens = turns.map((t, i) => (investigative(t) ? i : -1)).filter((i) => i >= 0);
   const selfAnswers = turns.filter((t) => t.tags.includes("selfAnswer")).length;
   const ask = idx(turns, "askOptions");
   const way = Math.max(idx(turns, "wayForward"), idx(turns, "checkin"));
@@ -26,12 +28,12 @@ export function makePickupEvaluate(o: { name: string; keyId: string; stepId: str
         ? cr("Q1", Q1, "demonstrated", supportAt(turns, named), q(turns[named]), "Keep naming what you saw, plainly and once.")
         : cr("Q1", Q1, "partial", supportAt(turns, named), `${soft ? "You named it, wrapped in apology." : "You named it, but not until turn " + (named + 1) + "."} ${q(turns[named])}`, "Say what you saw early, without apologizing for asking.");
 
-  const Q2 = `Asked open questions and left them for ${o.name} to answer`;
+  const Q2 = `Asked open questions about the problem and left them for ${o.name} to answer`;
   const q2 =
     opens.length >= 2
-      ? cr("Q2", Q2, "demonstrated", supportAt(turns, opens[1]), `${opens.length} open questions left for ${o.name} to answer.${selfAnswers ? ` ${selfAnswers} other question(s) you answered yourself.` : ""} ${q(turns[opens[1]])}`, "Keep asking, then waiting.")
+      ? cr("Q2", Q2, "demonstrated", supportAt(turns, opens[1]), `${opens.length} open questions about the problem left for ${o.name} to answer (${allOpens} open questions in total).${selfAnswers ? ` ${selfAnswers} other question(s) you answered yourself.` : ""} ${q(turns[opens[1]])}`, "Keep asking, then waiting.")
       : opens.length === 1
-        ? cr("Q2", Q2, "partial", supportAt(turns, opens[0]), `One open question left for ${o.name}.${selfAnswers ? ` ${selfAnswers} question(s) you answered yourself.` : ""} ${q(turns[opens[0]])}`, "Ask a second open question. You don't need to know the answer first.")
+        ? cr("Q2", Q2, "partial", supportAt(turns, opens[0]), `One open question about the problem left for ${o.name} (${allOpens} open questions in total).${selfAnswers ? ` ${selfAnswers} question(s) you answered yourself.` : ""} ${q(turns[opens[0]])}`, "Ask a second open question. You don't need to know the answer first.")
         : cr("Q2", Q2, "not_observed", "n/a", selfAnswers ? `${selfAnswers} question(s), but you supplied the answer each time.` : "No open questions.", "Ask \"What's been happening at pickup?\" and stop talking.");
 
   const Q3 = "Surfaced what observation couldn't show";
@@ -211,15 +213,15 @@ export const pickup: ConvoScenario = {
   endings: {
     plan_key: { id: "plan_key", title: "Plan agreed, cause found", text: "Dev heads back with a plan for the four-to-six block. What you saw at the counter had a cause you couldn't see from there." },
     plan_surface: { id: "plan_surface", title: "Plan agreed, cause missed", text: "You and Dev agreed on a plan, but it isn't built on the cause. Either the drive-through coverage never came up, or the plan came from you instead of Dev. The rushing will likely continue." },
-    unconfirmed: { id: "unconfirmed", title: "Plan proposed, not confirmed", text: "Dev proposed a step and a time, but the conversation ended before you confirmed it. Dev heads back unsure whether anything will change." },
-    closed: { id: "closed", title: "Ended without a plan", text: "Dev goes back to the counter, unsure what the conversation was about." },
-    time: { id: "time", title: "Out of time", text: "The afternoon picks up and Dev has to go. The conversation stopped before a plan." },
+    unconfirmed: { id: "unconfirmed", title: "Plan proposed, not confirmed", text: "Dev proposed a step and a time, but the conversation ended before you confirmed it. Dev heads back unsure whether anything will change.", textWithCause: "You found the cause: Dev covers the drive-through and pickup at once from four to six, and Dev proposed a step and a time. You never confirmed it, so Dev doesn't know whether the plan is on." },
+    closed: { id: "closed", title: "Ended without a plan", text: "Dev goes back to the counter, unsure what the conversation was about.", textWithCause: "You found the cause: Dev covers the drive-through and pickup at once from four to six. The conversation ended before Dev proposed a fix and you agreed on it, so nothing changes yet." },
+    time: { id: "time", title: "Out of time", text: "The afternoon picks up and Dev has to go. The conversation stopped before a plan.", textWithCause: "You found the cause: Dev covers the drive-through and pickup at once from four to six. The afternoon pulled Dev away before you agreed on a next step." },
   },
   criteria: [
     { id: "Q1", label: "Raised the concern plainly", anchors: ["Never said why the conversation was happening", "Named the concern late, or buried it in apology", "Named what was observed plainly within the first two turns"] },
-    { id: "Q2", label: "Asked open questions and left them for Dev to answer", anchors: ["No open question, or every question was leading or self-answered", "One open question left for Dev to answer", "Two or more open questions left for Dev to answer"] },
+    { id: "Q2", label: "Asked open questions about the problem and left them for Dev to answer", anchors: ["No open question about the problem, or every question was leading or self-answered", "One open question about the problem left for Dev to answer", "Two or more open questions about the problem left for Dev to answer"] },
     { id: "Q3", label: "Surfaced what observation couldn't show", anchors: ["Nothing beyond what was visible at the counter", "Learned pickup was busier, but not why", "Learned about the drive-through coverage"] },
-    { id: "Q4", label: "Built the way forward with Dev", anchors: ["No plan, or Priya supplied it", "Asked for ideas or set a next step, not both", "Asked for Dev's ideas and agreed on a next step or check-in"] },
+    { id: "Q4", label: "Built the way forward with Dev", anchors: ["No plan, or Priya supplied the plan and Dev went along", "Asked for ideas or a next step, but no plan built on Dev's own idea was proposed and confirmed", "Dev proposed a step built on Dev's own idea, and Priya confirmed it on a later turn"] },
   ],
   evaluate: makePickupEvaluate({ name: "Dev", keyId: "drive", stepId: "busier", keyText: "covering the drive-through", stepText: "pickup is busier", stepNext: "Ask what's different about how the afternoon runs now.", vantage: "from the counter" }),
   framework: GROW,
