@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1d2433;
+  --color-paper: #f6f1e7;
+  --color-cream: #fbf8f2;
+  --color-teal: #0f766e;
+  --color-teal-dark: #0b5953;
+  --color-coral: #e0704f;
+  --color-coral-dark: #a8391f;
+  --color-mustard: #e3a83b;
+}
+
+html { background: var(--color-cream); color: var(--color-ink); }
+body { font-family: var(--font-sans); }
+
+:focus-visible { outline: 3px solid var(--color-mustard); outline-offset: 3px; border-radius: 6px; }
+
+@layer components {
+  .eyebrow { @apply text-xs font-bold uppercase tracking-[0.18em] text-teal-dark; }
+  .h2 { @apply text-xl font-extrabold text-ink; }
+  .card { @apply rounded-2xl border border-ink/10 bg-white p-6 shadow-[0_1px_0_rgba(29,36,51,.06),0_8px_24px_-12px_rgba(29,36,51,.18)]; }
+  .btn-primary { @apply inline-flex items-center justify-center rounded-full bg-ink px-6 py-3 font-bold text-white transition hover:bg-teal-dark disabled:opacity-40; }
+  .btn-ghost { @apply inline-flex items-center justify-center rounded-full border-2 border-ink/20 px-4 py-2 text-sm font-bold text-ink transition hover:border-ink disabled:opacity-40; }
+  .link { @apply font-semibold text-teal-dark underline decoration-2 underline-offset-2 hover:text-ink disabled:no-underline disabled:opacity-50; }
+  .choice { @apply block w-full rounded-xl border-2 border-ink/15 bg-cream px-4 py-3 text-left text-[15px] leading-snug transition hover:border-ink hover:bg-white; }
+  .tab { @apply rounded-full px-4 py-1.5 text-sm font-bold text-ink/70 disabled:opacity-40; }
+  .tab-on { @apply bg-ink text-white; }
+  .bubble-them { @apply max-w-[85%] rounded-2xl rounded-tl-sm bg-teal/10 px-4 py-2.5 text-[15px]; }
+  .bubble-me { @apply max-w-[85%] rounded-2xl rounded-tr-sm bg-ink px-4 py-2.5 text-[15px] text-white; }
+  .prose-d h2 { @apply mt-14 scroll-mt-24 text-3xl font-extrabold text-ink; }
+  .prose-d h3 { @apply mt-8 text-xl font-bold text-ink; }
+  .prose-d p { @apply mt-3 leading-relaxed text-ink/85; }
+  .prose-d ul { @apply mt-3 list-disc space-y-1.5 pl-6 text-ink/85; }
+  .prose-d table { @apply mt-4 w-full border-collapse text-sm; }
+  .prose-d th { @apply border-b-2 border-ink bg-paper p-2 text-left font-bold; }
+  .prose-d td { @apply border-b border-ink/10 p-2 align-top text-ink/85; }
+  .prose-d pre { @apply mt-4 overflow-x-auto rounded-xl bg-ink p-4 text-xs leading-relaxed text-white/90; }
+  .prose-d blockquote { @apply mt-4 border-l-4 border-mustard bg-paper px-4 py-3 text-ink/85; }
+}
+
+.scene-person { transition: transform .5s ease; }
+.cue { animation: pop .5s ease both; }
+.map-current rect { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+@keyframes pulse { 50% { stroke-width: 5; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
