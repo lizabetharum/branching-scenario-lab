@@ -31,10 +31,10 @@ export const conversationRun = {
       },
       "note": "Every criterion quotes a completed behavior, including Sam's proposal and the confirmation.",
       "transcript": [
-        "Thanks for coming in. Walk me through what's been happening at your station when these mix-ups happen. → [open, namesConcern] released pattern",
+        "Thanks for coming in. Walk me through what's been happening at your station when these mix-ups happen. → [open, acknowledge] released pattern",
         "What happens to the label you were working on when you get called to the register? → [open] released tray",
         "That makes sense. What do you think would help? → [acknowledge, askOptions] released idea",
-        "Let's try it. What will you do first, and when should we check how it's going? → [wayForward, checkin, confirms] released commit",
+        "Let's try it. What will you do first, and when should we check how it's going? → [wayForward, checkin] released commit",
         "Friday works. Let's do it. → [confirms, wayForward]"
       ],
       "pass": true
@@ -46,7 +46,7 @@ export const conversationRun = {
       "ending": "closed",
       "expectedEnding": "unconfirmed or closed",
       "scores": {
-        "P1": "not_observed",
+        "P1": "partial",
         "P2": "demonstrated",
         "P3": "partial",
         "P4": "partial"
@@ -68,8 +68,8 @@ export const conversationRun = {
       "note": "Pins the reviewer's finding: no plan ending, and no P4 credit for asking. P3 varies between runs (not observed, or partial when the question draws out Sam's surface idea), so either is accepted.",
       "transcript": [
         "You need to slow down and double-check every label. → [instruction]",
-        "Sorry, I jumped ahead. What's actually happening at your station when these come up? → [acknowledge, open] released pattern",
-        "What will you do first, and when should we check how it is working? → [wayForward, checkin] released surfaceIdea"
+        "Sorry, I jumped ahead. What's actually happening at your station when these come up? → [open, acknowledge] released pattern",
+        "What will you do first, and when should we check how it is working? → [open, askOptions, wayForward, checkin] released surfaceIdea"
       ],
       "pass": true
     },
@@ -156,10 +156,10 @@ export const conversationRun = {
       },
       "note": "Q4 needs Dev's own idea, Dev's proposal and Priya's confirmation.",
       "transcript": [
-        "Thanks for coming in. A customer said yesterday they felt rushed at pickup, and I've noticed a couple of quick handoffs this week. What's been going on? → [open, namesConcern] released busier",
+        "Thanks for coming in. A customer said yesterday they felt rushed at pickup, and I've noticed a couple of quick handoffs this week. What's been going on? → [namesConcern, open] released busier",
         "What's different about how the afternoons run now? → [open] released drive",
-        "I didn't know that. What do you think would help? → [open, acknowledge, askOptions] released idea",
-        "Let's try that. What's the first step, and when should we check in? → [confirms, wayForward, checkin] released commit",
+        "I didn't know that. What do you think would help? → [acknowledge, askOptions] released idea",
+        "Let's try that. What's the first step, and when should we check in? → [wayForward, checkin] released commit",
         "Friday it is. Thanks, Dev. → [confirms, closes]"
       ],
       "pass": true
