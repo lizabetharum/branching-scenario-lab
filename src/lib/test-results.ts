@@ -12,7 +12,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through what's going on at your station when these mix-ups happen.",
       "expected": "Tagged open. Sam reveals the 5 p.m. pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"It's usually around five when things get hectic. I'll be in the middle of a label and someone pulls me to the register, then I come back and just pick up where I think I left off. That's when the mistakes happen.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"It's the timing, honestly. Around five o'clock the line gets crazy, and I'm labeling and then someone pulls me to the register in the middle of it. When I get back, I just... jump back in where I thought I was, I guess.\"",
       "pass": true
     },
     {
@@ -22,7 +22,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "so whats been going on w/ the labels at ur station",
       "expected": "Same result as T01. Style is not penalized.",
-      "observed": "Tags: open, namesConcern. Released: pattern. Reply: \"Honestly, it gets pretty hectic around five when I'm pulled to the register. I lose my place on what I'm working on and come back mixed up.\"",
+      "observed": "Tags: open. Released: pattern. Reply (authored): \"Mostly it's around five. The line backs up, I get called to the register, and when I come back I pick up where I think I left off.\"",
       "pass": true
     },
     {
@@ -172,7 +172,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's changed lately? It's probably just the new hires, right?",
       "expected": "Tagged self-answer. The drive-through stays hidden.",
-      "observed": "Tags: leading, selfAnswer. Released: nothing. Reply: \"Maybe. I don't know.\"",
+      "observed": "Tags: open, leading, selfAnswer. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -192,7 +192,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "Is it because you're covering the drive-through too?",
       "expected": "Tagged leading. Not released. On every run, Dev's reply neither agrees, confirms nor hints at the drive-through.",
-      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\"",
+      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -202,7 +202,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's different about how the afternoons run now?",
       "expected": "Second open question releases the drive-through coverage.",
-      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed a few weeks ago, I've been covering both the drive-through and the pickup counter at the same time from 4 to 6, so when that bell rings I have to stop whoever I'm helping at the counter.\"",
+      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed about three weeks ago, I've been covering both the drive-through and the pickup counter at the same time from four to six. So whenever that bell rings, I have to step away from whoever's at the counter.\"",
       "pass": true
     },
     {
@@ -222,7 +222,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through how these numbers end up wrong.",
       "expected": "Tagged open. Ana reveals the Monday-morning pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"It's mostly Monday mornings when I'm covering both the phone and drop-off until ten, so I'm typing while someone's on hold. I'm probably rushing through the entry.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"It's mostly Monday mornings. I cover the phone line and drop-off until ten, so I'm typing while someone's on hold. I'm probably not catching what I'm writing.\"",
       "pass": true
     },
     {
