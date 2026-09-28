@@ -176,7 +176,7 @@ function Classroom({ mood, cue }: { mood: Mood; cue?: string }) {
   );
 }
 
-function Pharmacy({ mood, cue }: { mood: Mood; cue?: string }) {
+function Pharmacy({ mood, cue, who = "sam" }: { mood: Mood; cue?: string; who?: "sam" | "dev" }) {
   const boxes = ["#e8d7c3", "#cfe3e1", "#f1d9a8", "#d9dbe8", "#e7c9c0"];
   return (
     <>
@@ -191,13 +191,43 @@ function Pharmacy({ mood, cue }: { mood: Mood; cue?: string }) {
           ))}
         </g>
       ))}
-      {/* clock at 2:15 */}
+      {/* clock: 2:15 for Sam, 1:30 for Dev */}
       <g transform="translate(560 64)">
         <circle r={28} fill="#fff" stroke={INK} strokeWidth={3} />
-        <path d="M0 0v-12M0 0h15" stroke={INK} strokeWidth={3} strokeLinecap="round" transform="rotate(8)" />
+        {who === "sam" ? (
+          <path d="M0 0v-12M0 0h15" stroke={INK} strokeWidth={3} strokeLinecap="round" transform="rotate(8)" />
+        ) : (
+          <path d="M0 0l6 -10M0 0v18" stroke={INK} strokeWidth={3} strokeLinecap="round" />
+        )}
       </g>
-      {/* Sam */}
-      <Person x={380} y={92} mood={mood} skin="#e0b394" hair="#3a2a1f" shirt="#2f7f8a" hairStyle="bun" crossed={mood === "guarded"} badge />
+      {/* drive-through window */}
+      {cue === "drive" && (
+        <g transform="translate(470 58)" className="cue">
+          <rect x={-8} y={-10} width={156} height={108} rx={10} fill="none" stroke="#e3a83b" strokeWidth={3} strokeDasharray="6 5" />
+          <rect width={140} height={80} rx={4} fill="#bcd9e8" stroke="#fff" strokeWidth={5} />
+          <path d="M14 66 q6 -22 30 -24 h40 q20 2 30 24z" fill="#5d6b78" />
+          <circle cx={36} cy={68} r={7} fill={INK} />
+          <circle cx={98} cy={68} r={7} fill={INK} />
+          <circle cx={126} cy={14} r={8} fill="#e3a83b" />
+          <text x={70} y={-16} textAnchor="middle" fontSize={11} fontWeight={700} fill={INK} fontFamily="var(--font-sans)">drive-through, 4 to 6</text>
+        </g>
+      )}
+      {/* schedule on the wall */}
+      {cue === "schedule" && (
+        <g transform="translate(250 40)" className="cue">
+          <rect width={92} height={112} rx={3} fill="#fff" stroke={INK} strokeWidth={2} transform="rotate(-3 46 56)" />
+          {[0, 1, 2, 3, 4].map((r) => (
+            <path key={r} d={`M10 ${24 + r * 18}h72`} stroke="#9aa7ab" strokeWidth={2} transform="rotate(-3 46 56)" />
+          ))}
+          <rect x={8} y={74} width={76} height={16} fill="#e3a83b" opacity={0.6} transform="rotate(-3 46 56)" />
+          <text x={46} y={16} textAnchor="middle" fontSize={10} fontWeight={800} fill={INK} fontFamily="var(--font-sans)" transform="rotate(-3 46 56)">SCHEDULE</text>
+        </g>
+      )}
+      {who === "sam" ? (
+        <Person x={380} y={92} mood={mood} skin="#e0b394" hair="#3a2a1f" shirt="#2f7f8a" hairStyle="bun" crossed={mood === "guarded"} badge />
+      ) : (
+        <Person x={380} y={92} mood={mood} skin="#8d5a3b" hair="#1d1611" shirt="#3b6ea5" hairStyle="short" crossed={mood === "guarded"} badge />
+      )}
       {/* counter */}
       <rect x={220} y={240} width={400} height={22} rx={4} fill="#5d6b78" />
       <rect x={236} y={262} width={368} height={80} fill="#7c8a96" />
@@ -250,15 +280,17 @@ export function Scene({
   mood,
   cue,
   label,
+  who,
 }: {
   scene: "classroom" | "pharmacy";
   mood: Mood;
   cue?: string;
   label: string;
+  who?: "sam" | "dev";
 }) {
   return (
     <svg viewBox="0 0 640 360" role="img" aria-label={label} className="w-full h-auto rounded-2xl block">
-      {scene === "classroom" ? <Classroom mood={mood} cue={cue} /> : <Pharmacy mood={mood} cue={cue} />}
+      {scene === "classroom" ? <Classroom mood={mood} cue={cue} /> : <Pharmacy mood={mood} cue={cue} who={who} />}
     </svg>
   );
 }

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { Scene } from "@/components/Scene";
-import { scenarioList } from "@/lib/scenarios";
+import { scenarios } from "@/lib/scenarios";
+import { convoScenarios } from "@/lib/convo";
 
 const PRACTICES = [
   ["Performance first", "Each scenario starts from a behavior an observer could see, not a topic.", "/design#performance"],
   ["Intake before build", "Duration, the moment the skill breaks down, and learner experience set the scope.", "/design#intake"],
   ["Personas as specs", "Characters follow written response rules. Warmth alone doesn't unlock evidence.", "/design#personas"],
+  ["Two formats, side by side", "Open conversations built on a fact packet, next to a fixed branching tree. Same guardrails, different trade-offs.", "/design#convo"],
   ["Consequences and recovery", "Mistakes play out, and you can repair them. Repairs stay on the record.", "/design#map"],
   ["The app scores, not the AI", "The model matches your words to a response type. Code decides the next node and the criteria.", "/design#ai"],
   ["Guardrails and privacy", "Personal information, off-topic chat, personal and clinical advice, and rule overrides are caught.", "/design#guardrails"],
@@ -22,13 +24,13 @@ export default function Home() {
               Practice the conversation before it counts.
             </h1>
             <p className="mt-5 max-w-xl text-lg text-ink/80">
-              Two AI-supported branching scenarios. Type what you would say or pick a response, and watch it play out. The debrief scores what you did, not whether you reached the last screen.
+              Three practice conversations in two formats. In the pharmacy scenarios you talk freely, and the character only tells you what your questions earn. In the classroom scenario you move through a fixed branching tree. Every debrief scores what you did, not whether you reached the last screen.
             </p>
             <p className="mt-4 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-ink/80 ring-1 ring-ink/10">
               Design demonstration. Not yet approved for learner use.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/scenario/grow" className="btn-primary">Start the pharmacy scenario</Link>
+              <Link href="/scenario/labels" className="btn-primary">Start a pharmacy conversation</Link>
               <Link href="/design" className="btn-ghost !px-6 !py-3 !text-base">See how it was designed</Link>
             </div>
           </div>
@@ -49,19 +51,29 @@ export default function Home() {
         </blockquote>
         <p className="mt-3 text-center text-sm text-ink/60">The design standard for both scenarios, from the research guide behind this app.</p>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-          {scenarioList.map((s) => (
-            <article key={s.id} className="card flex flex-col overflow-hidden !p-0">
-              <Scene scene={s.scene} mood={s.nodes[s.start].mood} label={`Opening scene for ${s.title}.`} />
+        <div className="mt-12 grid gap-8 lg:grid-cols-3">
+          {[
+            ...Object.values(convoScenarios).map((c) => ({
+              id: c.id, title: c.title, domain: c.domain, tagline: c.tagline, format: "Open conversation · fact packet",
+              who: c.who, scene: "pharmacy" as const, mood: "guarded" as const,
+              play: `${c.persona.name}. ${c.persona.gap}`, talk: `${c.counterpart.name}, ${c.counterpart.role.split(",")[0].toLowerCase()}`,
+            })),
+            ...Object.values(scenarios).map((t) => ({
+              id: t.id, title: t.title, domain: t.domain, tagline: t.tagline, format: "Fixed branching tree",
+              who: undefined, scene: t.scene, mood: t.nodes[t.start].mood,
+              play: t.learnerPersonas.map((p) => p.name).join(" or "), talk: `${t.counterpart.name}, ${t.counterpart.role.charAt(0).toLowerCase() + t.counterpart.role.slice(1)}`,
+            })),
+          ].map((c) => (
+            <article key={c.id} className="card flex flex-col overflow-hidden !p-0">
+              <Scene scene={c.scene} who={c.who} mood={c.mood} label={`Opening scene for ${c.title}.`} />
               <div className="flex flex-1 flex-col p-6">
-                <p className="eyebrow">{s.domain}</p>
-                <h2 className="mt-2 text-2xl font-extrabold">{s.title}</h2>
-                <p className="mt-2 text-ink/80">{s.tagline}</p>
-                <p className="mt-3 text-sm text-ink/70">
-                  <b>You play:</b> {s.learnerPersonas.map((p) => p.name).join(" or ")}. <b>You talk with:</b> {s.counterpart.name}, {s.counterpart.role.charAt(0).toLowerCase() + s.counterpart.role.slice(1)}.
-                </p>
+                <p className="eyebrow">{c.domain}</p>
+                <h2 className="mt-2 text-2xl font-extrabold">{c.title}</h2>
+                <p className="mt-2 inline-block self-start rounded-full bg-ink px-3 py-1 text-xs font-bold text-white">{c.format}</p>
+                <p className="mt-3 text-ink/80">{c.tagline}</p>
+                <p className="mt-3 text-sm text-ink/70"><b>You play:</b> {c.play} <b>You talk with:</b> {c.talk}.</p>
                 <div className="mt-auto pt-5">
-                  <Link href={`/scenario/${s.id}`} className="btn-primary">Start</Link>
+                  <Link href={`/scenario/${c.id}`} className="btn-primary">Start</Link>
                 </div>
               </div>
             </article>

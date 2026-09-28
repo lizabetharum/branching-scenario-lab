@@ -54,7 +54,7 @@ export const BOUNDARY_MESSAGES: Record<BoundaryKind, string> = {
 
 /** Words that must never appear in a character reply. If they do, the app uses the authored line. */
 const LEAK = /\b(rubric|criteri(on|a)|branch|node|ending|E[123]|score|pass(ed)?|system prompt|as an ai|language model)\b/i;
-const CLINICAL = /\b(\d+\s?mg|mcg|dose|dosage|milligrams?|prescribe|diagnos\w*|overdose|interaction|allerg\w*)\b/i;
+const CLINICAL = /\b(\d+\s?mg|mcg|dose|dosage|milligrams?|prescribe|diagnos\w*|overdose|drug interactions?|allerg\w*)\b/i;
 
 export function replyIsSafe(reply: string, scene: "classroom" | "pharmacy"): boolean {
   if (!reply || reply.length > 360) return false;

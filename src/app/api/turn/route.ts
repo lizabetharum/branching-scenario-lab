@@ -11,22 +11,11 @@ import {
   replyIsSafe,
 } from "@/lib/guardrails";
 import { model } from "@/lib/model";
+import { limited } from "@/lib/ratelimit";
 import type { ApiResponse, BoundaryKind } from "@/lib/types";
 
 export const maxDuration = 30;
 
-
-// Best-effort limiter. Serverless instances don't share memory, so this slows
-// abuse on one instance but is not a hard cap. A production build would use a
-// shared store or the Vercel firewall.
-const hits = new Map<string, number[]>();
-function limited(ip: string) {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < 5 * 60_000);
-  recent.push(now);
-  hits.set(ip, recent);
-  return recent.length > 40;
-}
 
 const Body = z.object({
   scenarioId: z.string(),
@@ -59,8 +48,7 @@ export async function POST(req: Request) {
   if (input.length === 0) return boundary("unclear", false);
   if (input.length > MAX_INPUT) return boundary("too_long", false);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (limited(ip)) return boundary("rate_limited", false);
+  if (limited(req)) return boundary("rate_limited", false);
 
   // Checks that run before anything reaches the model.
   if (detectPersonalInfo(input)) return boundary("personal_info", false);

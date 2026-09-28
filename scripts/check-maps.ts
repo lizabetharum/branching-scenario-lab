@@ -35,3 +35,36 @@ for (const s of Object.values(scenarios)) {
   console.log(`${ok2 ? "✓" : "✗"} ${s.id}: interrupted attempt never scores 0 or partial, marks unfinished criteria NE (${cut.map(c=>c.status).join(",")})`);
   if (!ok1 || !ok2) process.exitCode = 1;
 }
+
+// Engine checks for the fact-packet scenarios: release rules, guard and endings.
+import { convoScenarios } from "../src/lib/convo";
+import { replay, step, endingFor } from "../src/lib/convo/engine";
+import type { Behavior, ConvoTurn } from "../src/lib/convo/types";
+function run(id: string, seq: Behavior[][]) {
+  const s = convoScenarios[id]; const turns: ConvoTurn[] = []; let ending: string | null = null;
+  for (const tags of seq) {
+    const st = replay(s, turns); const { guard, fact } = step(s, st, tags);
+    const released = fact ? [...st.released, fact.id] : st.released;
+    turns.push({ learner: tags.join("+"), reply: "", tags, released: fact ? [fact.id] : [], hintBefore: false, guardAfter: guard });
+    ending = endingFor(s, released, new Set([...st.seen, ...tags]), tags, turns.length, false);
+    if (ending) break;
+  }
+  const st = replay(s, turns);
+  return { released: st.released, guard: st.guard, ending, scores: s.evaluate(turns, st.released).map((c) => c.status) };
+}
+const cases: [string, string, Behavior[][], (r: ReturnType<typeof run>) => boolean][] = [
+  ["labels ideal: two opens, ask options, way forward", "labels", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["labels telling shuts Sam down: nothing released", "labels", [["interpretation", "instruction"], ["leading"]], (r) => r.guard === 3 && r.released.length === 0],
+  ["labels repair reopens: acknowledge + open releases pattern", "labels", [["interpretation"], ["acknowledge", "open"]], (r) => r.released.includes("pattern")],
+  ["labels early options give the surface idea, not the real one", "labels", [["open"], ["askOptions"], ["wayForward"]], (r) => r.released.includes("surfaceIdea") && !r.released.includes("idea") && r.ending === "plan_surface"],
+  ["labels guessing the tray (leading) doesn't release it", "labels", [["open"], ["leading"]], (r) => !r.released.includes("tray")],
+  ["pickup: no concern named, open question releases nothing", "pickup", [["overSoften"], ["open"]], (r) => r.released.length === 0],
+  ["pickup: self-answered questions earn nothing", "pickup", [["namesConcern"], ["open", "selfAnswer"], ["open", "selfAnswer"]], (r) => r.released.length === 0],
+  ["pickup ideal reaches the drive-through and a plan", "pickup", [["namesConcern", "open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.released.includes("drive") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["turn limit ends the conversation; no open questions means P2 not evaluable", "labels", Array(12).fill(["closed"]), (r) => r.ending === "time" && r.scores[1] === "not_evaluable"],
+];
+for (const [name, id, seq, ok] of cases) {
+  const r = run(id, seq); const pass = ok(r);
+  if (!pass) process.exitCode = 1;
+  console.log(`${pass ? "✓" : "✗"} engine: ${name} (released=${r.released.join(",") || "-"} guard=${r.guard} ending=${r.ending} scores=${r.scores.join(",")})`);
+}

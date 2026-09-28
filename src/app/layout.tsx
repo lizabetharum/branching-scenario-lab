@@ -27,7 +27,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               Branching Scenario Lab
             </Link>
             <div className="flex gap-5 text-sm font-bold">
-              <Link href="/scenario/grow" className="hover:text-teal-dark">Pharmacy</Link>
+              <Link href="/scenario/labels" className="hover:text-teal-dark">Marcus</Link>
+              <Link href="/scenario/pickup" className="hover:text-teal-dark">Priya</Link>
               <Link href="/scenario/jordan" className="hover:text-teal-dark">Classroom</Link>
               <Link href="/design" className="hover:text-teal-dark">How it was designed</Link>
             </div>

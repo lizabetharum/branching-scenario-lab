@@ -6,7 +6,7 @@ import { scenarios } from "@/lib/scenarios";
 import type { ApiResponse, BoundaryKind, Move, Turn } from "@/lib/types";
 import { BOUNDARY_MESSAGES, MAX_INPUT, detectPersonalInfo } from "@/lib/guardrails";
 import { Scene } from "./Scene";
-import { PROVIDER_LABEL } from "@/lib/model";
+import { PROVIDER_LABEL } from "@/lib/model-info";
 import { BranchMap } from "./BranchMap";
 import { Debrief } from "./Debrief";
 
