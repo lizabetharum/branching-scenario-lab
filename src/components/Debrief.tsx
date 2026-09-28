@@ -10,6 +10,7 @@ import { Scene } from "./Scene";
 import { BranchMap } from "./BranchMap";
 import { WordingPractice } from "./WordingPractice";
 import { useViewReset } from "./useViewReset";
+import { TransferCard } from "./TransferCard";
 
 const STATUS: Record<CriterionStatus, { icon: string; text: string; score: string; cls: string }> = {
   demonstrated: { icon: "✓", text: "Demonstrated", score: "2", cls: "bg-teal/15 text-teal-dark border-teal" },
@@ -35,6 +36,14 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
   const ending = s.endings[summary.endingId];
   const persona = s.learnerPersonas.find((p) => p.id === summary.personaId)!;
   const results = applyInterruption(s.evaluate(summary.history), summary.interrupted);
+  const firstGap = results.find((r) => r.status !== "demonstrated")?.id;
+  const commitment =
+    ({
+      T1: "Ask what the student expected, what happened and what changed, before I suggest anything.",
+      T2: "Offer one change to test and ask the student to predict the result.",
+      T3: "Leave the student a specific next step whenever I step away, and let them make every change.",
+      T4: "Ask what the result shows and what it doesn't before we move on.",
+    } as Record<string, string>)[firstGap ?? ""] ?? TRANSFER[s.id];
   const selectedOnly = summary.history.length > 0 && summary.history.every((t) => t.mode === "choice");
   const heading = useViewReset<HTMLHeadingElement>("debrief", false);
   const [reflection, setReflection] = useState("");
@@ -147,11 +156,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
               </ul>
             </div>
           )}
-          <div className="card border-l-8 border-l-teal">
-            <h2 className="h2">Take it back to work</h2>
-            <p className="mt-2 text-ink/85">{TRANSFER[s.id]}</p>
-            <p className="mt-3 text-sm text-ink/70"><b>What would show this worked:</b> {s.transferEvidence}</p>
-          </div>
+
           {persona.reflection && (
             <div className="card">
               <h2 className="h2">Written reflection for {persona.name}</h2>
@@ -164,6 +169,8 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
           )}
         </div>
       </div>
+
+      <TransferCard scenarioId={s.id} suggestion={commitment} evidence={s.transferEvidence} />
 
       <WordingPractice scenarioId={s.id} />
 

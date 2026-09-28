@@ -13,7 +13,7 @@ const page = await ctx.newPage();
 const results = [];
 const ok = (name, pass, detail = "") => { results.push(pass); console.log(`${pass ? "✓" : "✗"} ${name}${detail ? " · " + detail : ""}`); };
 
-for (const path of ["/", "/scenario/labels", "/scenario/pickup", "/scenario/jordan", "/scenario/labels-b", "/design", "/review"]) {
+for (const path of ["/", "/scenario/labels", "/scenario/pickup", "/scenario/jordan", "/scenario/labels-b", "/design", "/review", "/author", "/checklist/labels"]) {
   await page.goto(BASE + path, { waitUntil: "networkidle" });
   const w = await page.evaluate(() => document.documentElement.scrollWidth);
   const brandH = await page.evaluate(() => document.querySelector("header a")?.getBoundingClientRect().height ?? 0);
@@ -25,7 +25,7 @@ if (OUT) await page.screenshot({ path: `${OUT}/home-390.png` });
 // Mobile menu
 await page.getByRole("button", { name: "Menu" }).click();
 const vis = await page.locator("#mobile-nav a").evaluateAll((els) => els.map((e) => e.textContent));
-ok("menu opens with scenario titles", vis.length === 4 && vis.includes("The Pickup Counter"), vis.join(" | "));
+ok("menu opens with scenario titles", vis.length === 5 && vis.includes("The Pickup Counter"), vis.join(" | "));
 if (OUT) await page.screenshot({ path: `${OUT}/menu-390.png` });
 await page.keyboard.press("Escape");
 ok("Escape closes menu", (await page.locator("#mobile-nav").count()) === 0);

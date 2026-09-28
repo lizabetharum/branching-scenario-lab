@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/scenario/labels", label: "The Label Conversation" },
   { href: "/scenario/pickup", label: "The Pickup Counter" },
   { href: "/scenario/jordan", label: "Can You Just Fix It?" },
+  { href: "/author", label: "Build your own" },
   { href: "/design", label: "How it was designed" },
 ];
 
@@ -22,7 +23,7 @@ function Logo() {
   );
 }
 
-// Below 1024 px the links collapse into a menu button, so the header never
+// Below 1280 px the links collapse into a menu button, so the header never
 // wraps or pushes the page wider than the screen.
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -57,7 +58,7 @@ export function SiteHeader() {
           <Logo />
           <span className="truncate">Branching Scenario Lab</span>
         </Link>
-        <nav aria-label="Main" className="hidden lg:block">
+        <nav aria-label="Main" className="hidden xl:block">
           <ul className="flex gap-6 text-sm font-bold">
             {LINKS.map((l) => (
               <li key={l.href}>
@@ -69,7 +70,7 @@ export function SiteHeader() {
         <button
           ref={button}
           type="button"
-          className="shrink-0 rounded-full border-2 border-ink/20 px-4 py-1.5 text-sm font-bold lg:hidden"
+          className="shrink-0 rounded-full border-2 border-ink/20 px-4 py-1.5 text-sm font-bold xl:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           onClick={() => setOpen((o) => !o)}
@@ -78,7 +79,7 @@ export function SiteHeader() {
         </button>
       </div>
       {open && (
-        <nav id="mobile-nav" aria-label="Main" className="border-t border-ink/10 lg:hidden">
+        <nav id="mobile-nav" aria-label="Main" className="border-t border-ink/10 xl:hidden">
           <ul className="mx-auto max-w-7xl px-5 py-2">
             {LINKS.map((l) => (
               <li key={l.href}>

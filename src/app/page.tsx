@@ -10,6 +10,7 @@ const PRACTICES = [
   ["Two formats, side by side", "Open conversations built on a fact packet, next to a fixed branching tree. Same guardrails, different trade-offs.", "/design#convo"],
   ["Consequences and recovery", "Mistakes play out, and you can repair them. Repairs stay on the record.", "/design#map"],
   ["AI labels, code scores, people check", "The AI labels what you did on each turn. Code turns those labels into outcomes and scores, so a wrong label means a wrong score. Every label is shown and can be flagged.", "/design#ai"],
+  ["Build your own", "An authoring kit turns one filled-in template into a full practice conversation, then runs the same rule checks the site runs before release.", "/author"],
   ["Guardrails and privacy", "Personal information, off-topic chat, personal and clinical advice, and rule overrides are caught.", "/design#guardrails"],
 ];
 

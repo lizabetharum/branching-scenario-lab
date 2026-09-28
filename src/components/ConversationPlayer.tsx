@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { casesFor, convoScenarios } from "@/lib/convo";
-import type { Behavior, ConvoEnding, ConvoTurn } from "@/lib/convo/types";
+import type { Behavior, ConvoEnding, ConvoScenario, ConvoTurn } from "@/lib/convo/types";
+import type { AuthoredPacket } from "@/lib/convo/authoring";
 import { TAG_LABEL } from "@/lib/convo/tags";
 import { encodeAttempt } from "@/lib/convo/share";
 import { endingFor, endingText, hintFor, moodFor, replay } from "@/lib/convo/engine";
@@ -16,6 +17,7 @@ import type { CriterionStatus, Support } from "@/lib/types";
 import { Scene } from "./Scene";
 import { useSpeech } from "./useSpeech";
 import { useViewReset } from "./useViewReset";
+import { TransferCard } from "./TransferCard";
 
 type Entry =
   | { kind: "setting" | "system" | "boundary"; text: string }
@@ -34,8 +36,8 @@ const STATUS: Record<CriterionStatus, { icon: string; text: string; score: strin
 };
 const SUPPORT: Record<Support, string> = { independent: "Independent", after_recovery: "After a recovery", with_hint: "With a hint", "n/a": "" };
 
-export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
-  const s = convoScenarios[scenarioId];
+export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string; custom?: { scenario: ConvoScenario; packet: AuthoredPacket } }) {
+  const s = custom?.scenario ?? convoScenarios[scenarioId];
   const p = s.persona;
   const name = s.counterpart.name;
 
@@ -100,7 +102,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
       const res = await fetch("/api/converse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenarioId: s.id, text, turns }),
+        body: JSON.stringify({ scenarioId: s.id, text, turns, packet: custom?.packet }),
       });
       const d = (await res.json()) as ConverseResponse;
       if (!d.ok) throw new Error(d.message);
@@ -160,7 +162,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
         <p className="eyebrow">{s.domain} · open conversation</p>
         <h1 ref={heading} tabIndex={-1} className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{s.title}</h1>
         <p className="mt-3 max-w-2xl text-lg text-ink/80">{s.tagline}</p>
-        <nav aria-label="Cases for this skill" className="mt-5 flex flex-wrap items-center gap-2 text-sm">
+        {casesFor(s).length > 1 && <nav aria-label="Cases for this skill" className="mt-5 flex flex-wrap items-center gap-2 text-sm">
           <span className="font-semibold text-ink/70">Cases:</span>
           {casesFor(s).map((c) => (
             <Link key={c.id} href={`/scenario/${c.id}`} aria-current={c.id === s.id ? "page" : undefined} className={`rounded-full border-2 px-3 py-1 font-bold ${c.id === s.id ? "border-ink bg-ink text-white" : "border-ink/20 hover:border-ink"}`}>
@@ -168,7 +170,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
             </Link>
           ))}
           <span className="text-ink/70">Same skill, different facts. A second case shows whether the skill carries over.</span>
-        </nav>
+        </nav>}
         <div className="mt-8">
           <div className="card">
             <h2 className="h2">You are {p.name}</h2>
@@ -326,10 +328,11 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           </div>
         </div>
 
-        <div className="card mt-6 border-l-8 border-l-teal">
-          <h2 className="h2">Take it back to work</h2>
-          <p className="mt-2 text-ink/85"><b>What would show this worked:</b> {s.transferEvidence}</p>
-        </div>
+        {custom ? (
+          <div className="card mt-6 text-sm"><b>This is a draft.</b> The transfer tools, review links and observation checklist appear once a scenario is published. <Link className="link" href="/author">Back to the authoring kit</Link></div>
+        ) : (
+          <TransferCard scenarioId={s.id} suggestion={sum.commitment} evidence={s.transferEvidence} />
+        )}
 
         {s.reflection && (
           <div className="card mt-6">
@@ -340,7 +343,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           </div>
         )}
 
-        <div className="card mt-6">
+        {!custom && <div className="card mt-6">
           <h2 className="h2">Send to a facilitator for review</h2>
           <p className="mt-2 text-sm text-ink/80">
             This makes a review link that holds your conversation, its labels and your flags. A facilitator can check every label and correct it, and the scores recompute. The conversation lives inside the link itself, after the &ldquo;#&rdquo;. Browsers never send that part to a server, so this app stores nothing. Anyone you give the link to can read it, so send it only to your facilitator.
@@ -365,7 +368,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
             </button>
             {shareLink && <input readOnly value={shareLink} onFocus={(ev) => ev.target.select()} aria-label="Review link" className="min-w-0 flex-1 rounded-lg border border-ink/20 px-2 py-1 text-xs" />}
           </div>
-        </div>
+        </div>}
 
         <div className="mt-8 flex flex-wrap gap-3">
           <button className="btn-primary" onClick={start}>Try this case again</button>

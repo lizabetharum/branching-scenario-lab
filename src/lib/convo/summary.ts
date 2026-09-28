@@ -21,8 +21,18 @@ export function attemptSummary(s: ConvoScenario, turns: ConvoTurn[]) {
   else if (plan.proposeAt < 0) missing.push(`A specific next step and check-in proposed by ${name}.`);
   else if (plan.confirmAt < 0) missing.push(`Your confirmation of the step ${name} proposed.`);
   else if (plan.kind === "commitManager") missing.push(`A plan from ${name}. The one agreed came from you.`);
+  // One concrete commitment for the next real conversation, from the first thing missing.
+  const commitment =
+    key && !released.includes(key.id)
+      ? `Ask two open questions about what's actually happening, and build on the answer, before I say what I think the cause is.`
+      : !ownIdea
+        ? `Once the cause is clear, ask what they think would help before I offer my own fix.`
+        : plan.confirmAt < 0
+          ? `End with a specific first step and a check-in date, and say it back to confirm we agree.`
+          : `Keep asking before interpreting, and end every coaching conversation with a confirmed step and date.`;
   return {
     found: found.map((f) => ({ label: f.label, key: Boolean(f.key) })),
     missing,
+    commitment,
   };
 }

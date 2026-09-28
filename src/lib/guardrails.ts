@@ -59,6 +59,9 @@ const CLINICAL = /\b(\d+\s?mg|mcg|dose|dosage|milligrams?|prescribe|diagnos\w*|o
 /** Boundaries where the fixed tree can offer its scripted options as a way forward. */
 export const TREE_FALLBACK: BoundaryKind[] = ["personal_info", "off_topic", "unclear", "rate_limited"];
 
+/** Times, days and deadlines. A character may only mention one if a fact it can say contains one. */
+export const TIME_WORDS = /\b(next week|this week|in a (couple|few) (of )?(days|weeks)|couple (of )?weeks|tomorrow|tonight|today|this afternoon|monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|end of (the )?(day|week|shift)|\d{1,2}(:\d{2})?\s?(am|pm))\b/i;
+
 export function replyIsSafe(reply: string, scene: "classroom" | "pharmacy"): boolean {
   if (!reply || reply.length > 360) return false;
   if (LEAK.test(reply)) return false;

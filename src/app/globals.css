@@ -56,3 +56,10 @@ body { font-family: var(--font-sans); }
 
 /* Headings receive focus after a view change so screen readers announce them. No ring needed. */
 h1[tabindex="-1"]:focus { outline: none; }
+
+/* Printing the observation checklist: only the sheet. */
+@media print {
+  header, footer, .no-print { display: none !important; }
+  body { background: #fff; }
+  .checklist { padding: 0; max-width: none; }
+}

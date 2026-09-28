@@ -52,6 +52,8 @@ const TOC = [
   ["guardrails", "Guardrails"],
   ["privacy", "Privacy"],
   ["healthcare", "Healthcare considerations"],
+  ["transfer", "After the debrief"],
+  ["authoring", "Authoring kit"],
   ["review-route", "Review route"],
   ["testing", "Testing"],
   ["evaluation", "Evaluating behavior change"],
@@ -353,6 +355,32 @@ export default function Design() {
           <li><b>What would change for a clinical scenario.</b> A clinical version would need a clinician-approved case packet, local policy alignment and a structured debrief of self, team and system factors. Patient-data risk and staff-performance confidentiality would each need a separate decision. The AI would be barred from inventing vital signs, results or orders. An unsupported clinical output would void the assessment, not count against the learner.</li>
           <li><b>Claims.</b> A review of 51 virtual-patient trials found low-quality evidence for some skill gains. None of the trials directly reported patient outcomes. (<Cite href={SRC.kononowicz}>Kononowicz et al.</Cite>) The accurate claim for this kind of tool is &ldquo;improved observed communication&rdquo; when that is what was measured. It is never &ldquo;improved patient safety.&rdquo;</li>
         </ul>
+
+        <h2 id="transfer">After the debrief: the transfer loop</h2>
+        <p>
+          Behavior change happens in the next real conversation, not in the debrief. Every debrief ends with three steps, all built in the browser. Nothing is sent or stored.
+        </p>
+        <ul>
+          <li><b>Commit to one thing.</b> A commitment prefilled from what the attempt was missing (for example, &ldquo;End with a specific first step and a check-in date, and say it back to confirm we agree&rdquo;). The learner rewrites it in their own words.</li>
+          <li><b>Practice again in a week.</b> A calendar file for a delayed attempt on the other case for the same skill: Marcus moves from Sam to Ana, Priya from Dev to Luis. LTEM separates immediate performance from retained performance, and a new case separates the skill from memory of one conversation. (<Cite href={SRC.ltem}>Thalheimer</Cite>)</li>
+          <li><b>Get observed.</b> A printable one-page checklist for a colleague to use in the learner&apos;s next real conversation, with the same behaviors as the debrief. It defines an eligible conversation, separates &ldquo;not seen&rdquo; from &ldquo;no chance,&rdquo; and computes the behavior rate the evaluation plan uses. It says plainly that it isn&apos;t a performance evaluation.</li>
+        </ul>
+        <p>
+          These are tools for transfer, not evidence of it. Whether anyone uses the checklist, and what it shows, is still unmeasured.
+        </p>
+
+        <h2 id="authoring">Authoring kit</h2>
+        <p>
+          A new case used to mean editing code. The <Link className="link" href="/author">authoring kit</Link> turns one filled-in template into a full practice conversation. A subject-matter expert writes the people, the setting and five things the character knows: the visible pattern, the hidden cause, their own fix, the fix they suggest if asked too early, and their proposal with a time. The kit builds the topics, the three kinds of proposal, the endings and the four scored behaviors, using the &ldquo;investigate before interpreting&rdquo; pattern from The Label Conversation.
+        </p>
+        <ul>
+          <li><b>Content check.</b> The kit rejects apparent real personal information, rejects dose or medication content (clinical cases need clinician review), requires the proposal to include a time, and warns when the setting may give away the cause.</li>
+          <li><b>Rule checks.</b> The same checks the site runs before release, run on the draft: a strong conversation succeeds, planning, general and leading questions never reveal the cause, telling shuts the character down, asking for a plan isn&apos;t agreement, and every demonstrated rating quotes a completed behavior.</li>
+          <li><b>Playtest and export.</b> A passing draft can be played immediately with the live AI, and downloaded as a JSON file. Drafts stay in the browser. The server validates and builds the draft on every turn and stores nothing.</li>
+        </ul>
+        <p>
+          Passing the checks means a draft behaves as designed. It doesn&apos;t mean the case is realistic or the cause is plausible. That still needs someone who does the work to read it. The kit supports one pattern. A second pattern, such as raising a safety concern, would need its own template and checks.
+        </p>
 
         <h2 id="review-route">Review route</h2>
         <p>

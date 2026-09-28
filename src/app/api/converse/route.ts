@@ -1,10 +1,11 @@
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { convoScenarios } from "@/lib/convo";
+import { buildScenario, validatePacket } from "@/lib/convo/authoring";
 import { BEHAVIORS, type Behavior, type Fact } from "@/lib/convo/types";
 import { endingFor, replay, step } from "@/lib/convo/engine";
 import { LEAK_CHECK_RULES, counterpartSystem, leakCheckPrompt, taggerSystem } from "@/lib/convo/prompts";
-import { BOUNDARY_MESSAGES, MAX_INPUT, detectClinical, detectOverride, detectPersonalInfo, replyIsSafe } from "@/lib/guardrails";
+import { BOUNDARY_MESSAGES, MAX_INPUT, TIME_WORDS, detectClinical, detectOverride, detectPersonalInfo, replyIsSafe } from "@/lib/guardrails";
 import { counterpartModel, model } from "@/lib/model";
 import { limited } from "@/lib/ratelimit";
 import type { BoundaryKind } from "@/lib/types";
@@ -16,6 +17,8 @@ const BOUNDARIES = ["none", "off_topic", "personal_advice", "clinical_advice", "
 
 const Body = z.object({
   scenarioId: z.string(),
+  /** An authored draft from the authoring kit. Validated and built on the server. */
+  packet: z.unknown().optional(),
   text: z.string(),
   turns: z
     .array(
@@ -44,8 +47,13 @@ const failure = (message: string, status = 503) => Response.json({ ok: false, ki
 export async function POST(req: Request) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return failure("Malformed request.", 400);
-  const { scenarioId, text, turns } = parsed.data;
-  const s = convoScenarios[scenarioId];
+  const { scenarioId, text, turns, packet } = parsed.data;
+  let s = convoScenarios[scenarioId];
+  if (scenarioId === "custom") {
+    const v = validatePacket(packet);
+    if (!v.packet || v.errors.length) return failure("This draft scenario has problems to fix in the authoring kit first.", 400);
+    s = buildScenario(v.packet);
+  }
   if (!s) return failure("Unknown scenario state.", 400);
   if (turns.some((t) => t.released.some((id) => !s.facts.find((f) => f.id === id)))) return failure("Unknown scenario state.", 400);
 
@@ -122,9 +130,12 @@ export async function POST(req: Request) {
     const unreleased: Fact[] = s.facts.filter((f) => !released.includes(f.id));
     const leaks = unreleased.some((f) => f.keywords.some((k) => lower.includes(k)));
     const missed = Boolean(fact) && !output?.conveyed_new_fact;
+    // Invented timing: the reply names a time or day that none of the sayable facts contains.
+    const sayable = [...known, ...(fact ? [fact] : [])];
+    const inventedTime = TIME_WORDS.test(r) && !sayable.some((f) => TIME_WORDS.test(f.text) || TIME_WORDS.test(f.says));
     // Backstop for guesses: no agreeing opener, and too short to add detail.
     const confirms = guess && (/^\W*(yeah|yes|yep|yup|right|exactly|true|definitely|probably|that'?s (it|right|part|probably|true|a big))/i.test(r) || /part of it|that'?s it|you'?re right|pretty much/i.test(r) || r.length > 70);
-    if (r && replyIsSafe(r, "pharmacy") && !leaks && !missed && !confirms) {
+    if (r && replyIsSafe(r, "pharmacy") && !leaks && !missed && !confirms && !inventedTime) {
       // Meaning check: does the reply reveal or confirm a fact the learner hasn't earned?
       // Only a clear "no" lets the model's line through. Errors fall back to the authored line.
       let revealed = true;

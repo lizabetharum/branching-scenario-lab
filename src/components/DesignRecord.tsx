@@ -7,7 +7,7 @@ import { DEFAULT_MODEL } from "@/lib/model-info";
 // Tables that describe the map are generated from the scenario data, so they
 // can't drift from what runs.
 
-export const VERSION = "v2.5";
+export const VERSION = "v2.6";
 export const VERSION_DATE = "2026-09-28";
 
 const BRIEF = {
@@ -100,6 +100,7 @@ const REVISIONS = [
   ["RV-27", "A blind-mode screenshot showed P4 and Q4 anchors still describing the old rule (\"a next step or a check-in, not both\").", "Major", "Anchors weren't updated when agreement became propose then confirm", "Rewrote both anchors to match the scoring. A blind rater now reads the same rule the app applies.", "Visual check"],
   ["RV-28", "Third outside review: Sam offered to slow down, double-check and review next week, but the debrief said \"Sam never proposed one.\"", "Minor", "Feedback only recognized a formal proposal. The character also added a time the fact didn't contain.", "P4 and Q4 feedback now quote what was offered and say it didn't address the cause and wasn't confirmed. The debrief summary says the same. Characters may no longer add times or commitments a fact doesn't include.", "check-maps REVIEW 3"],
   ["RV-29", "Third outside review: the prebrief said each reply goes to the AI twice, while the design page described a third leak-check call.", "Minor", "Disclosure not updated when the leak check was added", "Prebrief, design table and privacy table now say up to three calls and list what each receives.", "Manual check"],
+  ["RV-30", "After adding a rule against invented times, characters still added \"next week\" or \"a couple weeks\" to a surface idea in 3 of 5 runs.", "Minor", "A prompt rule alone wasn't followed reliably", "Code check: a reply naming a time or day that no sayable fact contains is replaced with the authored line. T30 now checks all 5 runs for invented times.", "T30 (5 runs)"],
 ] as const;
 
 const RATINGS: [string, string, string, string, string, string][] = [

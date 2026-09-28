@@ -161,3 +161,13 @@ import { decodeAttempt, encodeAttempt, type SharedAttempt } from "../src/lib/con
   if (bad) process.exitCode = 1;
   console.log(`${bad ? "✗" : "✓"} evidence: every "demonstrated" tree rating quotes the learner (${bad} violations)`);
 }
+
+// Authoring kit: the example draft must validate and pass every authoring check.
+import { EXAMPLE_PACKET, buildScenario, runAuthoringChecks, validatePacket } from "../src/lib/convo/authoring";
+{
+  const v = validatePacket(EXAMPLE_PACKET);
+  const results = v.packet && !v.errors.length ? runAuthoringChecks(buildScenario(v.packet)) : [];
+  const ok = v.errors.length === 0 && results.length > 0 && results.every((r) => r.pass);
+  if (!ok) process.exitCode = 1;
+  console.log(`${ok ? "✓" : "✗"} authoring kit: example validates and passes ${results.filter((r) => r.pass).length}/${results.length} checks${v.errors.length ? ` (${v.errors.join("; ")})` : ""}`);
+}
