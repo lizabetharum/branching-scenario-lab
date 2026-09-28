@@ -12,7 +12,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through what's going on at your station when these mix-ups happen.",
       "expected": "Tagged open. Sam reveals the 5 p.m. pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"Honestly, it's usually around 5 when things get crazy. I'll be in the middle of a label and someone calls me up to the register, then I come back and... I'm not always sure exactly where I left off.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"Honestly, it's usually around five when things get hectic. I'm labeling, then someone calls me up to the register because the line's backed up, and when I get back I'm not always sure exactly where I left off.\"",
       "pass": true
     },
     {
@@ -22,7 +22,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "so whats been going on w/ the labels at ur station",
       "expected": "Same result as T01. Style is not penalized.",
-      "observed": "Tags: open. Released: pattern. Reply (authored): \"Mostly it's around five. The line backs up, I get called to the register, and when I come back I pick up where I think I left off.\"",
+      "observed": "Tags: open, namesConcern. Released: pattern. Reply: \"Honestly, I think it's the timing. Around five o'clock it gets crazy, and I'm getting pulled to the register in the middle of what I'm doing. Then I come back and lose my place on what I was working on.\"",
       "pass": true
     },
     {
@@ -192,7 +192,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "Is it because you're covering the drive-through too?",
       "expected": "Tagged leading. Not released. On every run, Dev's reply neither agrees, confirms nor hints at the drive-through.",
-      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\"",
+      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -202,7 +202,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's different about how the afternoons run now?",
       "expected": "Second open question releases the drive-through coverage.",
-      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed a few weeks ago, I've been covering both the drive-through and the pickup counter at the same time from four to six. So whenever that bell rings, I have to leave whoever I'm with at the counter.\"",
+      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed about three weeks ago, I've been covering both the drive-through and the pickup counter at the same time from four to six. So whenever that bell rings at the window, I have to jump away from whoever I'm helping up front.\"",
       "pass": true
     },
     {
@@ -222,7 +222,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through how these numbers end up wrong.",
       "expected": "Tagged open. Ana reveals the Monday-morning pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"It's mostly Monday mornings, when I'm covering the phone line and drop-off at the same time. I'm typing while someone's on hold, so I'm probably rushing and not catching mistakes.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"I'm usually on the phone and drop-off at the same time until ten, so I'm typing while someone's holding. That's mostly when it happens—Mondays especially.\"",
       "pass": true
     },
     {
