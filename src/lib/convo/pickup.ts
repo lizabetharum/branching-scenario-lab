@@ -1,5 +1,5 @@
 import type { ConvoScenario, ConvoTurn } from "./types";
-import { cr, idx, q, supportAt, validOpenIdx } from "./eval";
+import { confirmedQ, cr, idx, planTrace, proposedQ, q, supportAt, validOpenIdx } from "./eval";
 import { GROW } from "./labels";
 
 // Priya Nair: conceptual gap. She doesn't believe she can ask without already
@@ -44,12 +44,16 @@ export function makePickupEvaluate(o: { name: string; keyId: string; stepId: str
         : cr("Q3", Q3, "not_observed", "n/a", "Nothing came up beyond what you could see at the counter.", "Name what you saw, then ask what's been going on.");
 
   const Q4 = `Built the way forward with ${o.name}`;
+  const plan = planTrace(turns);
+  const ideaAt = turns.findIndex((t) => t.released.includes("idea"));
   const q4 =
-    ask >= 0 && way >= 0
-      ? cr("Q4", Q4, "demonstrated", supportAt(turns, way), q(turns[way]), `Keep asking for ${o.name}'s ideas and closing with a date.`)
-      : ask >= 0 || way >= 0
-        ? cr("Q4", Q4, "partial", supportAt(turns, Math.max(ask, way)), `${ask >= 0 ? "You asked for ideas but didn't agree on a step or check-in." : `You set a step, but didn't ask for ${o.name}'s ideas.`} ${q(turns[Math.max(ask, way)])}`, `Ask what ${o.name} thinks would help, then agree on a first step and a check-in.`)
-        : cr("Q4", Q4, "not_observed", "n/a", "No plan came out of the conversation.", `Ask what ${o.name} thinks would help.`);
+    plan.kind === "commit" && plan.confirmAt >= 0
+      ? cr("Q4", Q4, "demonstrated", supportAt(turns, plan.confirmAt), `${q(turns[ideaAt])} ${proposedQ(o.name, turns[plan.proposeAt])} ${confirmedQ(turns[plan.confirmAt])}`, `Keep asking for ${o.name}'s ideas and closing with a date.`)
+      : plan.kind === "commitManager" && plan.confirmAt >= 0
+        ? cr("Q4", Q4, "not_observed", "n/a", `You supplied the plan, and ${o.name} went along with it. ${confirmedQ(turns[plan.confirmAt])}`, `Ask what ${o.name} thinks would help before offering your own plan.`)
+        : plan.proposeAt >= 0 || ask >= 0 || way >= 0
+          ? cr("Q4", Q4, "partial", supportAt(turns, Math.max(plan.proposeAt, ask, way)), plan.proposeAt >= 0 && plan.confirmAt < 0 ? `${proposedQ(o.name, turns[plan.proposeAt])} You never confirmed it, so nothing was agreed.` : ask >= 0 && ideaAt < 0 ? `You asked for ideas before the cause came up. ${q(turns[ask])}` : ask >= 0 ? `You asked for ${o.name}'s ideas but didn't agree on a step and a time. ${q(turns[ask])}` : `You asked for a next step, but no plan was proposed. ${q(turns[way])}`, `Ask what ${o.name} thinks would help, then confirm a first step and a check-in.`)
+          : cr("Q4", Q4, "not_observed", "n/a", "No plan came out of the conversation.", `Ask what ${o.name} thinks would help.`);
 
   return [q1, q2, q3, q4];
 }
@@ -116,6 +120,7 @@ export const pickup: ConvoScenario = {
   facts: [
     {
       id: "busier",
+      probe: "asks what has been happening at pickup, with customers, or with Dev's workload lately",
       label: "Pickup has been busier in the late afternoon",
       text: "Pickup has felt much busier for the last few weeks, especially in the late afternoon.",
       says: "It's been a lot busier at pickup lately. Especially late afternoon.",
@@ -125,6 +130,7 @@ export const pickup: ConvoScenario = {
     },
     {
       id: "drive",
+      probe: "asks what has changed about how the afternoon or shift runs, Dev's duties, coverage or schedule",
       label: "Since a schedule change, Dev covers drive-through and pickup at once from 4 to 6",
       text: "Since the schedule changed three weeks ago, Dev covers the drive-through window and the pickup counter at the same time from 4 to 6 p.m. When the drive-through bell rings, Dev has to wrap up whoever is at the counter.",
       says: "Since the schedule changed three weeks ago, I cover the drive-through and pickup at the same time, four to six. When the bell goes, I have to wrap up whoever's in front of me.",
@@ -140,7 +146,7 @@ export const pickup: ConvoScenario = {
       text: "Dev's idea: when the register is slow, the cashier takes the drive-through from 4 to 6, so Dev can give pickup customers full attention.",
       says: "If the cashier could take the drive-through from four to six when the register's slow, I could give people at pickup my full attention.",
       keywords: ["cashier"],
-      release: { anyOf: ["askOptions"], requires: ["drive"], maxGuard: 2 },
+      release: { anyOf: ["askOptions", "wayForward"], requires: ["drive"], maxGuard: 2 },
       idea: true,
       cue: "drive",
       hint: "Ask Dev what would help. You don't need a solution ready.",
@@ -152,12 +158,13 @@ export const pickup: ConvoScenario = {
       text: "Without the real cause on the table, Dev's only idea is to try to be friendlier.",
       says: "I guess I could try to be friendlier?",
       keywords: ["friendlier"],
-      release: { anyOf: ["askOptions"], maxGuard: 2 },
+      release: { anyOf: ["askOptions", "wayForward"], unless: ["idea"], maxGuard: 2 },
       idea: true,
       hint: "Ask for Dev's ideas.",
     },
     {
       id: "district",
+      probe: "asks why Dev hadn't raised it, or who set the schedule",
       optional: true,
       label: "Dev assumed the schedule couldn't change",
       text: "The schedule came from the district office, so Dev assumed it wasn't up for discussion and never raised it.",
@@ -167,11 +174,44 @@ export const pickup: ConvoScenario = {
       cue: "schedule",
       hint: "Optional: ask why Dev hadn't mentioned it.",
     },
+    {
+      id: "commit",
+      label: "Dev proposes a first step and a check-in built on Dev's own idea",
+      text: "Dev will ask the cashier about covering the drive-through from four to six today and suggests checking in Friday.",
+      says: "I'll ask the cashier about covering four to six today. Can we check how it's going Friday?",
+      keywords: [],
+      release: { anyOf: ["wayForward", "checkin"], requires: ["idea"], maxGuard: 2 },
+      commitment: "own",
+      hint: "Ask what Dev will do first and when you'll check in.",
+    },
+    {
+      id: "commitSurface",
+      optional: true,
+      label: "Dev proposes a step built on the surface idea",
+      text: "Dev commits to the surface idea with a specific time.",
+      says: "Okay. I'll try to be friendlier, starting today. Check in Friday?",
+      keywords: [],
+      release: { anyOf: ["wayForward", "checkin"], requires: ["surfaceIdea"], maxGuard: 2 },
+      commitment: "surface",
+      hint: "Ask for a first step and a check-in.",
+    },
+    {
+      id: "commitManager",
+      optional: true,
+      label: "Dev accepts the plan you supplied",
+      text: "Dev agrees to do what the manager said, with a check-in.",
+      says: "Okay. I'll do it the way you said. Check in Friday?",
+      keywords: [],
+      release: { anyOf: ["wayForward", "checkin"], needsInstruction: true, maxGuard: 2 },
+      commitment: "manager",
+      hint: "Ask for a first step and a check-in.",
+    },
   ],
   maxTurns: 12,
   endings: {
     plan_key: { id: "plan_key", title: "Plan agreed, cause found", text: "Dev heads back with a plan for the four-to-six block. What you saw at the counter had a cause you couldn't see from there." },
-    plan_surface: { id: "plan_surface", title: "Plan agreed, cause missed", text: "Dev agrees to be friendlier. The drive-through schedule never came up, so the rushing will likely continue." },
+    plan_surface: { id: "plan_surface", title: "Plan agreed, cause missed", text: "You and Dev agreed on a plan, but it isn't built on the cause. Either the drive-through coverage never came up, or the plan came from you instead of Dev. The rushing will likely continue." },
+    unconfirmed: { id: "unconfirmed", title: "Plan proposed, not confirmed", text: "Dev proposed a step and a time, but the conversation ended before you confirmed it. Dev heads back unsure whether anything will change." },
     closed: { id: "closed", title: "Ended without a plan", text: "Dev goes back to the counter, unsure what the conversation was about." },
     time: { id: "time", title: "Out of time", text: "The afternoon picks up and Dev has to go. The conversation stopped before a plan." },
   },

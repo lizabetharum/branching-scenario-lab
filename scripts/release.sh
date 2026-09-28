@@ -24,12 +24,13 @@ for i in $(seq 1 30); do curl -s -o /dev/null "http://localhost:$PORT" && break;
 node scripts/mobile-check.mjs "http://localhost:$PORT"
 MODEL_LABEL="$MODEL_LABEL" TARGET_LABEL="production build, run locally before deploy" \
   node scripts/guardrail-tests.mjs "http://localhost:$PORT" --write
+TARGET_LABEL="production build, run locally before deploy" npx tsx scripts/conversation-tests.mts "http://localhost:$PORT" --write
 kill $SERVER 2>/dev/null || true
 
 echo "4/5 Deploy (rebuilds with the fresh test results)"
 npx vercel deploy --prod --yes
 
-echo "5/5 Same tests against the live site"
+echo "5/5 Single-turn AI cases against the live site (full conversations run before deploy, to stay under the public rate limit)"
 if ! node scripts/guardrail-tests.mjs "$LIVE"; then
   echo "Live tests failed after deploy. Roll back with: npx vercel rollback"
   exit 1

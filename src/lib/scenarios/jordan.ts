@@ -397,7 +397,7 @@ function evaluate(history: Turn[]) {
           : triage
             ? result("T3", T3, "demonstrated", supportOf(triage), `You handled Maya and left Jordan a test to run alone. ${quote(triage)}`, "Keep leaving a concrete next step whenever you step away.", triage)
             : bounded
-              ? result("T3", T3, "demonstrated", supportOf(bounded), "Jordan made and tested every change.", "Keep the next action in Jordan's hands.", bounded)
+              ? result("T3", T3, "demonstrated", supportOf(bounded), `You gave Jordan the step to carry out, and Jordan ran it. ${quote(bounded)}`, "Keep the next action in Jordan's hands.", bounded)
               : result("T3", T3, "not_observed", "n/a", "The interaction ended before Jordan acted on a next step.", "Give Jordan one step to carry out.");
 
   return [

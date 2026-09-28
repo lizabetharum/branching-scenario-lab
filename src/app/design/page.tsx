@@ -5,6 +5,7 @@ import { scenarios } from "@/lib/scenarios";
 import { PROMPT_RULES } from "@/lib/prompts";
 import { BOUNDARY_MESSAGES } from "@/lib/guardrails";
 import { testRun } from "@/lib/test-results";
+import { conversationRun } from "@/lib/conversation-results";
 import { DEFAULT_MODEL, PROVIDER_LABEL } from "@/lib/model-info";
 import { DesignRecord } from "@/components/DesignRecord";
 import { convoScenarios } from "@/lib/convo";
@@ -184,12 +185,12 @@ export default function Design() {
         <ol className="mt-3 list-decimal space-y-1.5 pl-6 text-ink/85">
           <li>The browser blocks obvious personal information before sending.</li>
           <li>The server repeats that check and blocks rule overrides and clinical questions before any model sees them.</li>
-          <li><b>Tagger</b> (<code>{DEFAULT_MODEL}</code>) labels your message with behaviors, or a boundary. It never plays the character.</li>
-          <li><b>Engine</b> (code) updates the character&apos;s guard level and releases at most one fact whose rule is now met.</li>
+          <li><b>Tagger</b> (<code>{DEFAULT_MODEL}</code>) labels your message with behaviors, or a boundary, and marks which topics it is genuinely about. It never plays the character.</li>
+          <li><b>Engine</b> (code) updates the character&apos;s guard level and releases at most one fact whose rule is now met. A fact with a topic releases only if the question was about that topic. Counting questions is not enough.</li>
           <li><b>Counterpart</b> (<code>{COUNTERPART_DEFAULT}</code>, chosen for speed) replies in character using only released facts. A newly released fact must be conveyed.</li>
           <li><b>Checks</b> (code): if the reply names an unreleased fact, skips the new fact, or fails the leak and clinical filters, the authored line is used instead.</li>
           <li><b>Leak check</b> (<code>{DEFAULT_MODEL}</code>): a third call sees the hidden facts the character never saw and asks whether the reply reveals or confirms one. It must quote the exact words, and code confirms the quote is really in the reply. A reveal, or any error, means the authored line is used. You never lose a fact you earned, and you never get one by guessing.</li>
-          <li><b>Engine</b> checks whether the conversation ended: a plan agreed, the conversation closed, or {labels.maxTurns} turns used.</li>
+          <li><b>Engine</b> checks whether the conversation ended. A plan counts as agreed only after three separate events: you asked, the character proposed a specific step and time, and you confirmed it on a later turn. Otherwise it ends when you close the conversation or after {labels.maxTurns} turns.</li>
         </ol>
 
         <h3>Guard level</h3>
@@ -216,8 +217,8 @@ export default function Design() {
                 {c.facts.map((f) => (
                   <tr key={f.id}>
                     <td>{f.label}</td>
-                    <td>{describeRule(f.release, (id) => c.facts.find((x) => x.id === id)?.label ?? id, c.counterpart.name)}</td>
-                    <td>{f.key ? "Key: what observation can't show" : f.idea ? "Plan idea" : f.optional ? "Optional context" : "Step toward the key fact"}</td>
+                    <td>{describeRule(f.release, (id) => c.facts.find((x) => x.id === id)?.label ?? id, c.counterpart.name, f.probe)}</td>
+                    <td>{f.key ? "Key: what observation can't show" : f.commitment === "own" ? "Proposal built on their own idea" : f.commitment === "surface" ? "Proposal built on the surface idea" : f.commitment === "manager" ? "Acceptance of your plan" : f.idea ? "Plan idea" : f.optional ? "Optional context" : "Step toward the key fact"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -225,8 +226,7 @@ export default function Design() {
           </div>
         ))}
         <p>
-          Endings, decided in code: a plan agreed after the key fact surfaced, a plan built on the surface idea, a conversation closed without a plan, or time running out. Two surface ideas (&ldquo;slow down,&rdquo; &ldquo;be friendlier&rdquo;) exist so that asking for options too early has a realistic cost. The character offers an idea that targets the wrong cause.
-        </p>
+          Endings, decided in code: a plan agreed after the key fact surfaced; a plan agreed without the cause (built on the surface idea, or on a plan you supplied and the character accepted); a plan proposed but never confirmed; a conversation closed without a plan; or time running out. Two surface ideas (&ldquo;slow down,&rdquo; &ldquo;be friendlier&rdquo;) exist so that asking for options too early has a realistic cost. The character offers an idea that targets the wrong cause. </p>
 
         <h3>The three prompts</h3>
         <p>These rule blocks are sent as-is. Scenario details are appended at run time.</p>
@@ -284,11 +284,11 @@ export default function Design() {
 
         <h2 id="ai">How the AI is used</h2>
         <p>
-          The two formats use the AI differently, but the same rule holds: the model reads and speaks, and code decides. The fact-packet flow is described above. In the tree, each typed reply triggers one model call. It classifies your reply into one of the moves allowed at the current node, or into a boundary category, and rephrases the authored line for that move.
+          The AI&apos;s judgments feed every result. Code applies fixed rules to them, but it can&apos;t correct a wrong label: if the AI misreads a question, the fact release, the ending and the score follow the misreading. An outside review found exactly that (see RV-17). So every label is shown in the debrief, can be flagged, and can be corrected on the review page. The fact-packet flow is described above. In the tree, each typed reply triggers one model call. It classifies your reply into one of the moves allowed at the current node, or into a boundary category, and rephrases the authored line for that move.
         </p>
         <ul>
           <li><b>The app controls transitions.</b> The model&apos;s answer is limited to an enum of the current node&apos;s move IDs. The server ignores anything else.</li>
-          <li><b>The app controls scoring.</b> Criteria are computed in code from the path. The model never sees the rubric and never returns a score.</li>
+          <li><b>The AI shapes the score.</b> The model never sees the rubric or returns a score, but it decides which move your words count as. The score follows from that reading.</li>
           <li><b>Character replies are checked.</b> A reply is thrown out if it runs over 360 characters, mentions the rubric, branches, scores or being an AI, or (in the pharmacy scenario) uses clinical words. The authored line is used instead.</li>
           <li><b>Unsure means unclear.</b> The model is told not to guess. An &ldquo;unclear&rdquo; result asks you to rephrase instead of picking a branch for you.</li>
           <li><b>Scripted choices never call the model.</b></li>
@@ -389,6 +389,26 @@ export default function Design() {
         ) : (
           <p>The test script in <code>scripts/guardrail-tests.mjs</code> runs the guide&apos;s minimum AI test cases plus off-topic, personal-advice and clinical cases. Results will appear here after a run.</p>
         )}
+        <h3 id="conversations">Full conversations</h3>
+        <p>
+          Single-turn cases can&apos;t show whether a whole conversation earns its score. These scripts play complete conversations through the live endpoint, score them with the app&apos;s own code, and compare the ending and every criterion with ratings written in advance. <b>Those expected ratings were written by the designer, not by independent raters.</b> They check that the system does what the design says. They don&apos;t check that the design matches expert judgment. That needs the human ratings the review page is built to collect.
+        </p>
+        {conversationRun ? (
+          <table>
+            <thead><tr><th>Conversation</th><th>Expected</th><th>Observed</th></tr></thead>
+            <tbody>
+              {conversationRun.conversations.map((c) => (
+                <tr key={c.id}>
+                  <td><b>{c.id}. {c.name}</b><br /><span className="text-xs">{c.transcript.join(" · ")}</span></td>
+                  <td>Ending: {c.expectedEnding}. {c.note}</td>
+                  <td>{c.pass ? "✓ " : "✗ "}Ending: {c.ending ?? "none"}. {Object.entries(c.scores).map(([k, v]) => `${k} ${v}`).join(", ")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>Results will appear here after the next release.</p>
+        )}
         <p>
           <b>Release gate.</b> Every build runs the map, engine and review-link checks first, and fails if any rule breaks. The release script then runs lint, runs every AI case above against the production build before deploying, and reruns them on the live site after. A GitHub workflow repeats the checks on every push. To prove the gate works, one release rule was loosened on purpose. That exposed a rule no check protected. A check was added, and the loosened rule then failed the build.
         </p>
@@ -423,6 +443,8 @@ export default function Design() {
           <li>AI output is not stable ground truth. The same reply can be classified or tagged differently on different runs. In the conversations, a mistagged turn can release a fact or change guard, so the flag control matters.</li>
           <li>The leak check is itself an AI judgment. It caught both confirmed leaks in its probe set and let four correct replies through, but that is seven examples, not a measured error rate. Facilitator review of sampled transcripts is still the backstop.</li>
           <li>How the teacher handles Maya in the classroom scenario is deliberately unscored: the objective targets Jordan&apos;s learning, triage is out of scope, and one scripted choice is too little evidence to judge it, so its cost appears in the debrief instead.</li>
+          <li>Whether a question is relevant to a hidden fact is an AI judgment too. It stops question counting from unlocking facts, but it can misjudge. Labels also vary between runs: the same question can draw out a surface idea on one run and nothing on another. The full-conversation tests accept either where both are defensible, and pin the outcomes that matter.</li>
+          <li>The pharmacy criteria measure the practice constraint in each persona&apos;s objective, such as Marcus&apos;s two open questions before interpreting and no leading questions. They are not a validated measure of effective coaching, which can take other forms. Relevant closed clarifications and accurate summaries aren&apos;t penalized (T24, T25), but they earn no open-question credit.</li>
           <li>A guess that earns nothing now gets a short noncommittal reply, usually &ldquo;Maybe. I don&apos;t know.&rdquo; That is safe but repetitive when a learner guesses several times in a row.</li>
           <li>The scenarios, response rules, rubrics and test cases here are untested illustrations. Validate them locally before real use.</li>
           <li>Accessibility follows WCAG 2.2 practices (keyboard use, visible focus, reduced motion, status shown without relying on color). It has not been audited by assistive-technology users. (<Cite href={SRC.wcag}>WCAG 2.2</Cite>)</li>

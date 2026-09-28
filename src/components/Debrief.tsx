@@ -60,7 +60,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
           <h2 className="h2">What happened</h2>
           <p className="mt-2 text-ink/85">{ending.text}</p>
           <p className="mt-4 text-sm text-ink/70">
-            The ending shows the consequence inside the story. The criteria below show what you did. They are scored by the app from the path you took, not by the AI.
+            The ending shows the consequence inside the story. The criteria below show what you did. Code scores them from your path. When you typed, the AI decided which response your words counted as, so its reading shapes the score. Each typed turn shows that reading and can be flagged.
           </p>
           {summary.interrupted && (
             <p className="mt-3 rounded-lg bg-coral/10 p-3 text-sm">

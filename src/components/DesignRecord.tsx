@@ -7,7 +7,7 @@ import { DEFAULT_MODEL } from "@/lib/model-info";
 // Tables that describe the map are generated from the scenario data, so they
 // can't drift from what runs.
 
-export const VERSION = "v2.2";
+export const VERSION = "v2.3";
 export const VERSION_DATE = "2026-09-28";
 
 const BRIEF = {
@@ -87,6 +87,11 @@ const REVISIONS = [
   ["RV-14", "No release rule check protected when Sam or Dev will share while guarded. A loosened rule passed every check.", "Major", "Coverage gap found by deliberately breaking a rule", "Added guard checks for both personas. The loosened rule now fails the build.", "Sabotage run, check-maps"],
   ["RV-15", "The gate blocked a release: Dev answered a correct drive-through guess with \"Yeah, that's probably part of it,\" and Sam hinted \"we rotate through the same station.\" An earlier run had marked the Dev reply a pass.", "Critical", "A character rule said to \"go along with\" suggested causes, which confirms right guesses. Tests only looked for fact words.", "Guesses now get a one-sentence noncommittal reply. Code rejects agreeing openers and long replies on guess turns. Tests also check for confirmations.", "T07, T17, T18, T21, T23 (3 runs each for guesses)"],
   ["RV-16", "The classroom scenario was too generic: an unnamed \"project\" and options that read as right versus wrong.", "Major", "No concrete content, no competing demands", "Rebuilt around a micro:bit line-following robot with three specific changes. Added a plausible wrong lead, a revert-everything request, a second student and the end of class. Trade-off costs appear in the debrief, unscored.", "check-maps tree trade-off paths"],
+  ["RV-17", "Outside review: asking \"What will you do first, and when should we check?\" ended the conversation as \"Plan agreed, cause found\" and scored P4 demonstrated, though Sam never proposed anything. Reproduced in the engine.", "Critical", "The ending fired on the learner's question, and Marcus's own earlier instruction counted as a plan on the table", "Agreement now needs three events: the learner asks, the character proposes a specific step and time, the learner confirms on a later turn. A plan the learner imposed ends as plan agreed, cause missed.", "check-maps REVIEW FINDING 1, T27, T28, C1, C2"],
+  ["RV-18", "Outside review: \"What would make this conversation useful for you?\" released the shared tray, because any second open question did. Reproduced in the engine.", "Major", "Release rules counted questions instead of checking relevance", "Each hidden fact has a topic. The tagger marks which topics a question addresses, and a fact releases only on a relevant question.", "check-maps REVIEW FINDING 2, T29, C4"],
+  ["RV-19", "Outside review: the rubric treated one conversational form as competence. The research allows equivalent effective strategies.", "Major", "Criteria written from one persona's objective, with no tests of alternatives", "Added tests for a relevant closed clarification, an accurate summary and a Goal-first opening. A next-step question now draws out the character's own idea. The rubric states it measures a practice constraint.", "T24, T25, T26, T27"],
+  ["RV-20", "Outside review: \"the app scores, not the AI\" understated how much AI labels drive results.", "Major", "Wording claimed more independence than the design has", "Rewrote the claim on the home page, design page and both debriefs. Added full-conversation tests and an evidence rule: every demonstrated rating must quote a completed behavior.", "Evidence checks, C1 to C5"],
+  ["RV-21", "The first full-conversation run showed a pass for C4 while every turn had been rate-limited, so nothing happened and the expected \"nothing released\" matched.", "Major", "The tests treated a blocked turn as a normal result, and the app's own rate limiter throttled local test traffic", "A blocked or rate-limited turn now fails any test. The limiter exempts only loopback addresses, which no request through Vercel can have.", "Conversation tests rerun"],
 ] as const;
 
 const RATINGS: [string, string, string, string, string, string][] = [
@@ -238,6 +243,8 @@ export function DesignRecord() {
         <li><b>Assistance record.</b> Independent, after a recovery, or with a hint. Automatic support for Priya counts as a hint. In the conversations, &ldquo;after a recovery&rdquo; means a leading question, interpretation or supplied plan came earlier.</li>
         <li><b>Accommodations.</b> Pausing, stepping back and choosing text over the illustration are not coaching and are not recorded as assistance.</li>
         <li><b>Calibration.</b> Not done. Before scored use, two raters score a sample of transcripts independently, then compare with the app&apos;s scores.</li>
+        <li><b>Evidence rule.</b> Every &ldquo;demonstrated&rdquo; rating quotes a completed behavior from the transcript. Plan agreement quotes the character&apos;s proposal and the learner&apos;s confirmation. The build fails if a rating breaks this rule.</li>
+        <li><b>A practice constraint, not a coaching measure.</b> The pharmacy criteria measure the constraint in each persona&apos;s objective. Other effective coaching forms exist, and these criteria don&apos;t judge them. Not for workplace performance judgments.</li>
         <li><b>Tagging is evidence, not a verdict.</b> In the conversations, the tagger&apos;s labels feed the scores. Every turn&apos;s tags are shown in the debrief so a learner or reviewer can check them.</li>
         <li><b>Review and appeal.</b> Learners can flag any AI reading. The flag goes into the facilitator summary. No reviewer is assigned yet.</li>
         <li><b>High-stakes limit.</b> Not authorized for any consequential decision.</li>
@@ -281,7 +288,7 @@ export function DesignRecord() {
 
       <h2 id="review">Review and release decision</h2>
       <p>
-        <b>This is a designer self-review, not an independent review.</b> The rubric asks for independent reviewers who compare ratings. Treat these ratings as the designer&apos;s starting position for that review. Ratings are not averaged. One major gap blocks learner use, however strong the rest is.
+        <b>This is a designer self-review, plus one outside review.</b> A colleague reviewed one complete pharmacy conversation, its debrief, the prebrief and this documentation. Four findings came from that review (RV-17 to RV-20). Both behavioral findings were reproduced in the engine before fixing. The rubric asks for independent reviewers who compare ratings. Treat these ratings as the designer&apos;s starting position for that review. Ratings are not averaged. One major gap blocks learner use, however strong the rest is.
       </p>
       <table>
         <thead><tr><th>Criterion</th><th>Rating</th><th>Evidence</th><th>Finding</th><th>Severity</th><th>Action</th></tr></thead>

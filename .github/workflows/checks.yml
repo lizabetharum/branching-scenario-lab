@@ -36,3 +36,4 @@ jobs:
           npx next start -p 3199 &
           for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:3199 && break; sleep 1; done
           node scripts/guardrail-tests.mjs http://localhost:3199
+          npx tsx scripts/conversation-tests.mts http://localhost:3199

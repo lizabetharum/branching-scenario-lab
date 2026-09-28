@@ -3,7 +3,10 @@
 // shared store or the Vercel firewall.
 const hits = new Map<string, number[]>();
 export function limited(req: Request, max = 40) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  // Requests from this machine (dev, CI, and the release gate's tests) carry a
+  // loopback address. Requests through Vercel carry the client's real address.
+  if (ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1") return false;
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < 5 * 60_000);
   recent.push(now);

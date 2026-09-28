@@ -23,3 +23,19 @@ export const validOpenIdx = (turns: ConvoTurn[]) => turns.map((t, i) => (isValid
 export function cr(id: string, label: string, status: CriterionStatus, support: Support, evidence: string, nextStep: string): CriterionResult {
   return { id, label, status, support, via: status === "not_observed" ? "none" : "own_words", evidence, nextStep };
 }
+
+// Plan agreement is three observable events: the learner asks, the counterpart
+// proposes a specific step and time, and the learner confirms on a later turn.
+export const COMMIT_IDS = ["commit", "commitSurface", "commitManager"];
+
+const trim = (s: string) => (s.length > 160 ? s.slice(0, 157) + "..." : s);
+export const proposedQ = (name: string, t?: ConvoTurn) => (t ? `${name} proposed: "${trim(t.reply)}"` : "");
+export const confirmedQ = (t?: ConvoTurn) => (t ? `You confirmed: "${trim(t.learner)}"` : "");
+
+export function planTrace(turns: ConvoTurn[]) {
+  const askAt = turns.findIndex((t) => t.tags.includes("wayForward") || t.tags.includes("checkin"));
+  const proposeAt = turns.findIndex((t) => t.released.some((id) => COMMIT_IDS.includes(id)));
+  const kind = proposeAt >= 0 ? turns[proposeAt].released.find((id) => COMMIT_IDS.includes(id)) : undefined;
+  const confirmAt = proposeAt >= 0 ? turns.findIndex((t, i) => i > proposeAt && t.tags.includes("confirms")) : -1;
+  return { askAt, proposeAt, kind, confirmAt };
+}

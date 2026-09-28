@@ -1,0 +1,1 @@
+export const conversationRun = null as null | { date: string; target: string; conversations: readonly { id: string; name: string; ending: string | null; expectedEnding: string; scores: Record<string, string>; note: string; transcript: readonly string[]; pass: boolean }[] };

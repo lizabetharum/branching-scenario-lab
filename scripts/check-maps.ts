@@ -37,41 +37,74 @@ for (const s of Object.values(scenarios)) {
 }
 
 // Engine checks for the fact-packet scenarios: release rules, guard and endings.
+// Each step is a list of labels. By default a step is treated as relevant to
+// every topic. Use { tags, addr } to say which topics a message addresses.
 import { convoScenarios } from "../src/lib/convo";
 import { replay, step, endingFor } from "../src/lib/convo/engine";
 import type { Behavior, ConvoTurn } from "../src/lib/convo/types";
-function run(id: string, seq: Behavior[][]) {
+type Step = Behavior[] | { tags: Behavior[]; addr: string[] };
+function run(id: string, seq: Step[], opts: { forceEnd?: boolean } = {}) {
   const s = convoScenarios[id]; const turns: ConvoTurn[] = []; let ending: string | null = null;
-  for (const tags of seq) {
-    const st = replay(s, turns); const { guard, fact } = step(s, st, tags);
+  const all = s.facts.map((f) => f.id);
+  for (const x of seq) {
+    const tags = Array.isArray(x) ? x : x.tags; const addr = Array.isArray(x) ? all : x.addr;
+    const st = replay(s, turns); const { guard, fact } = step(s, st, tags, addr);
     const released = fact ? [...st.released, fact.id] : st.released;
-    turns.push({ learner: tags.join("+"), reply: "", tags, released: fact ? [fact.id] : [], hintBefore: false, guardAfter: guard });
-    ending = endingFor(s, released, new Set([...st.seen, ...tags]), tags, turns.length, false);
+    turns.push({ learner: `[${tags.join("+")}]`, reply: fact ? fact.says : "(no new fact)", tags, released: fact ? [fact.id] : [], hintBefore: false, guardAfter: guard });
+    ending = endingFor(s, st.released, released, tags, turns.length, false);
     if (ending) break;
   }
   const st = replay(s, turns);
-  return { released: st.released, guard: st.guard, ending, scores: s.evaluate(turns, st.released).map((c) => c.status) };
+  if (!ending && opts.forceEnd) ending = endingFor(s, st.released, st.released, [], st.turns, true);
+  const results = s.evaluate(turns, st.released);
+  return { released: st.released, guard: st.guard, ending, scores: results.map((c) => c.status), results };
 }
-const cases: [string, string, Behavior[][], (r: ReturnType<typeof run>) => boolean][] = [
-  ["labels ideal: two opens, ask options, way forward", "labels", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+const P = (r: ReturnType<typeof run>, id: string) => r.results.find((c) => c.id === id)?.status;
+const cases: [string, string, Step[], (r: ReturnType<typeof run>) => boolean, { forceEnd?: boolean }?][] = [
+  ["labels ideal: explore, ask ideas, ask for a plan, confirm it", "labels", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"], ["confirms"]], (r) => r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["labels: asking for a plan is not agreement (proposal pending, no ending)", "labels", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.ending === null && r.released.includes("commit") && P(r, "P4") === "partial"],
+  ["labels: walking away after the proposal ends unconfirmed", "labels", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.ending === "unconfirmed" && P(r, "P4") === "partial", { forceEnd: true }],
+  ["REVIEW FINDING 1: directive, repair, then asking for a plan does not end as agreed", "labels", [["instruction", "interpretation"], ["acknowledge", "open"], { tags: ["open", "wayForward", "checkin"], addr: [] }], (r) => r.ending !== "plan_key" && r.ending !== "plan_surface" && P(r, "P4") !== "demonstrated"],
+  ["REVIEW FINDING 2: an off-topic open question does not release the tray", "labels", [["open"], { tags: ["open"], addr: [] }], (r) => r.released.includes("pattern") && !r.released.includes("tray")],
+  ["a relevant second question does release the tray", "labels", [["open"], { tags: ["open"], addr: ["tray"] }], (r) => r.released.includes("tray")],
+  ["manager-imposed plan, accepted, ends plan agreed cause missed", "labels", [["open"], ["open"], ["instruction"], ["checkin"], ["confirms"]], (r) => r.ending === "plan_surface" && P(r, "P3") === "not_observed" && P(r, "P4") === "demonstrated"],
   ["labels telling shuts Sam down: nothing released", "labels", [["interpretation", "instruction"], ["leading"]], (r) => r.guard === 3 && r.released.length === 0],
   ["labels repair reopens: acknowledge + open releases pattern", "labels", [["interpretation"], ["acknowledge", "open"]], (r) => r.released.includes("pattern")],
-  ["labels early options give the surface idea, not the real one", "labels", [["open"], ["askOptions"], ["wayForward"]], (r) => r.released.includes("surfaceIdea") && !r.released.includes("idea") && r.ending === "plan_surface"],
+  ["labels early options give the surface idea, not the real one", "labels", [["open"], ["askOptions"], ["wayForward"], ["confirms"]], (r) => r.released.includes("surfaceIdea") && !r.released.includes("idea") && r.ending === "plan_surface"],
+  ["asking what Sam will do first draws out Sam's own idea once the cause is known", "labels", [["open"], ["open"], ["wayForward"]], (r) => r.released.includes("idea") && !r.released.some((x) => x.startsWith("commit"))],
+  ["labels guessing the tray (leading) doesn't release it", "labels", [["open"], ["leading"]], (r) => !r.released.includes("tray")],
   ["labels: the tray stays hidden while Sam is still guarded", "labels", [["open"], ["leading"], ["leading"], ["acknowledge", "open"]], (r) => r.released.includes("pattern") && !r.released.includes("tray")],
   ["pickup: the drive-through stays hidden while Dev is still guarded", "pickup", [["namesConcern", "open"], ["interpretation"], ["interpretation"], ["interpretation"], ["acknowledge", "open"]], (r) => r.released.includes("busier") && !r.released.includes("drive")],
-  ["labels guessing the tray (leading) doesn't release it", "labels", [["open"], ["leading"]], (r) => !r.released.includes("tray")],
   ["pickup: no concern named, open question releases nothing", "pickup", [["overSoften"], ["open"]], (r) => r.released.length === 0],
   ["pickup: self-answered questions earn nothing", "pickup", [["namesConcern"], ["open", "selfAnswer"], ["open", "selfAnswer"]], (r) => r.released.length === 0],
-  ["pickup ideal reaches the drive-through and a plan", "pickup", [["namesConcern", "open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.released.includes("drive") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
-  ["labels-b ideal reaches the form and a plan", "labels-b", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.released.includes("form") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
-  ["pickup-b ideal reaches the training load and a plan", "pickup-b", [["namesConcern", "open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.released.includes("training") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["pickup ideal reaches the drive-through and a confirmed plan", "pickup", [["namesConcern", "open"], ["open"], ["askOptions"], ["wayForward", "checkin"], ["confirms"]], (r) => r.released.includes("drive") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["pickup: a plan Priya supplies scores Q4 not demonstrated", "pickup", [["namesConcern", "open"], ["open"], ["instruction"], ["checkin"], ["confirms"]], (r) => r.ending === "plan_surface" && P(r, "Q4") === "not_observed"],
+  ["labels-b ideal reaches the form and a confirmed plan", "labels-b", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"], ["confirms"]], (r) => r.released.includes("form") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["pickup-b ideal reaches the training load and a confirmed plan", "pickup-b", [["namesConcern", "open"], ["open"], ["askOptions"], ["wayForward", "checkin"], ["confirms"]], (r) => r.released.includes("training") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
   ["pickup-b self-answered questions earn nothing", "pickup-b", [["namesConcern"], ["open", "selfAnswer"]], (r) => r.released.length === 0],
   ["turn limit ends the conversation; no open questions means P2 not evaluable", "labels", Array(12).fill(["closed"]), (r) => r.ending === "time" && r.scores[1] === "not_evaluable"],
 ];
-for (const [name, id, seq, ok] of cases) {
-  const r = run(id, seq); const pass = ok(r);
+const evidenceRuns: ReturnType<typeof run>[] = [];
+for (const [name, id, seq, ok, opts] of cases) {
+  const r = run(id, seq, opts ?? {}); const pass = ok(r);
+  evidenceRuns.push(r);
   if (!pass) process.exitCode = 1;
   console.log(`${pass ? "✓" : "✗"} engine: ${name} (released=${r.released.join(",") || "-"} guard=${r.guard} ending=${r.ending} scores=${r.scores.join(",")})`);
+}
+
+// Evidence rule: every "demonstrated" rating must quote a completed behavior in
+// the transcript. Plan agreement must quote the proposal and the confirmation.
+{
+  let bad = 0;
+  for (const r of evidenceRuns) for (const c of r.results) {
+    if (c.status !== "demonstrated") continue;
+    const quotesLearner = /You said: "|You confirmed: "/.test(c.evidence);
+    const plan = c.id === "P4" || c.id === "Q4";
+    const planOk = !plan || (/proposed: "/.test(c.evidence) && /You confirmed: "/.test(c.evidence));
+    if (!quotesLearner || !planOk) { bad++; console.log(`  ✗ ${c.id} evidence lacks a transcript quote: ${c.evidence.slice(0, 90)}`); }
+  }
+  if (bad) process.exitCode = 1;
+  console.log(`${bad ? "✗" : "✓"} evidence: every "demonstrated" conversation rating quotes a completed behavior (${bad} violations)`);
 }
 
 // Review link: encoding and decoding must return the same attempt.
@@ -109,9 +142,15 @@ import { decodeAttempt, encodeAttempt, type SharedAttempt } from "../src/lib/con
     ["the sensor lead costs time but can recover", ["D1.sensors", "D1b.diagnose", "D2.scaffold", "P1.triage", "D3.verify"], (x) => x.end === "E1" && x.r.T1 === "demonstrated"],
     ["takeover without repair fails T3", ["D1.takeover", "R1.continue"], (x) => x.end === "E2" && x.r.T3 === "not_observed"],
   ];
+  let bad = 0;
   for (const [name, ids, ok] of cases) {
     const x = walk(ids); const pass = ok(x);
+    const h: Turn[] = []; let cur = s.start;
+    for (const id of ids) { const m = s.nodes[cur].moves.find((y) => y.id === id)!; h.push({ nodeId: cur, moveId: id, mode: "free", learnerText: m.label, counterpartText: m.reply, hintBefore: false, afterRecovery: false }); cur = m.next; }
+    for (const c of s.evaluate(h)) if (c.status === "demonstrated" && !/You said: "/.test(c.evidence)) { bad++; console.log(`  ✗ tree ${c.id} evidence lacks a quote: ${c.evidence.slice(0, 80)}`); }
     if (!pass) process.exitCode = 1;
     console.log(`${pass ? "✓" : "✗"} tree: ${name} (end=${x.end} ${JSON.stringify(x.r)})`);
   }
+  if (bad) process.exitCode = 1;
+  console.log(`${bad ? "✗" : "✓"} evidence: every "demonstrated" tree rating quotes the learner (${bad} violations)`);
 }

@@ -9,7 +9,7 @@ const PRACTICES = [
   ["Personas as specs", "Characters follow written response rules. Warmth alone doesn't unlock evidence.", "/design#personas"],
   ["Two formats, side by side", "Open conversations built on a fact packet, next to a fixed branching tree. Same guardrails, different trade-offs.", "/design#convo"],
   ["Consequences and recovery", "Mistakes play out, and you can repair them. Repairs stay on the record.", "/design#map"],
-  ["The app scores, not the AI", "The model matches your words to a response type. Code decides the next node and the criteria.", "/design#ai"],
+  ["AI labels, code scores, people check", "The AI labels what you did on each turn. Code turns those labels into outcomes and scores, so a wrong label means a wrong score. Every label is shown and can be flagged.", "/design#ai"],
   ["Guardrails and privacy", "Personal information, off-topic chat, personal and clinical advice, and rule overrides are caught.", "/design#guardrails"],
 ];
 

@@ -45,7 +45,7 @@ export const BOUNDARY_MESSAGES: Record<BoundaryKind, string> = {
   clinical_advice:
     "This is a coaching simulation, not clinical decision support. It won't answer medication, dosing or patient-care questions. Use your organization's approved references and a pharmacist or clinician.",
   rule_override:
-    "Requests to change the rules, reveal the rubric or award a pass don't change the scenario or your results. The app, not the AI, controls scoring.",
+    "Requests to change the rules, reveal the rubric or award a pass don't change the scenario or your results. The rules and scoring are fixed in code, and a request can't change them.",
   unclear:
     "I couldn't match your reply to a response this scenario recognizes, so I didn't guess. Try saying it another way.",
   too_long: `Keep replies under ${MAX_INPUT} characters. In a real conversation this would be several turns.`,

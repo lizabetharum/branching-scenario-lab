@@ -17,6 +17,7 @@ export const BEHAVIORS = {
   acknowledge: "Acknowledges or reflects back what the person said, or repairs an earlier move (\"I jumped ahead\", \"I put words in your mouth\").",
   namesConcern: "States plainly why the conversation is happening or what was observed.",
   overSoften: "Apologizes, minimizes or hedges so much that the purpose of the conversation becomes unclear (\"Sorry, it's probably nothing, don't worry\").",
+  confirms: "Confirms or accepts a specific step and timing the other person just proposed (\"Friday works, let's do it\"). Asking for a plan is not confirming one.",
   closes: "Ends or wraps up the conversation.",
 } as const;
 export type Behavior = keyof typeof BEHAVIORS;
@@ -38,8 +39,20 @@ export interface Fact {
     minValidOpens?: number;
     /** Requires the concern to have been named at some point. */
     needsConcern?: boolean;
+    /** Requires the learner to have supplied a plan themselves at some point. */
+    needsInstruction?: boolean;
+    /** Never releases once any of these facts has released. */
+    unless?: string[];
     maxGuard: number;
   };
+  /**
+   * What a relevant question is about. When set, the fact only releases if the
+   * tagger marks the learner's message as addressing this probe. Counting
+   * questions is not enough.
+   */
+  probe?: string;
+  /** A specific step and time the counterpart proposes. Only one ever releases. */
+  commitment?: "own" | "surface" | "manager";
   /** The fact observation alone can't provide. */
   key?: boolean;
   /** A plan idea from the counterpart. */
@@ -62,7 +75,7 @@ export interface ConvoTurn {
 }
 
 export interface ConvoEnding {
-  id: "plan_key" | "plan_surface" | "closed" | "time";
+  id: "plan_key" | "plan_surface" | "unconfirmed" | "closed" | "time";
   kind: "met" | "partial" | "missed";
   title: string;
   text: string;

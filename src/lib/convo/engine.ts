@@ -1,8 +1,9 @@
 import type { Behavior, ConvoEnding, ConvoScenario, ConvoTurn, Fact } from "./types";
 
-// The deterministic half of a fact-packet scenario. Given the tagged turns so
-// far, it decides guard level, which facts are released and whether the
-// conversation has ended. The model never makes these decisions.
+// The deterministic half of a fact-packet scenario. Given the AI's labels for
+// each turn, it decides guard level, which facts are released and whether the
+// conversation has ended. The model doesn't make these decisions, but its
+// labels are the input, so a wrong label produces a wrong outcome.
 
 const RAISES_GUARD: Behavior[] = ["leading", "interpretation", "instruction"];
 const LOWERS_GUARD: Behavior[] = ["acknowledge"];
@@ -46,42 +47,67 @@ export function replay(s: ConvoScenario, turns: ConvoTurn[]): ConvoState {
   return st;
 }
 
-/** Apply one newly tagged turn. Returns the new guard and at most one released fact. */
-export function step(s: ConvoScenario, st: ConvoState, tags: Behavior[]) {
+const commitmentReleased = (s: ConvoScenario, released: string[]) =>
+  s.facts.find((f) => f.commitment && released.includes(f.id));
+
+/**
+ * Apply one newly labeled turn. Returns the new guard and at most one released fact.
+ * `addresses` lists the fact probes the learner's message is relevant to.
+ */
+export function step(s: ConvoScenario, st: ConvoState, tags: Behavior[], addresses: string[]) {
   const eff = effectiveTags(tags);
   const guard = nextGuard(st.guard, tags);
   const validOpens = st.validOpens + (eff.includes("open") ? 1 : 0);
   const concernNamed = st.concernNamed || tags.includes("namesConcern");
+  const instructed = st.seen.has("instruction") || tags.includes("instruction");
+  const hasCommitment = Boolean(commitmentReleased(s, st.released));
   let fact: Fact | undefined;
   if (guard < 3) {
     fact = s.facts.find(
       (f) =>
         !st.released.includes(f.id) &&
         f.release.anyOf.some((b) => eff.includes(b)) &&
+        (!f.probe || addresses.includes(f.id)) &&
         (f.release.requires ?? []).every((r) => st.released.includes(r)) &&
         validOpens >= (f.release.minValidOpens ?? 0) &&
         (!f.release.needsConcern || concernNamed) &&
+        (!f.release.needsInstruction || instructed) &&
+        !(f.release.unless ?? []).some((u) => st.released.includes(u)) &&
+        !(f.commitment && hasCommitment) &&
         guard <= f.release.maxGuard,
     );
   }
   return { guard, fact };
 }
 
-/** Did the conversation end on this turn? */
-export function endingFor(s: ConvoScenario, released: string[], seenAfter: Set<Behavior>, tags: Behavior[], turnCount: number, forced: boolean): ConvoEnding["id"] | null {
-  const hasOption = s.facts.some((f) => f.idea && released.includes(f.id)) || seenAfter.has("instruction");
-  const key = s.facts.find((f) => f.key);
-  const hasPlan = hasOption && (seenAfter.has("wayForward") || seenAfter.has("checkin"));
-  const planMoment = hasOption && (tags.includes("wayForward") || tags.includes("checkin"));
-  if (planMoment || ((forced || tags.includes("closes")) && hasPlan)) {
-    return key && released.includes(key.id) ? "plan_key" : "plan_surface";
+/**
+ * Did the conversation end on this turn?
+ * A plan counts as agreed only when three things happened in order: the learner
+ * asked, the counterpart proposed a specific step and time, and the learner
+ * confirmed that proposal on a later turn.
+ */
+export function endingFor(
+  s: ConvoScenario,
+  releasedBefore: string[],
+  releasedAfter: string[],
+  tags: Behavior[],
+  turnCount: number,
+  forced: boolean,
+): ConvoEnding["id"] | null {
+  const proposed = commitmentReleased(s, releasedBefore);
+  if (proposed && tags.includes("confirms")) {
+    const key = s.facts.find((f) => f.key);
+    const causeFound = Boolean(key && releasedBefore.includes(key.id));
+    // A plan that came from the manager, or from the surface idea, never counts as finding the cause.
+    return proposed.commitment === "own" && causeFound ? "plan_key" : "plan_surface";
   }
-  if (forced || tags.includes("closes")) return "closed";
-  if (turnCount >= s.maxTurns) return "time";
+  if (forced || tags.includes("closes")) return commitmentReleased(s, releasedAfter) ? "unconfirmed" : "closed";
+  if (turnCount >= s.maxTurns) return commitmentReleased(s, releasedAfter) ? "unconfirmed" : "time";
   return null;
 }
 
 export function hintFor(s: ConvoScenario, st: ConvoState): string {
+  if (commitmentReleased(s, st.released)) return `${s.counterpart.name} proposed a step and a time. If it works for you, confirm it. If not, say what you'd change.`;
   const next = s.facts.find((f) => !f.optional && !st.released.includes(f.id));
   if (next?.release.needsConcern && !st.concernNamed) return `${s.counterpart.name} doesn't know why you asked to talk. Say what you saw, plainly and once, then ask.`;
   if (st.guard >= 3) return `${s.counterpart.name} has shut down. Acknowledge what happened, then ask a genuine open question.`;
@@ -90,6 +116,7 @@ export function hintFor(s: ConvoScenario, st: ConvoState): string {
 }
 
 export function moodFor(guard: number, lastReleased?: Fact): import("../types").Mood {
+  if (lastReleased?.commitment) return "proud";
   if (lastReleased?.idea) return "proud";
   if (lastReleased?.key) return "thinking";
   return (["engaged", "neutral", "guarded", "guarded"] as const)[guard];

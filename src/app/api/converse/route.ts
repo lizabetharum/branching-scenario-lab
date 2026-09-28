@@ -32,7 +32,7 @@ const Body = z.object({
 });
 
 export type ConverseResponse =
-  | { ok: true; kind: "turn"; tags: Behavior[]; evidence: string; guard: number; released: string[]; reply: string; authoredReply: boolean; ending: string | null }
+  | { ok: true; kind: "turn"; tags: Behavior[]; addresses: string[]; evidence: string; guard: number; released: string[]; reply: string; authoredReply: boolean; ending: string | null }
   | { ok: true; kind: "boundary"; boundary: BoundaryKind; message: string; sentToModel: boolean }
   | { ok: false; kind: "system_failure"; message: string };
 
@@ -63,6 +63,7 @@ export async function POST(req: Request) {
   // Call 1: the tagger labels behavior. It never plays the character.
   let tags: Behavior[];
   let evidence: string;
+  let addresses: string[];
   try {
     const { output } = await generateText({
       model: model(),
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
         schema: z.object({
           boundary: z.enum(BOUNDARIES),
           tags: z.array(z.enum(TAGS)),
+          addresses: z.array(z.string()),
           evidence: z.string(),
         }),
       }),
@@ -81,17 +83,18 @@ export async function POST(req: Request) {
     if (!output) throw new Error("No output");
     if (output.boundary !== "none") return boundary(output.boundary, true);
     tags = [...new Set(output.tags)];
+    // Only topics this scenario defines count. The model can't invent a relevance.
+    addresses = output.addresses.filter((id) => s.facts.some((f) => f.id === id && f.probe));
     evidence = output.evidence.slice(0, 200);
   } catch (err) {
     console.error("converse: tagger failed", err instanceof Error ? `${err.name}: ${err.message.slice(0, 200)}` : "unknown");
     return failure("I didn't get a response from the AI. That's a system problem, not yours. Try sending again.");
   }
 
-  // The app, not the model, decides guard level and which fact is released.
-  const { guard, fact } = step(s, st, tags);
+  // Code applies fixed rules to the tagger's labels to set guard and release facts. The labels are still AI judgments.
+  const { guard, fact } = step(s, st, tags, addresses);
   const released = fact ? [...st.released, fact.id] : st.released;
-  const seenAfter = new Set([...st.seen, ...tags]);
-  const ending = endingFor(s, released, seenAfter, tags, st.turns + 1, false);
+  const ending = endingFor(s, st.released, released, tags, st.turns + 1, false);
 
   // Call 2: the counterpart speaks, limited to released facts.
   const known = s.facts.filter((f) => st.released.includes(f.id));
@@ -154,5 +157,5 @@ export async function POST(req: Request) {
     console.error("converse: counterpart failed", err instanceof Error ? err.name : "unknown");
   }
 
-  return Response.json({ ok: true, kind: "turn", tags, evidence, guard, released: fact ? [fact.id] : [], reply, authoredReply, ending } satisfies ConverseResponse);
+  return Response.json({ ok: true, kind: "turn", tags, addresses, evidence, guard, released: fact ? [fact.id] : [], reply, authoredReply, ending } satisfies ConverseResponse);
 }

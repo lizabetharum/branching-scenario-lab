@@ -149,7 +149,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
   }
 
   function endNow() {
-    const e = endingFor(s, st.released, st.seen, [], st.turns, true) ?? "closed";
+    const e = endingFor(s, st.released, st.released, [], st.turns, true) ?? "closed";
     setEnding(e);
   }
 
@@ -245,7 +245,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           <div className="card">
             <h2 className="h2">What happened</h2>
             <p className="mt-2 text-ink/85">{e.text}</p>
-            <p className="mt-4 text-sm text-ink/70">The app scored the criteria in code from the behaviors tagged on each of your turns. The AI labeled your turns. It didn&apos;t score them.</p>
+            <p className="mt-4 text-sm text-ink/70">The AI labeled each of your turns. Code turned those labels into what the character revealed, how the conversation ended and these scores, so a wrong label means a wrong score. Check the labels below and flag any you disagree with.</p>
             {interrupted && <p className="mt-3 rounded-lg bg-coral/10 p-3 text-sm"><b>Interrupted attempt.</b> A system failure is not a learner failure. Unfinished criteria are marked not evaluable.</p>}
           </div>
         </div>

@@ -1,5 +1,5 @@
 import type { ConvoScenario, ConvoTurn } from "./types";
-import { cr, idx, q, supportAt, validOpenIdx } from "./eval";
+import { confirmedQ, cr, idx, planTrace, proposedQ, q, supportAt, validOpenIdx } from "./eval";
 
 // Marcus Delgado: execution gap. He tells instead of asks.
 // Fact packet, release rules and dialogue are original and untested.
@@ -24,8 +24,6 @@ export function makeLabelsEvaluate(o: { name: string; cause: string; surface: st
   const before = opens.filter((i) => firstInterp === -1 || i < firstInterp);
   const leading = idx(turns, "leading");
   const instr = idx(turns, "instruction");
-  const way = idx(turns, "wayForward");
-  const check = idx(turns, "checkin");
 
   const P1 = "Asked two or more open questions before any interpretation";
   const p1 =
@@ -39,25 +37,28 @@ export function makeLabelsEvaluate(o: { name: string; cause: string; surface: st
     leading === -1 && opens.length === 0
       ? cr("P2", "Asked no leading questions", "not_evaluable", "n/a", "No open questions were asked, so there was nothing to judge.", "Ask open questions. This criterion checks how you phrase them.")
       : leading === -1
-        ? cr("P2", "Asked no leading questions", "demonstrated", "independent", "No leading questions tagged.", `Keep phrasing questions so ${o.name} supplies the answer.`)
+        ? cr("P2", "Asked no leading questions", "demonstrated", "independent", `No leading questions. Your first open question: ${q(turns[opens[0]])}`, `Keep phrasing questions so ${o.name} supplies the answer.`)
         : cr("P2", "Asked no leading questions", "not_observed", "n/a", `Leading question tagged. ${q(turns[leading])}`, "Turn \"Is it because...?\" into \"What's happening when...?\"");
 
   const P3 = `${o.name} generated the option, after the cause surfaced`;
   const ideaAt = turns.findIndex((t) => t.released.includes("idea"));
   const surfaceAt = turns.findIndex((t) => t.released.includes("surfaceIdea"));
   const p3 = released.includes("idea")
-    ? cr("P3", P3, "demonstrated", supportAt(turns, ideaAt), q(turns[ideaAt]), `Keep asking for ${o.name}'s ideas once the cause is clear.`)
+    ? cr("P3", P3, "demonstrated", supportAt(turns, ideaAt), `${q(turns[ideaAt])} ${o.name} answered: "${turns[ideaAt].reply}"`, `Keep asking for ${o.name}'s ideas once the cause is clear.`)
     : released.includes("surfaceIdea")
       ? cr("P3", P3, "partial", supportAt(turns, surfaceAt), `You asked for ideas before ${o.cause} came up, so ${o.name}'s idea targets ${o.surface}. ${q(turns[surfaceAt])}`, "Explore Reality further before asking for Options.")
       : cr("P3", P3, "not_observed", "n/a", instr >= 0 ? `You supplied the plan. ${q(turns[instr])}` : "Options never came up.", `Ask "What could you try?" and wait for ${o.name}'s answer.`);
 
   const P4 = "Agreed on a specific next step and check-in";
+  const plan = planTrace(turns);
   const p4 =
-    way >= 0 && check >= 0
-      ? cr("P4", P4, "demonstrated", supportAt(turns, Math.max(way, check)), q(turns[Math.max(way, check)]), "Keep closing with who does what, and when you'll check.")
-      : way >= 0 || check >= 0
-        ? cr("P4", P4, "partial", supportAt(turns, Math.max(way, check)), `${way >= 0 ? "A next step, but no check-in." : "A check-in, but no specific next step."} ${q(turns[Math.max(way, check)])}`, "Close with both: the first step and when you'll look at it together.")
-        : cr("P4", P4, "not_observed", "n/a", "The conversation ended without a next step or check-in.", `Ask what ${o.name} will do first and when you'll follow up.`);
+    plan.confirmAt >= 0
+      ? cr("P4", P4, "demonstrated", supportAt(turns, plan.confirmAt), `${proposedQ(o.name, turns[plan.proposeAt])} ${confirmedQ(turns[plan.confirmAt])}`, "Keep closing with who does what, and when you'll check.")
+      : plan.proposeAt >= 0
+        ? cr("P4", P4, "partial", supportAt(turns, plan.proposeAt), `${proposedQ(o.name, turns[plan.proposeAt])} You never confirmed it, so nothing was agreed.`, "When a step and a time are proposed, confirm them or adjust them out loud.")
+        : plan.askAt >= 0
+          ? cr("P4", P4, "partial", supportAt(turns, plan.askAt), `You asked for a next step, but ${o.name} never proposed one. ${q(turns[plan.askAt])}`, `${o.name} can only commit once there's an idea on the table. Ask for ideas first, then for the first step.`)
+          : cr("P4", P4, "not_observed", "n/a", "The conversation ended without anyone proposing a next step.", `Ask what ${o.name} will do first and when you'll follow up.`);
 
   return [p1, p2, p3, p4];
 }
@@ -124,6 +125,7 @@ export const labels: ConvoScenario = {
   facts: [
     {
       id: "pattern",
+      probe: "asks what is happening at the station, when or how the errors happen, or what Sam's shift is like when they occur",
       label: "Errors cluster at the 5 p.m. rush, when Sam is pulled to the register mid-label",
       text: "The errors happen around 5 p.m. The line backs up, Sam gets called to the register in the middle of a label, and when Sam comes back, Sam picks up where Sam thinks they left off.",
       says: "Mostly it's around five. The line backs up, I get called to the register, and when I come back I pick up where I think I left off.",
@@ -134,6 +136,7 @@ export const labels: ConvoScenario = {
     },
     {
       id: "tray",
+      probe: "asks what happens to the unfinished label or work in progress when Sam is interrupted, how labels are set down, stored or picked back up, or how the station is set up",
       label: "Unfinished labels go into a tray shared with Jess",
       text: "When called away, Sam leaves the unfinished label in a tray that Jess, another tech, also uses. Sometimes Sam grabs the wrong label when coming back.",
       says: "Honestly? I leave it in the shared tray. Jess uses that tray too. Sometimes when I come back I grab the wrong one.",
@@ -148,8 +151,8 @@ export const labels: ConvoScenario = {
       label: "Sam's idea: a separate bin for each tech",
       text: "Sam's idea: each tech gets their own bin, so an unfinished label stays in your own bin.",
       says: "What if Jess and I each had our own bin? If I get called away, the label stays in my bin.",
-      keywords: ["own bin", "each had", "separate bin", "my bin"],
-      release: { anyOf: ["askOptions"], requires: ["tray"], maxGuard: 2 },
+      keywords: ["own bin", "each had", "separate bin", "my bin", "somewhere else", "separate tray", "own tray"],
+      release: { anyOf: ["askOptions", "wayForward"], requires: ["tray"], maxGuard: 2 },
       idea: true,
       cue: "bins",
       hint: "Sam knows the station better than you. Ask for Sam's ideas before offering yours.",
@@ -161,12 +164,13 @@ export const labels: ConvoScenario = {
       text: "Without knowing the real cause, Sam's only idea is to slow down and double-check.",
       says: "I guess I could slow down and double-check everything?",
       keywords: ["slow down", "double-check"],
-      release: { anyOf: ["askOptions"], maxGuard: 2 },
+      release: { anyOf: ["askOptions", "wayForward"], unless: ["idea"], maxGuard: 2 },
       idea: true,
       hint: "Ask for Sam's ideas.",
     },
     {
       id: "history",
+      probe: "asks how the station setup came about or who decided it",
       optional: true,
       label: "Nobody ever assigned the tray",
       text: "The shared tray was there before Sam started. Nobody ever set it up or assigned it.",
@@ -175,11 +179,44 @@ export const labels: ConvoScenario = {
       release: { anyOf: ["open", "acknowledge"], requires: ["tray"], maxGuard: 1 },
       hint: "Optional: ask how the tray came to be shared.",
     },
+    {
+      id: "commit",
+      label: "Sam proposes a first step and a check-in built on Sam's own idea",
+      text: "Sam will set up separate bins before tonight's rush and suggests reviewing the error log together on Friday.",
+      says: "I'll set up the bins before the rush tonight. Can we look at the error log together Friday?",
+      keywords: [],
+      release: { anyOf: ["wayForward", "checkin"], requires: ["idea"], maxGuard: 2 },
+      commitment: "own",
+      hint: "Ask what Sam will do first and when you'll check in.",
+    },
+    {
+      id: "commitSurface",
+      optional: true,
+      label: "Sam proposes a step built on the surface idea",
+      text: "Sam commits to the surface idea with a specific time.",
+      says: "Okay. I'll slow down and double-check every label, starting tonight. We can look at the log Friday.",
+      keywords: [],
+      release: { anyOf: ["wayForward", "checkin"], requires: ["surfaceIdea"], maxGuard: 2 },
+      commitment: "surface",
+      hint: "Ask for a first step and a check-in.",
+    },
+    {
+      id: "commitManager",
+      optional: true,
+      label: "Sam accepts the plan you supplied",
+      text: "Sam agrees to do what the manager said, with a check-in.",
+      says: "Okay. I'll do it the way you said, starting tonight. We can look at the log Friday.",
+      keywords: [],
+      release: { anyOf: ["wayForward", "checkin"], needsInstruction: true, maxGuard: 2 },
+      commitment: "manager",
+      hint: "Ask for a first step and a check-in.",
+    },
   ],
   maxTurns: 12,
   endings: {
     plan_key: { id: "plan_key", title: "Plan agreed, cause found", text: "Sam heads back with a plan aimed at the shared tray. Check the criteria below. Reaching a plan doesn't mean every criterion was met." },
-    plan_surface: { id: "plan_surface", title: "Plan agreed, cause missed", text: "You have a plan, but it's built on what you could see. The shared tray never came up, so the next rush will likely look the same." },
+    plan_surface: { id: "plan_surface", title: "Plan agreed, cause missed", text: "You and Sam agreed on a plan, but it isn't built on the cause. Either the shared tray never came up, or the plan came from you instead of Sam. The next rush will likely look the same." },
+    unconfirmed: { id: "unconfirmed", title: "Plan proposed, not confirmed", text: "Sam proposed a step and a time, but the conversation ended before you confirmed it. Sam heads back unsure whether the plan is on." },
     closed: { id: "closed", title: "Ended without a plan", text: "Sam goes back to the counter. Nothing in the conversation targets why the errors happen." },
     time: { id: "time", title: "Out of time", text: "The five o'clock line starts to build and Sam has to go. The conversation stopped before a plan." },
   },

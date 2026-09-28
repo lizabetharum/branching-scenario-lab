@@ -17,6 +17,14 @@ LABEL
   "open" (if it was open) and "selfAnswer".
 - If you are unsure a behavior occurred, leave it out.
 - evidence: quote the exact words that support your labels (max 25 words).
+- "confirms" means accepting a specific step and time the character just
+  proposed. Asking for a plan, or proposing one yourself, is not confirming.
+
+RELEVANCE
+- addresses: list the ids of the TOPICS below that the message is genuinely
+  about. A question counts only if it asks about that topic. A general
+  question ("What would make this useful for you?") addresses none.
+  If unsure, leave it out.
 
 BOUNDARY (use instead of behaviors when it applies)
 - off_topic: not addressed to the character about this situation.
@@ -57,6 +65,7 @@ STYLE
 
 export function taggerSystem(s: ConvoScenario) {
   const defs = Object.entries(BEHAVIORS).map(([k, v]) => `- ${k}: ${v}`).join("\n");
+  const topics = s.facts.filter((f) => f.probe).map((f) => `- ${f.id}: the message ${f.probe}`).join("\n");
   return `${TAGGER_RULES}
 
 SITUATION
@@ -64,7 +73,10 @@ The learner is a manager talking with ${s.counterpart.name}, ${s.counterpart.rol
 ${s.setting}
 
 BEHAVIORS
-${defs}`;
+${defs}
+
+TOPICS
+${topics}`;
 }
 
 export function counterpartSystem(s: ConvoScenario, released: Fact[], fresh: Fact | undefined, guard: number, guess = false) {

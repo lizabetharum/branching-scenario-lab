@@ -9,6 +9,14 @@ const targetLabel = process.env.TARGET_LABEL ?? target;
 
 const busierTurn = { learner: "A customer said they felt rushed at pickup yesterday. What's been going on?", reply: "It's been a lot busier at pickup lately. Especially late afternoon.", tags: ["namesConcern", "open"], released: ["busier"], hintBefore: false, guardAfter: 0 };
 
+const L = {
+  pattern: { learner: "Walk me through what's happening at your station when these mix-ups happen.", reply: "Mostly it's around five. The line backs up, I get called to the register, and when I come back I pick up where I think I left off.", tags: ["open"], released: ["pattern"], hintBefore: false, guardAfter: 1 },
+  tray: { learner: "What happens to the label you were working on when you get called away?", reply: "Honestly? I leave it in the shared tray. Jess uses that tray too. Sometimes when I come back I grab the wrong one.", tags: ["open"], released: ["tray"], hintBefore: false, guardAfter: 0 },
+  idea: { learner: "That makes sense. What do you think would help?", reply: "What if Jess and I each had our own bin? If I get called away, the label stays in my bin.", tags: ["askOptions", "open"], released: ["idea"], hintBefore: false, guardAfter: 0 },
+  commit: { learner: "Let's try it. What will you do first, and when should we check how it's going?", reply: "I'll set up the bins before the rush tonight. Can we look at the error log together Friday?", tags: ["wayForward", "checkin"], released: ["commit"], hintBefore: false, guardAfter: 0 },
+};
+const NO_PENALTY = ["leading", "interpretation", "instruction", "selfAnswer"];
+
 // kind "convo": expect = { tags?: [...must include], notTags?: [...], release?: id | null, boundary?: kind }
 // kind "tree":  expect = move id or boundary kind
 const cases = [
@@ -35,6 +43,12 @@ const cases = [
   { id: "T20", name: "Personal advice (conversation)", kind: "convo", scenario: "pickup", turns: [], input: "Honestly I don't think I'm cut out to be a manager. Should I step down?", expect: { boundary: "personal_advice" }, expected: "Declined and redirected." },
   { id: "T22", name: "Case B: strong response", kind: "convo", scenario: "labels-b", turns: [], input: "Walk me through how these numbers end up wrong.", expect: { tags: ["open"], release: "pattern" }, expected: "Tagged open. Ana reveals the Monday-morning pattern." },
   { id: "T23", name: "Case B: guessing a hidden fact", kind: "convo", scenario: "pickup-b", turns: [{ learner: "Someone said you snapped at them, and you've missed huddle twice. What's been going on?", reply: "I've just had a lot on my plate lately. I feel behind all the time.", tags: ["namesConcern", "open"], released: ["busier"], hintBefore: false, guardAfter: 0 }], repeat: 3, input: "Is it because you're stuck training the new people?", expect: { tags: ["leading"], release: null, replyExcludes: /\b(yeah|yes|yep|yup|exactly|right|probably|definitely|that'?s (it|right|part|probably|true)|part of it|pretty much)\b|train|new hire|new people|teaching|showing them/i }, expected: "Tagged leading. Not released. On every run, Luis's reply neither agrees, confirms nor hints at the training." },
+  { id: "T24", name: "Alternative: relevant closed clarification", kind: "convo", scenario: "labels", turns: [L.pattern], input: "So this is when you get called away in the middle of a label?", expect: { notTags: NO_PENALTY }, expected: "Not penalized: no leading, interpretation or instruction label, so guard doesn't rise. It earns no open-question credit, because Marcus's objective counts open questions." },
+  { id: "T25", name: "Alternative: accurate summary", kind: "convo", scenario: "labels", turns: [L.pattern], input: "So around five you get pulled to the register, and when you come back you pick up where you think you left off.", expect: { notTags: NO_PENALTY }, expected: "Not penalized. A summary can lower guard as an acknowledgment." },
+  { id: "T26", name: "Alternative: start with Goal", kind: "convo", scenario: "labels", turns: [], input: "Before we get into it, what would a good shift look like for you at your station?", expect: { tags: ["open"], notTags: NO_PENALTY }, expected: "Counts as an open question and lowers guard. Facts release when a later question is relevant." },
+  { id: "T27", name: "Asks for an action that never occurs", kind: "convo", scenario: "labels", turns: [L.pattern, L.tray], input: "What will you do first, and when should we check in?", expect: { tags: ["wayForward"], release: "idea", ending: null }, expected: "Asking what Sam will do draws out Sam's own idea. It is not a proposal with a time, and nothing is agreed, so the conversation doesn't end." },
+  { id: "T28", name: "Confirming a real proposal", kind: "convo", scenario: "labels", turns: [L.pattern, L.tray, L.idea, L.commit], input: "Friday works. Let's do it.", expect: { tags: ["confirms"], ending: "plan_key" }, expected: "Only now does the conversation end as a plan agreed, cause found." },
+  { id: "T29", name: "Off-topic open question (review finding 2)", kind: "convo", scenario: "labels", turns: [L.pattern], input: "What would make this conversation useful for you?", expect: { release: null }, expected: "The shared tray stays hidden. Question count alone no longer releases facts." },
 ];
 
 async function post(path, body) {
@@ -57,12 +71,12 @@ for (const c of cases) {
       for (let k = 0; k < (c.repeat ?? 1); k++) runs.push(await post("/api/converse", { scenarioId: c.scenario, text: c.input, turns: c.turns }));
       const d = runs[0];
       if (d.kind === "turn" && runs.every((x) => x.kind === "turn")) {
-        pass = !e.boundary && !e.failure && runs.every((x) => (e.tags ?? []).every((t) => x.tags.includes(t)) && (e.release === undefined || e.release === (x.released[0] ?? null)) && !(e.replyExcludes && e.replyExcludes.test(x.reply)));
+        pass = !e.boundary && !e.failure && runs.every((x) => (e.tags ?? []).every((t) => x.tags.includes(t)) && !(e.notTags ?? []).some((t) => x.tags.includes(t)) && (e.release === undefined || e.release === (x.released[0] ?? null)) && (e.ending === undefined || e.ending === (x.ending ?? null)) && !(e.replyExcludes && e.replyExcludes.test(x.reply)));
         observed = runs
-          .map((x, k) => `${runs.length > 1 ? `Run ${k + 1}: ` : ""}Tags: ${x.tags.join(", ") || "none"}. Released: ${x.released[0] ?? "nothing"}. Reply${x.authoredReply ? " (authored)" : ""}: "${x.reply}"`)
+          .map((x, k) => `${runs.length > 1 ? `Run ${k + 1}: ` : ""}Tags: ${x.tags.join(", ") || "none"}. Released: ${x.released[0] ?? "nothing"}.${x.ending ? ` Ending: ${x.ending}.` : ""} Reply${x.authoredReply ? " (authored)" : ""}: "${x.reply}"`)
           .join(" ");
       } else if (d.kind === "boundary") {
-        pass = e.boundary === d.boundary;
+        pass = e.boundary === d.boundary && d.boundary !== "rate_limited";
         observed = `Boundary: ${d.boundary}${d.sentToModel ? "" : " (not sent to model)"}`;
       } else {
         pass = Boolean(e.failure);
