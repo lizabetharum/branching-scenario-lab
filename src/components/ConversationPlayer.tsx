@@ -331,7 +331,7 @@ export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string;
         {custom ? (
           <div className="card mt-6 text-sm"><b>This is a draft.</b> The transfer tools, review links and observation checklist appear once a scenario is published. <Link className="link" href="/author">Back to the authoring kit</Link></div>
         ) : (
-          <TransferCard scenarioId={s.id} suggestion={sum.commitment} evidence={s.transferEvidence} />
+          <TransferCard scenarioId={s.id} suggestion={sum.commitment} evidence={s.transferEvidence} fromGap={sum.missing.length > 0} />
         )}
 
         {s.reflection && (

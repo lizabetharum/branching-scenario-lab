@@ -9,7 +9,7 @@ import { delayedCaseFor, delayedPracticeIcs } from "@/lib/transfer";
  * practice with a new case, and a checklist a peer can use in the next real
  * conversation. Nothing here leaves the browser unless the learner downloads it.
  */
-export function TransferCard({ scenarioId, suggestion, evidence }: { scenarioId: string; suggestion: string; evidence: string }) {
+export function TransferCard({ scenarioId, suggestion, evidence, fromGap = true }: { scenarioId: string; suggestion: string; evidence: string; fromGap?: boolean }) {
   const [commitment, setCommitment] = useState(suggestion);
   // Default: a week from today, in local time.
   const [when, setWhen] = useState(() => {
@@ -39,7 +39,7 @@ export function TransferCard({ scenarioId, suggestion, evidence }: { scenarioId:
           <h3 className="font-bold">1. Commit to one thing</h3>
           <label htmlFor="commit" className="mt-1 block text-sm text-ink/80">Next time, I will:</label>
           <textarea id="commit" rows={4} value={commitment} onChange={(e) => setCommitment(e.target.value)} className="mt-1 w-full rounded-xl border-2 border-ink/20 p-3 text-sm" />
-          <p className="mt-1 text-xs text-ink/70">Suggested from what was missing. Rewrite it in your own words.</p>
+          <p className="mt-1 text-xs text-ink/70">{fromGap ? "Suggested from what was missing." : "Nothing was missing, so this suggests keeping what worked."} Rewrite it in your own words.</p>
         </div>
         <div>
           <h3 className="font-bold">2. Practice again in a week</h3>

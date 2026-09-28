@@ -7,7 +7,7 @@ const montserrat = Montserrat({ variable: "--font-montserrat", subsets: ["latin"
 
 export const metadata: Metadata = {
   title: "Branching Scenario Lab",
-  description: "Two AI-supported branching scenarios built for behavior change, with the design thinking, privacy decisions and guardrails shown in full.",
+  description: "Three AI-supported practice scenarios in two formats, built for behavior change, with the design thinking, privacy decisions and guardrails shown in full.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

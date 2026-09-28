@@ -170,7 +170,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
         </div>
       </div>
 
-      <TransferCard scenarioId={s.id} suggestion={commitment} evidence={s.transferEvidence} />
+      <TransferCard scenarioId={s.id} suggestion={commitment} evidence={s.transferEvidence} fromGap={Boolean(firstGap)} />
 
       <WordingPractice scenarioId={s.id} />
 

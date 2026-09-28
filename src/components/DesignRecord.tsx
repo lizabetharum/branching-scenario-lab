@@ -7,7 +7,7 @@ import { DEFAULT_MODEL } from "@/lib/model-info";
 // Tables that describe the map are generated from the scenario data, so they
 // can't drift from what runs.
 
-export const VERSION = "v2.6";
+export const VERSION = "v2.7";
 export const VERSION_DATE = "2026-09-28";
 
 const BRIEF = {
@@ -101,6 +101,7 @@ const REVISIONS = [
   ["RV-28", "Third outside review: Sam offered to slow down, double-check and review next week, but the debrief said \"Sam never proposed one.\"", "Minor", "Feedback only recognized a formal proposal. The character also added a time the fact didn't contain.", "P4 and Q4 feedback now quote what was offered and say it didn't address the cause and wasn't confirmed. The debrief summary says the same. Characters may no longer add times or commitments a fact doesn't include.", "check-maps REVIEW 3"],
   ["RV-29", "Third outside review: the prebrief said each reply goes to the AI twice, while the design page described a third leak-check call.", "Minor", "Disclosure not updated when the leak check was added", "Prebrief, design table and privacy table now say up to three calls and list what each receives.", "Manual check"],
   ["RV-30", "After adding a rule against invented times, characters still added \"next week\" or \"a couple weeks\" to a surface idea in 3 of 5 runs.", "Minor", "A prompt rule alone wasn't followed reliably", "Code check: a reply naming a time or day that no sayable fact contains is replaced with the authored line. T30 now checks all 5 runs for invented times.", "T30 (5 runs)"],
+  ["RV-31", "Fourth outside review: partial-plan advice said \"Ask for ideas first\" after Sam had offered one, the commitment note said \"what was missing\" when nothing was, two places described two scenarios instead of three, and the review count was out of date.", "Minor", "Copy written for one case applied to others, and counts not updated", "Advice now matches what the character offered, the commitment note depends on whether anything was missing, the site description and authorized wording say three scenarios, and the review record counts four reviews.", "check-maps REVIEW 4, manual check"],
 ] as const;
 
 const RATINGS: [string, string, string, string, string, string][] = [
@@ -297,7 +298,7 @@ export function DesignRecord() {
 
       <h2 id="review">Review and release decision</h2>
       <p>
-        <b>This is a designer self-review, plus two outside reviews.</b> A colleague reviewed one complete pharmacy conversation, its debrief, the prebrief and this documentation (RV-17 to RV-20), then retested two conversations after the fixes (RV-23 to RV-26). Each behavioral finding was reproduced before fixing. The rubric asks for independent reviewers who compare ratings. Treat these ratings as the designer&apos;s starting position for that review. Ratings are not averaged. One major gap blocks learner use, however strong the rest is.
+        <b>This is a designer self-review, plus four outside reviews by one colleague.</b> The first covered one complete pharmacy conversation, its debrief, the prebrief and this documentation (RV-17 to RV-20). The second retested two conversations after the fixes (RV-23 to RV-26). The third checked feedback accuracy and disclosure (RV-28, RV-29). The fourth checked copy (RV-31). Each behavioral finding was reproduced before fixing. The rubric asks for independent reviewers who compare ratings. Treat these ratings as the designer&apos;s starting position for that review. Ratings are not averaged. One major gap blocks learner use, however strong the rest is.
       </p>
       <table>
         <thead><tr><th>Criterion</th><th>Rating</th><th>Evidence</th><th>Finding</th><th>Severity</th><th>Action</th></tr></thead>
@@ -327,7 +328,7 @@ export function DesignRecord() {
       <table>
         <tbody>
           <tr><td><b>Current evidence status</b></td><td>None. No learners have used it. Not even participation data exists.</td></tr>
-          <tr><td><b>Authorized wording</b></td><td>&ldquo;A tested prototype of two branching scenarios. No learner performance or transfer evidence yet.&rdquo;</td></tr>
+          <tr><td><b>Authorized wording</b></td><td>&ldquo;A tested prototype of three practice scenarios in two formats. No learner performance or transfer evidence yet.&rdquo;</td></tr>
           <tr><td><b>Next evidence needed</b></td><td>Immediate scenario performance from a supervised pilot, scored by calibrated raters.</td></tr>
         </tbody>
       </table>
