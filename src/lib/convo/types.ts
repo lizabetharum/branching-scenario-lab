@@ -92,6 +92,8 @@ export interface ConvoScenario {
   guardTone: [string, string, string, string];
   /** Authored replies when no fact is released, by guard level. */
   guardLines: [string, string, string, string];
+  /** Authored noncommittal reply to a guess. */
+  guessLine?: string;
   facts: Fact[];
   maxTurns: number;
   endings: Record<ConvoEnding["id"], Omit<ConvoEnding, "kind">>;

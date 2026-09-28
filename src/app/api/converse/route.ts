@@ -95,7 +95,9 @@ export async function POST(req: Request) {
 
   // Call 2: the counterpart speaks, limited to released facts.
   const known = s.facts.filter((f) => st.released.includes(f.id));
-  const authored = fact ? fact.says : s.guardLines[guard];
+  // A guess (leading or self-answered) that earned nothing must never be confirmed.
+  const guess = !fact && (tags.includes("leading") || tags.includes("selfAnswer"));
+  const authored = fact ? fact.says : guess ? (s.guessLine ?? "Maybe. I don't know.") : s.guardLines[guard];
   let reply = authored;
   let authoredReply = true;
   try {
@@ -106,7 +108,7 @@ export async function POST(req: Request) {
     const { output } = await generateText({
       model: counterpartModel(),
       output: Output.object({ schema: z.object({ reply: z.string(), conveyed_new_fact: z.boolean() }) }),
-      system: counterpartSystem(s, known, fact, guard),
+      system: counterpartSystem(s, known, fact, guard, guess),
       prompt: `${s.counterpart.name.toUpperCase()} (opening): ${s.opener}\n${history}\nMANAGER: <<<${input}>>>\n\nReply as ${s.counterpart.name}.`,
       abortSignal: AbortSignal.timeout(12_000),
       maxRetries: 1,
@@ -116,7 +118,9 @@ export async function POST(req: Request) {
     const unreleased: Fact[] = s.facts.filter((f) => !released.includes(f.id));
     const leaks = unreleased.some((f) => f.keywords.some((k) => lower.includes(k)));
     const missed = Boolean(fact) && !output?.conveyed_new_fact;
-    if (r && replyIsSafe(r, "pharmacy") && !leaks && !missed) {
+    // Backstop for guesses: no agreeing opener, and too short to add detail.
+    const confirms = guess && (/^\W*(yeah|yes|yep|yup|right|exactly|true|definitely|probably|that'?s (it|right|part|probably|true|a big))/i.test(r) || /part of it|that'?s it|you'?re right|pretty much/i.test(r) || r.length > 70);
+    if (r && replyIsSafe(r, "pharmacy") && !leaks && !missed && !confirms) {
       // Meaning check: does the reply reveal or confirm a fact the learner hasn't earned?
       // Only a clear "no" lets the model's line through. Errors fall back to the authored line.
       let revealed = true;

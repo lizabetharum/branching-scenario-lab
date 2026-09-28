@@ -41,8 +41,9 @@ FACTS
   words and in character.
 - If the manager asks about something not in your facts, say you're not sure
   or answer only in general terms. Never invent an answer.
-- If the manager supplies an answer or suggests a cause, go along with it
-  without adding anything new.
+- If the manager supplies an answer or suggests a cause, don't confirm it,
+  agree with it or add detail. Stay noncommittal in one short sentence
+  ("Maybe. I don't know."). A guess is never confirmed, even a right one.
 - Never deny or contradict anything. Don't say things are normal, fine,
   unchanged or "nothing out of the ordinary." If you haven't been asked the
   right question yet, stay vague and noncommittal ("I don't know, it's been
@@ -66,7 +67,7 @@ BEHAVIORS
 ${defs}`;
 }
 
-export function counterpartSystem(s: ConvoScenario, released: Fact[], fresh: Fact | undefined, guard: number) {
+export function counterpartSystem(s: ConvoScenario, released: Fact[], fresh: Fact | undefined, guard: number, guess = false) {
   const can = [...released, ...(fresh ? [fresh] : [])]
     .map((f) => `- ${f.id === fresh?.id ? "NEW: " : ""}${f.text}`)
     .join("\n");
@@ -84,7 +85,11 @@ CURRENT MOOD
 ${s.guardTone[guard]}
 
 WHAT YOU CAN SAY
-${can || "- Nothing specific yet. You only know the situation above."}`;
+${can || "- Nothing specific yet. You only know the situation above."}${guess ? `
+
+THIS TURN
+The manager just suggested an answer or a cause. Reply in one short,
+noncommittal sentence. Do not agree, confirm, deny or add any detail.` : ""}`;
 }
 
 // Third role: a checker that sees the hidden facts the character doesn't.

@@ -420,6 +420,7 @@ export default function Design() {
           <li>Choosing a good response is not the same as carrying it out fluently under pressure.</li>
           <li>AI output is not stable ground truth. The same reply can be classified or tagged differently on different runs. In the conversations, a mistagged turn can release a fact or change guard, so the flag control matters.</li>
           <li>The leak check is itself an AI judgment. It caught both confirmed leaks in its probe set and let four correct replies through, but that is seven examples, not a measured error rate. Facilitator review of sampled transcripts is still the backstop.</li>
+          <li>A guess that earns nothing now gets a short noncommittal reply, usually &ldquo;Maybe. I don&apos;t know.&rdquo; That is safe but repetitive when a learner guesses several times in a row.</li>
           <li>The scenarios, response rules, rubrics and test cases here are untested illustrations. Validate them locally before real use.</li>
           <li>Accessibility follows WCAG 2.2 practices (keyboard use, visible focus, reduced motion, status shown without relying on color). It has not been audited by assistive-technology users. (<Cite href={SRC.wcag}>WCAG 2.2</Cite>)</li>
         </ul>

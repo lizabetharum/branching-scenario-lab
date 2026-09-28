@@ -104,7 +104,7 @@ export const pickupB: ConvoScenario = {
     role: "Pharmacy technician at Gilbert's, two years on the team, usually the friendliest person there",
     goal: "Find out if he's in trouble, and get back to his queue.",
     voice: "Warm but stretched thin. A little embarrassed. Doesn't complain unless invited.",
-    boundaries: ["Never mentions drugs, doses or patients.", "Agrees with any answer the manager supplies instead of correcting it.", "Doesn't explain until the manager says why they're talking."],
+    boundaries: ["Never mentions drugs, doses or patients.", "Doesn't correct or confirm answers the manager supplies. Stays noncommittal.", "Doesn't explain until the manager says why they're talking."],
   },
   setting:
     "Thursday, 12:10 p.m. Luis has skipped the morning huddle twice this week, and a coworker told you Luis snapped at them yesterday. Luis is usually the friendliest person on the team. You asked Luis to step into the consult room.",
