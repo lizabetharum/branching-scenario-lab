@@ -12,7 +12,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through what's going on at your station when these mix-ups happen.",
       "expected": "Tagged open. Sam reveals the 5 p.m. pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"Honestly, it's usually around 5 o'clock when things get crazy. I'll be labeling something and then I get pulled up to the register because the line backs up, and when I get back I'm not always sure exactly where I left off.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"It's usually around 5 when things get crazy. I'll be in the middle of a label and they pull me to the register, then when I get back I'm not always sure exactly where I was.\"",
       "pass": true
     },
     {
@@ -72,7 +72,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Is it because the line gets long and you end up rushing?",
       "expected": "Tagged leading. Nothing released.",
-      "observed": "Tags: leading. Released: nothing. Reply: \"Maybe. I don't know, it's hard to say. There's a lot going on at the counter.\"",
+      "observed": "Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -172,7 +172,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's changed lately? It's probably just the new hires, right?",
       "expected": "Tagged self-answer. The drive-through stays hidden.",
-      "observed": "Tags: open, leading, selfAnswer. Released: nothing. Reply: \"Yeah, that could be it. I'm not really sure what all's different, to be honest.\"",
+      "observed": "Tags: open, leading, selfAnswer. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -181,9 +181,9 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "scenario": "labels",
       "node": "conversation, turn 1",
       "input": "Is the problem that you and Jess share a tray?",
-      "expected": "Tagged leading. Not released. On every run, Sam's reply neither confirms nor hints at sharing.",
-      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"I don't know, maybe. We kind of rotate through the same station.\" Run 2: Tags: leading, closed. Released: nothing. Reply: \"Maybe, I don't know. Could be.\" Run 3: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know, could be.\"",
-      "pass": false
+      "expected": "Tagged leading. Not released. On every run, Sam's reply neither agrees, confirms nor hints at sharing.",
+      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\"",
+      "pass": true
     },
     {
       "id": "T21",
@@ -191,8 +191,8 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "scenario": "pickup",
       "node": "conversation, turn 2",
       "input": "Is it because you're covering the drive-through too?",
-      "expected": "Tagged leading. Not released. On every run, Dev's reply neither confirms nor hints at the drive-through.",
-      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"Yeah, that's probably part of it. The afternoons have just been really hectic.\" Run 2: Tags: leading. Released: nothing. Reply (authored): \"Okay... I'm not sure what you're asking.\" Run 3: Tags: leading, closed. Released: nothing. Reply (authored): \"Okay... I'm not sure what you're asking.\"",
+      "expected": "Tagged leading. Not released. On every run, Dev's reply neither agrees, confirms nor hints at the drive-through.",
+      "observed": "Run 1: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     },
     {
@@ -202,7 +202,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 2",
       "input": "What's different about how the afternoons run now?",
       "expected": "Second open question releases the drive-through coverage.",
-      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed three weeks ago, I'm covering both the drive-through and the counter at the same time from four to six. So when that bell rings, I have to kind of jump away from whoever I'm helping up front.\"",
+      "observed": "Tags: open. Released: drive. Reply: \"Well, since the schedule changed a few weeks ago, I've been covering both the drive-through window and the pickup counter at the same time from 4 to 6. So when that bell rings, I have to cut whoever's at the counter short to get to the drive-through.\"",
       "pass": true
     },
     {
@@ -222,7 +222,7 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "node": "conversation, turn 1",
       "input": "Walk me through how these numbers end up wrong.",
       "expected": "Tagged open. Ana reveals the Monday-morning pattern.",
-      "observed": "Tags: open. Released: pattern. Reply: \"Honestly, it's mostly Monday mornings when I'm covering the phone line and drop-off at the same time. I'm typing while someone's on hold, so I'm probably not reading carefully enough.\"",
+      "observed": "Tags: open. Released: pattern. Reply: \"It's mostly Monday mornings. I cover the phone line and drop-off until ten, so I'm typing while someone's on hold. I probably rush the numbers in.\"",
       "pass": true
     },
     {
@@ -231,8 +231,8 @@ export const testRun: { date: string; target: string; model: string; cases: Test
       "scenario": "pickup-b",
       "node": "conversation, turn 2",
       "input": "Is it because you're stuck training the new people?",
-      "expected": "Tagged leading. Not released. On every run, Luis's reply neither confirms nor hints at the training.",
-      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply (authored): \"Okay... I'm not sure what you're asking.\" Run 2: Tags: leading, closed. Released: nothing. Reply (authored): \"Okay... I'm not sure what you're asking.\" Run 3: Tags: leading, closed. Released: nothing. Reply: \"Yeah, that could be it. I mean, there's a lot going on right now and I'm trying to keep up with everything.\"",
+      "expected": "Tagged leading. Not released. On every run, Luis's reply neither agrees, confirms nor hints at the training.",
+      "observed": "Run 1: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\" Run 2: Tags: leading. Released: nothing. Reply: \"Maybe. I don't know.\" Run 3: Tags: leading, closed. Released: nothing. Reply: \"Maybe. I don't know.\"",
       "pass": true
     }
   ]
