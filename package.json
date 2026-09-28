@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "tsx scripts/check-maps.ts && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check": "tsx scripts/check-maps.ts",
+    "test:ai": "node scripts/guardrail-tests.mjs",
+    "release": "bash scripts/release.sh"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.66",
@@ -24,6 +27,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

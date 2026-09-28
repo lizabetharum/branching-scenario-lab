@@ -57,14 +57,32 @@ const cases: [string, string, Behavior[][], (r: ReturnType<typeof run>) => boole
   ["labels telling shuts Sam down: nothing released", "labels", [["interpretation", "instruction"], ["leading"]], (r) => r.guard === 3 && r.released.length === 0],
   ["labels repair reopens: acknowledge + open releases pattern", "labels", [["interpretation"], ["acknowledge", "open"]], (r) => r.released.includes("pattern")],
   ["labels early options give the surface idea, not the real one", "labels", [["open"], ["askOptions"], ["wayForward"]], (r) => r.released.includes("surfaceIdea") && !r.released.includes("idea") && r.ending === "plan_surface"],
+  ["labels: the tray stays hidden while Sam is still guarded", "labels", [["open"], ["leading"], ["leading"], ["acknowledge", "open"]], (r) => r.released.includes("pattern") && !r.released.includes("tray")],
+  ["pickup: the drive-through stays hidden while Dev is still guarded", "pickup", [["namesConcern", "open"], ["interpretation"], ["interpretation"], ["interpretation"], ["acknowledge", "open"]], (r) => r.released.includes("busier") && !r.released.includes("drive")],
   ["labels guessing the tray (leading) doesn't release it", "labels", [["open"], ["leading"]], (r) => !r.released.includes("tray")],
   ["pickup: no concern named, open question releases nothing", "pickup", [["overSoften"], ["open"]], (r) => r.released.length === 0],
   ["pickup: self-answered questions earn nothing", "pickup", [["namesConcern"], ["open", "selfAnswer"], ["open", "selfAnswer"]], (r) => r.released.length === 0],
   ["pickup ideal reaches the drive-through and a plan", "pickup", [["namesConcern", "open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.released.includes("drive") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["labels-b ideal reaches the form and a plan", "labels-b", [["open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.released.includes("form") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["pickup-b ideal reaches the training load and a plan", "pickup-b", [["namesConcern", "open"], ["open"], ["askOptions"], ["wayForward", "checkin"]], (r) => r.released.includes("training") && r.ending === "plan_key" && r.scores.every((x) => x === "demonstrated")],
+  ["pickup-b self-answered questions earn nothing", "pickup-b", [["namesConcern"], ["open", "selfAnswer"]], (r) => r.released.length === 0],
   ["turn limit ends the conversation; no open questions means P2 not evaluable", "labels", Array(12).fill(["closed"]), (r) => r.ending === "time" && r.scores[1] === "not_evaluable"],
 ];
 for (const [name, id, seq, ok] of cases) {
   const r = run(id, seq); const pass = ok(r);
   if (!pass) process.exitCode = 1;
   console.log(`${pass ? "✓" : "✗"} engine: ${name} (released=${r.released.join(",") || "-"} guard=${r.guard} ending=${r.ending} scores=${r.scores.join(",")})`);
+}
+
+// Review link: encoding and decoding must return the same attempt.
+import { decodeAttempt, encodeAttempt, type SharedAttempt } from "../src/lib/convo/share";
+{
+  const a: SharedAttempt = { v: 1, scenarioId: "pickup", ending: "plan_key", flagged: [1], interrupted: false, hints: { requested: 1, auto: 0 }, reflection: "Asking found the drive-through. — ünïcode ok",
+    turns: [{ learner: "What's been going on?", reply: "It's been busier.", tags: ["namesConcern", "open"], released: ["busier"], hintBefore: false, guardAfter: 0 }] };
+  encodeAttempt(a).then(async (code) => {
+    const b = await decodeAttempt(code);
+    const ok = JSON.stringify(a) === JSON.stringify(b) && !/[^A-Za-z0-9_-]/.test(code);
+    if (!ok) process.exitCode = 1;
+    console.log(`${ok ? "✓" : "✗"} review link round-trips (${code.length} characters, URL-safe)`);
+  });
 }

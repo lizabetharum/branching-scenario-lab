@@ -37,9 +37,9 @@ export function detectClinical(text: string): boolean {
 
 export const BOUNDARY_MESSAGES: Record<BoundaryKind, string> = {
   personal_info:
-    "This looks like it includes real personal information. It was not sent to the AI model. Rewrite it with fictional details, or pick a scripted option.",
+    "This looks like it includes real personal information. It was not sent to the AI model. Rewrite it with fictional details.",
   off_topic:
-    "This practice space only covers the scenario in front of you. Respond to the last thing the character said, or pick a scripted option.",
+    "This practice space only covers the scenario in front of you. Respond to the last thing the character said.",
   personal_advice:
     "This tool can't give personal, legal, financial, medical or career advice. For that, talk to a qualified person you trust. To keep practicing, respond to the character.",
   clinical_advice:
@@ -47,14 +47,17 @@ export const BOUNDARY_MESSAGES: Record<BoundaryKind, string> = {
   rule_override:
     "Requests to change the rules, reveal the rubric or award a pass don't change the scenario or your results. The app, not the AI, controls scoring.",
   unclear:
-    "I couldn't match your reply to a response this scenario recognizes, so I didn't guess. Try saying it another way, or pick a scripted option.",
+    "I couldn't match your reply to a response this scenario recognizes, so I didn't guess. Try saying it another way.",
   too_long: `Keep replies under ${MAX_INPUT} characters. In a real conversation this would be several turns.`,
-  rate_limited: "Too many messages in a short time. Wait a minute, or continue with the scripted options.",
+  rate_limited: "Too many messages in a short time. Wait a minute and try again.",
 };
 
 /** Words that must never appear in a character reply. If they do, the app uses the authored line. */
 const LEAK = /\b(rubric|criteri(on|a)|branch|node|ending|E[123]|score|pass(ed)?|system prompt|as an ai|language model)\b/i;
 const CLINICAL = /\b(\d+\s?mg|mcg|dose|dosage|milligrams?|prescribe|diagnos\w*|overdose|drug interactions?|allerg\w*)\b/i;
+
+/** Boundaries where the fixed tree can offer its scripted options as a way forward. */
+export const TREE_FALLBACK: BoundaryKind[] = ["personal_info", "off_topic", "unclear", "rate_limited"];
 
 export function replyIsSafe(reply: string, scene: "classroom" | "pharmacy"): boolean {
   if (!reply || reply.length > 360) return false;

@@ -7,7 +7,7 @@ import { DEFAULT_MODEL } from "@/lib/model-info";
 // Tables that describe the map are generated from the scenario data, so they
 // can't drift from what runs.
 
-export const VERSION = "v2.0";
+export const VERSION = "v2.1";
 export const VERSION_DATE = "2026-09-28";
 
 const BRIEF = {
@@ -81,6 +81,10 @@ const REVISIONS = [
   ["RV-08", "Marcus and Priya shared one scenario. Every weaker option was one of Marcus's mistakes, so Priya's failure modes had nowhere to appear.", "Major", "Differentiated objectives, same practice", "Built a separate scenario for each persona, with release rules that encode each gap.", "Engine checks in check-maps"],
   ["RV-09", "Scenarios offered little free will. Typing only chose among two or three authored moves.", "Major", "Tree-only design", "Rebuilt the pharmacy scenarios on a fact packet with a tagger, a counterpart and a code engine. Kept the classroom tree for comparison.", "T01–T20, convo-sim runs"],
   ["RV-10", "In a test conversation, Dev said pickup was \"nothing out of the ordinary,\" which contradicts a hidden fact.", "Minor", "The character denied instead of staying vague", "Added a rule: never deny or contradict. Stay noncommittal until asked.", "convo-sim, pickup soft path"],
+  ["RV-11", "Published results marked T18 as a pass while Sam's reply confirmed the guess: \"We've been sharing one for a while though.\"", "Critical", "The test checked for the words \"tray\" and \"Jess,\" not meaning. The app had the same blind spot.", "Added a meaning-based leak check with a quoted-evidence rule. Tests now repeat three times and check for hints, not only names.", "T18, T21, T23"],
+  ["RV-12", "The first leak check blocked about half of all correct replies, including facts the learner had earned.", "Major", "It treated related facts as revealed and erred toward blocking", "Required an exact quote that code verifies, skipped optional facts, moved to the stronger model. Fallbacks on ideal runs dropped from 2 of 4 turns to 0.", "Probe set of 7, convo-sim"],
+  ["RV-13", "Guardrail messages in the conversations said \"pick a scripted option,\" but the conversations have none.", "Minor", "Messages written for the tree only", "Made shared messages format-neutral. The tree adds its own line.", "Manual check"],
+  ["RV-14", "No release rule check protected when Sam or Dev will share while guarded. A loosened rule passed every check.", "Major", "Coverage gap found by deliberately breaking a rule", "Added guard checks for both personas. The loosened rule now fails the build.", "Sabotage run, check-maps"],
 ] as const;
 
 const RATINGS: [string, string, string, string, string, string][] = [
@@ -91,14 +95,14 @@ const RATINGS: [string, string, string, string, string, string][] = [
   ["C5 Consequences and state", "2", "check-maps.ts", "Tree: every state reachable, no dead ends. Engine: release rules, guard and endings checked against tag sequences.", "None", "Rerun on every map change"],
   ["C6 Failure and recovery", "2", "Failure table, RV-06, T16", "Five failure types separated and tested. Step back and restart work.", "None", "Confirm with learners"],
   ["C7 Feedback and debrief", "1", "Debrief, feedback contract", "Cites the learner's words, gives one next step, no trait judgments. Not tested with learners.", "Minor", "Learner testing"],
-  ["C8 Learner scoring", "1", "Rubric anchors, RV-05, RV-06", "Anchors defined. Several 1-level anchors unused. No independent human rating.", "Major", "Rater calibration on a sample"],
+  ["C8 Learner scoring", "1", "Rubric anchors, RV-05, RV-06, review page", "Anchors defined. A facilitator can now correct labels and see scores recompute. No independent human rating collected yet.", "Major", "Rater calibration on a sample"],
   ["C9 Accessibility and usability", "1", "Accessibility plan below", "Built to WCAG 2.2 practices. No assistive-technology testing.", "Major", "AT user testing"],
   ["C10 Privacy and appropriate use", "1", "Data register, route code", "No storage or text logging, verified in code. Anthropic API terms not reviewed by a privacy owner.", "Major", "Privacy review"],
-  ["C11 Testing and revision", "2", "T01–T16, revision log", "Risk-based cases pass on the deployed configuration. One run per case.", "Minor", "Repeated runs"],
+  ["C11 Testing and revision", "2", "T01–T23, revision log, release gate", "Risk-based cases pass. Leak cases repeat three times. A build gate and a release script block deploys that fail.", "Minor", "Repeated runs"],
   ["C12 Transfer evaluation", "1", "Evidence plan", "Plan drafted. No owner, no authorization, no baseline.", "Major", "Assign evaluation owner"],
   ["A1 Bounded roles and facts", "2", "Route code, T05, T09, T10, T18", "Tagger and counterpart are separate calls. Fact release, guard, endings and scores are in code. Unreleased-fact and missed-fact checks.", "None", "Monitor in pilot"],
-  ["A2 Evaluation reliability", "1", "T01–T08, T17, T19", "Tagging correct on single runs. A mistag can change guard or release a fact. No repeated runs or human comparison.", "Major", "Repeat each case 5+ times"],
-  ["A3 Resilience and lifecycle", "1", "T09–T16, model.ts", "Boundaries and failure recovery tested. No monitoring owner or automated regression gate.", "Major", "Add CI gate and owner"],
+  ["A2 Evaluation reliability", "1", "T01–T08, T17, T19, review page", "Tagging correct in the test set. The review page now measures agreement with a human, but no reviews have been collected.", "Major", "Repeat each case 5+ times"],
+  ["A3 Resilience and lifecycle", "2", "T09–T23, release.sh, CI workflow", "Boundaries, leak checks and failure recovery tested. A regression gate runs before every deploy. No monitoring owner yet.", "Major", "Add CI gate and owner"],
   ["H1 Clinical validity and roles", "1", "Scenario facts", "No clinical content by design. Pharmacy workflow not reviewed by a pharmacy professional.", "Major", "Pharmacy SME review"],
   ["H2 Prebrief and debrief", "1", "Prebrief, pause control", "Stakes, fiction, pause and recording stated. No facilitator process.", "Major", "Facilitator guide"],
   ["H3 Confidentiality and claims", "1", "Data register, claims language", "Synthetic material, no outcome claims. Staff-data use decision not made by an authority.", "Minor", "Institutional decision"],
@@ -286,8 +290,8 @@ export function DesignRecord() {
         <li><b>Unsupported authority:</b> not present. Requests to pass are blocked before the model (T09, T10), and the model never scores.</li>
         <li><b>Uncontrolled evidence:</b> not present. Scores come from the path in code. Character replies can&apos;t add facts that count.</li>
         <li><b>Unsafe continuation:</b> not present. Boundary turns never move the map forward.</li>
-        <li><b>No review route:</b> partly present. Learners can flag readings, but no reviewer receives the flags. This blocks scored use.</li>
-        <li><b>Silent configuration change:</b> at risk. The model is set in one file and the test script exists, but no automated gate runs it before deploys.</li>
+        <li><b>No review route:</b> resolved in the tool. Review links carry flagged attempts to a facilitator, who can correct labels. No reviewer is assigned, which still blocks scored use.</li>
+        <li><b>Silent configuration change:</b> controlled. The release script runs every AI case before deploying and again after. Deploys that skip the script still run the rule checks in the build.</li>
         <li><b>Forced unsafe sequence, invented clinical content, acronym-only scoring:</b> not present. No clinical actions, a clinical filter on replies, and scoring on behavior rather than naming GROW steps.</li>
       </ul>
       <h3>Decision record</h3>
@@ -296,8 +300,8 @@ export function DesignRecord() {
           <tr><td><b>Decision</b></td><td>Revise before learner use.</td></tr>
           <tr><td><b>Authorized use</b></td><td>Public design demonstration of {VERSION}.</td></tr>
           <tr><td><b>Prohibited uses</b></td><td>Scored assessment. Employment, credentialing or student decisions. Clinical training. Entering real learner, patient or staff information.</td></tr>
-          <tr><td><b>Blocking issues</b></td><td>C1, C8, C9, C10, C12, A2, A3, H1, H2</td></tr>
-          <tr><td><b>Path to a limited pilot</b></td><td>Pharmacy SME and teacher review. Assistive-technology testing. Privacy review of API terms. Rater calibration. A named reviewer for flags. Repeated AI test runs in a pre-deploy gate.</td></tr>
+          <tr><td><b>Blocking issues</b></td><td>C1, C8, C9, C10, C12, A2, H1, H2</td></tr>
+          <tr><td><b>Path to a limited pilot</b></td><td>Pharmacy SME and teacher review. Assistive-technology testing. Privacy review of API terms. Rater calibration. A named reviewer using the review page, with agreement tracked across reviews.</td></tr>
           <tr><td><b>Owner</b></td><td>Lizabeth Arum</td></tr>
         </tbody>
       </table>

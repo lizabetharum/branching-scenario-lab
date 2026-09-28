@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { convoScenarios } from "@/lib/convo";
+import { casesFor, convoScenarios } from "@/lib/convo";
 import type { Behavior, ConvoEnding, ConvoTurn } from "@/lib/convo/types";
 import { TAG_LABEL } from "@/lib/convo/tags";
+import { encodeAttempt } from "@/lib/convo/share";
 import { endingFor, hintFor, moodFor, replay } from "@/lib/convo/engine";
 import type { ConverseResponse } from "@/app/api/converse/route";
 import { BOUNDARY_MESSAGES, MAX_INPUT, detectPersonalInfo } from "@/lib/guardrails";
@@ -51,6 +52,8 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
   const [flagged, setFlagged] = useState<number[]>([]);
   const [reflection, setReflection] = useState("");
   const [copied, setCopied] = useState(false);
+  const [shareReflection, setShareReflection] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
   const speech = useSpeech(setDraft);
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +76,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
     setFailures(0);
     setInterrupted(false);
     setFlagged([]);
+    setShareLink(null);
     setLog([
       { kind: "setting", text: s.setting },
       { kind: "them", text: s.opener },
@@ -151,6 +155,15 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
         <p className="eyebrow">{s.domain} · open conversation</p>
         <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{s.title}</h1>
         <p className="mt-3 max-w-2xl text-lg text-ink/80">{s.tagline}</p>
+        <nav aria-label="Cases for this skill" className="mt-5 flex flex-wrap items-center gap-2 text-sm">
+          <span className="font-semibold text-ink/70">Cases:</span>
+          {casesFor(s).map((c) => (
+            <Link key={c.id} href={`/scenario/${c.id}`} aria-current={c.id === s.id ? "page" : undefined} className={`rounded-full border-2 px-3 py-1 font-bold ${c.id === s.id ? "border-ink bg-ink text-white" : "border-ink/20 hover:border-ink"}`}>
+              {c.caseLabel}: {c.counterpart.name}
+            </Link>
+          ))}
+          <span className="text-ink/60">Same skill, different facts. A second case shows whether the skill carries over.</span>
+        </nav>
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
           <div className="card">
             <h2 className="h2">Intake: the three questions asked before building</h2>
@@ -213,7 +226,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
     const e = s.endings[ending];
     const results = applyInterruption(s.evaluate(turns, st.released), interrupted);
     const summary = [
-      `${s.title} · ${p.name}`,
+      `${s.title} (${s.caseLabel}) · ${p.name}`,
       `Ending: ${e.title}${interrupted ? " (interrupted by a system failure)" : ""}`,
       ...results.map((r) => `${r.id} ${r.label}: ${STATUS[r.status].score} ${STATUS[r.status].text}${SUPPORT[r.support] ? `, ${SUPPORT[r.support].toLowerCase()}` : ""}`),
       `Turns: ${turns.length}. Hints requested: ${hints.requested}. Automatic support: ${hints.auto}. Flagged turns: ${flagged.map((i) => i + 1).join(", ") || "none"}.`,
@@ -306,8 +319,38 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           </div>
         )}
 
+        <div className="card mt-6">
+          <h2 className="h2">Send to a facilitator for review</h2>
+          <p className="mt-2 text-sm text-ink/80">
+            This makes a review link that holds your conversation, its labels and your flags. A facilitator can check every label and correct it, and the scores recompute. The conversation lives inside the link itself, after the &ldquo;#&rdquo;. Browsers never send that part to a server, so this app stores nothing. Anyone you give the link to can read it, so send it only to your facilitator.
+          </p>
+          {s.reflection && (
+            <label className="mt-3 flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={shareReflection} onChange={(ev) => { setShareReflection(ev.target.checked); setShareLink(null); }} className="accent-ink" />
+              Include my written reflection
+            </label>
+          )}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              className="btn-ghost"
+              onClick={async () => {
+                const code = await encodeAttempt({ v: 1, scenarioId: s.id, ending, turns, flagged, interrupted, hints, reflection: shareReflection && reflection ? reflection : undefined });
+                const link = `${window.location.origin}/review#${code}`;
+                setShareLink(link);
+                await navigator.clipboard.writeText(link).catch(() => {});
+              }}
+            >
+              {shareLink ? "Link copied" : "Make a review link"}
+            </button>
+            {shareLink && <input readOnly value={shareLink} onFocus={(ev) => ev.target.select()} aria-label="Review link" className="min-w-0 flex-1 rounded-lg border border-ink/20 px-2 py-1 text-xs" />}
+          </div>
+        </div>
+
         <div className="mt-8 flex flex-wrap gap-3">
-          <button className="btn-primary" onClick={start}>Try the conversation again</button>
+          <button className="btn-primary" onClick={start}>Try this case again</button>
+          {casesFor(s).filter((c) => c.id !== s.id).map((c) => (
+            <Link key={c.id} href={`/scenario/${c.id}`} className="btn-ghost">Try {c.caseLabel}: a new case with {c.counterpart.name}</Link>
+          ))}
           <button className="btn-ghost" onClick={async () => { await navigator.clipboard.writeText(summary + (reflection ? `\n\nReflection:\n${reflection}` : "")); setCopied(true); }}>
             {copied ? "Copied" : "Copy summary for a facilitator"}
           </button>

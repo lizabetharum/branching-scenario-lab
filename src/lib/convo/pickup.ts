@@ -9,7 +9,8 @@ import { GROW } from "./labels";
 
 const at = (turns: ConvoTurn[], fact: string) => turns.findIndex((t) => t.released.includes(fact));
 
-function evaluate(turns: ConvoTurn[], released: string[]) {
+export function makePickupEvaluate(o: { name: string; keyId: string; stepId: string; keyText: string; stepText: string; stepNext: string; vantage: string }) {
+  return function evaluate(turns: ConvoTurn[], released: string[]) {
   const named = idx(turns, "namesConcern");
   const soft = named >= 0 && turns[named].tags.includes("overSoften");
   const opens = validOpenIdx(turns);
@@ -20,42 +21,45 @@ function evaluate(turns: ConvoTurn[], released: string[]) {
   const Q1 = "Raised the concern plainly";
   const q1 =
     named === -1
-      ? cr("Q1", Q1, "not_observed", "n/a", "You never said why you asked Dev to talk.", "Open with what you saw, in one or two sentences, then ask.")
+      ? cr("Q1", Q1, "not_observed", "n/a", `You never said why you asked ${o.name} to talk.`, "Open with what you saw, in one or two sentences, then ask.")
       : named <= 1 && !soft
         ? cr("Q1", Q1, "demonstrated", supportAt(turns, named), q(turns[named]), "Keep naming what you saw, plainly and once.")
         : cr("Q1", Q1, "partial", supportAt(turns, named), `${soft ? "You named it, wrapped in apology." : "You named it, but not until turn " + (named + 1) + "."} ${q(turns[named])}`, "Say what you saw early, without apologizing for asking.");
 
-  const Q2 = "Asked open questions and left them for Dev to answer";
+  const Q2 = `Asked open questions and left them for ${o.name} to answer`;
   const q2 =
     opens.length >= 2
-      ? cr("Q2", Q2, "demonstrated", supportAt(turns, opens[1]), `${opens.length} open questions left for Dev to answer.${selfAnswers ? ` ${selfAnswers} other question(s) you answered yourself.` : ""} ${q(turns[opens[1]])}`, "Keep asking, then waiting.")
+      ? cr("Q2", Q2, "demonstrated", supportAt(turns, opens[1]), `${opens.length} open questions left for ${o.name} to answer.${selfAnswers ? ` ${selfAnswers} other question(s) you answered yourself.` : ""} ${q(turns[opens[1]])}`, "Keep asking, then waiting.")
       : opens.length === 1
-        ? cr("Q2", Q2, "partial", supportAt(turns, opens[0]), `One open question left for Dev.${selfAnswers ? ` ${selfAnswers} question(s) you answered yourself.` : ""} ${q(turns[opens[0]])}`, "Ask a second open question. You don't need to know the answer first.")
+        ? cr("Q2", Q2, "partial", supportAt(turns, opens[0]), `One open question left for ${o.name}.${selfAnswers ? ` ${selfAnswers} question(s) you answered yourself.` : ""} ${q(turns[opens[0]])}`, "Ask a second open question. You don't need to know the answer first.")
         : cr("Q2", Q2, "not_observed", "n/a", selfAnswers ? `${selfAnswers} question(s), but you supplied the answer each time.` : "No open questions.", "Ask \"What's been happening at pickup?\" and stop talking.");
 
   const Q3 = "Surfaced what observation couldn't show";
-  const key = at(turns, "drive");
+  const key = at(turns, o.keyId);
   const q3 =
     key >= 0
-      ? cr("Q3", Q3, "demonstrated", supportAt(turns, key), `Dev told you about covering the drive-through. ${q(turns[key])}`, "Use this in your reflection. You couldn't have seen it from the counter.")
-      : released.includes("busier")
-        ? cr("Q3", Q3, "partial", supportAt(turns, at(turns, "busier")), "You learned pickup is busier, but not why.", "Ask what's different about how the afternoon runs now.")
+      ? cr("Q3", Q3, "demonstrated", supportAt(turns, key), `${o.name} told you about ${o.keyText}. ${q(turns[key])}`, `Use this in your reflection. You couldn't have seen it ${o.vantage}.`)
+      : released.includes(o.stepId)
+        ? cr("Q3", Q3, "partial", supportAt(turns, at(turns, o.stepId)), `You learned ${o.stepText}, but not why.`, `${o.stepNext}`)
         : cr("Q3", Q3, "not_observed", "n/a", "Nothing came up beyond what you could see at the counter.", "Name what you saw, then ask what's been going on.");
 
-  const Q4 = "Built the way forward with Dev";
+  const Q4 = `Built the way forward with ${o.name}`;
   const q4 =
     ask >= 0 && way >= 0
-      ? cr("Q4", Q4, "demonstrated", supportAt(turns, way), q(turns[way]), "Keep asking for Dev's ideas and closing with a date.")
+      ? cr("Q4", Q4, "demonstrated", supportAt(turns, way), q(turns[way]), `Keep asking for ${o.name}'s ideas and closing with a date.`)
       : ask >= 0 || way >= 0
-        ? cr("Q4", Q4, "partial", supportAt(turns, Math.max(ask, way)), `${ask >= 0 ? "You asked for ideas but didn't agree on a step or check-in." : "You set a step, but didn't ask for Dev's ideas."} ${q(turns[Math.max(ask, way)])}`, "Ask what Dev thinks would help, then agree on a first step and a check-in.")
-        : cr("Q4", Q4, "not_observed", "n/a", "No plan came out of the conversation.", "Ask what Dev thinks would help.");
+        ? cr("Q4", Q4, "partial", supportAt(turns, Math.max(ask, way)), `${ask >= 0 ? "You asked for ideas but didn't agree on a step or check-in." : `You set a step, but didn't ask for ${o.name}'s ideas.`} ${q(turns[Math.max(ask, way)])}`, `Ask what ${o.name} thinks would help, then agree on a first step and a check-in.`)
+        : cr("Q4", Q4, "not_observed", "n/a", "No plan came out of the conversation.", `Ask what ${o.name} thinks would help.`);
 
   return [q1, q2, q3, q4];
+}
 }
 
 export const pickup: ConvoScenario = {
   id: "pickup",
   format: "conversation",
+  caseGroup: "priya",
+  caseLabel: "Case A",
   title: "The Pickup Counter",
   domain: "Healthcare · pharmacy leadership coaching",
   tagline: "You're Priya, a new manager. A technician has been rushing customers. Find out why before you decide what it means.",
@@ -177,7 +181,7 @@ export const pickup: ConvoScenario = {
     { id: "Q3", label: "Surfaced what observation couldn't show", anchors: ["Nothing beyond what was visible at the counter", "Learned pickup was busier, but not why", "Learned about the drive-through coverage"] },
     { id: "Q4", label: "Built the way forward with Dev", anchors: ["No plan, or Priya supplied it", "Asked for ideas or set a next step, not both", "Asked for Dev's ideas and agreed on a next step or check-in"] },
   ],
-  evaluate,
+  evaluate: makePickupEvaluate({ name: "Dev", keyId: "drive", stepId: "busier", keyText: "covering the drive-through", stepText: "pickup is busier", stepNext: "Ask what's different about how the afternoon runs now.", vantage: "from the counter" }),
   framework: GROW,
   reflection:
     "What did Dev tell you that you couldn't have seen from the counter? Explain why asking surfaced it when watching didn't. Then give one example from your own team. Describe the situation, not the person. Leave out names.",

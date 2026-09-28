@@ -176,7 +176,16 @@ function Classroom({ mood, cue }: { mood: Mood; cue?: string }) {
   );
 }
 
-function Pharmacy({ mood, cue, who = "sam" }: { mood: Mood; cue?: string; who?: "sam" | "dev" }) {
+const PEOPLE = {
+  sam: { skin: "#e0b394", hair: "#3a2a1f", shirt: "#2f7f8a", style: "bun" },
+  dev: { skin: "#8d5a3b", hair: "#1d1611", shirt: "#3b6ea5", style: "short" },
+  ana: { skin: "#c68a62", hair: "#5b2c1a", shirt: "#7a5ea8", style: "curly" },
+  luis: { skin: "#d9a57c", hair: "#2a2a2a", shirt: "#2f8a5b", style: "short" },
+} as const;
+export type Who = keyof typeof PEOPLE;
+
+function Pharmacy({ mood, cue, who = "sam" }: { mood: Mood; cue?: string; who?: Who }) {
+  const p = PEOPLE[who];
   const boxes = ["#e8d7c3", "#cfe3e1", "#f1d9a8", "#d9dbe8", "#e7c9c0"];
   return (
     <>
@@ -194,7 +203,7 @@ function Pharmacy({ mood, cue, who = "sam" }: { mood: Mood; cue?: string; who?: 
       {/* clock: 2:15 for Sam, 1:30 for Dev */}
       <g transform="translate(560 64)">
         <circle r={28} fill="#fff" stroke={INK} strokeWidth={3} />
-        {who === "sam" ? (
+        {who === "sam" || who === "ana" ? (
           <path d="M0 0v-12M0 0h15" stroke={INK} strokeWidth={3} strokeLinecap="round" transform="rotate(8)" />
         ) : (
           <path d="M0 0l6 -10M0 0v18" stroke={INK} strokeWidth={3} strokeLinecap="round" />
@@ -212,6 +221,34 @@ function Pharmacy({ mood, cue, who = "sam" }: { mood: Mood; cue?: string; who?: 
           <text x={70} y={-16} textAnchor="middle" fontSize={11} fontWeight={700} fill={INK} fontFamily="var(--font-sans)">drive-through, 4 to 6</text>
         </g>
       )}
+      {/* intake form with two phone fields */}
+      {cue === "form" && (
+        <g transform="translate(250 150)" className="cue">
+          <rect x={-8} y={-26} width={120} height={104} rx={8} fill="none" stroke="#e3a83b" strokeWidth={3} strokeDasharray="6 5" />
+          <rect width={104} height={82} rx={3} fill="#fff" stroke={INK} strokeWidth={2} />
+          <text x={52} y={-12} textAnchor="middle" fontSize={11} fontWeight={700} fill={INK} fontFamily="var(--font-sans)">intake form</text>
+          {[0, 1].map((i) => (
+            <g key={i} transform={`translate(8 ${16 + i * 26})`}>
+              <text fontSize={8} fontWeight={700} fill={INK} fontFamily="var(--font-sans)">{i === 0 ? "Prescriber phone" : "Customer phone"}</text>
+              <rect y={4} width={88} height={12} fill={i === 0 ? "#fbe3dd" : "#dff3ec"} stroke={INK} strokeWidth={1} />
+            </g>
+          ))}
+        </g>
+      )}
+      {/* training: two new hires at the station */}
+      {cue === "training" && (
+        <g transform="translate(470 150)" className="cue">
+          <rect x={-10} y={-26} width={140} height={96} rx={10} fill="none" stroke="#e3a83b" strokeWidth={3} strokeDasharray="6 5" />
+          <text x={60} y={-12} textAnchor="middle" fontSize={11} fontWeight={700} fill={INK} fontFamily="var(--font-sans)">training two new hires</text>
+          {[20, 90].map((x) => (
+            <g key={x} transform={`translate(${x} 22)`}>
+              <circle r={14} fill="#e8d7c3" />
+              <path d="M-22 54 q0 -34 22 -36 q22 2 22 36z" fill="#9aa7ab" />
+              <rect x={6} y={30} width={14} height={9} rx={2} fill="#fff" stroke={INK} strokeWidth={1} />
+            </g>
+          ))}
+        </g>
+      )}
       {/* schedule on the wall */}
       {cue === "schedule" && (
         <g transform="translate(250 40)" className="cue">
@@ -223,11 +260,7 @@ function Pharmacy({ mood, cue, who = "sam" }: { mood: Mood; cue?: string; who?: 
           <text x={46} y={16} textAnchor="middle" fontSize={10} fontWeight={800} fill={INK} fontFamily="var(--font-sans)" transform="rotate(-3 46 56)">SCHEDULE</text>
         </g>
       )}
-      {who === "sam" ? (
-        <Person x={380} y={92} mood={mood} skin="#e0b394" hair="#3a2a1f" shirt="#2f7f8a" hairStyle="bun" crossed={mood === "guarded"} badge />
-      ) : (
-        <Person x={380} y={92} mood={mood} skin="#8d5a3b" hair="#1d1611" shirt="#3b6ea5" hairStyle="short" crossed={mood === "guarded"} badge />
-      )}
+      <Person x={380} y={92} mood={mood} skin={p.skin} hair={p.hair} shirt={p.shirt} hairStyle={p.style} crossed={mood === "guarded"} badge />
       {/* counter */}
       <rect x={220} y={240} width={400} height={22} rx={4} fill="#5d6b78" />
       <rect x={236} y={262} width={368} height={80} fill="#7c8a96" />
@@ -286,7 +319,7 @@ export function Scene({
   mood: Mood;
   cue?: string;
   label: string;
-  who?: "sam" | "dev";
+  who?: Who;
 }) {
   return (
     <svg viewBox="0 0 640 360" role="img" aria-label={label} className="w-full h-auto rounded-2xl block">

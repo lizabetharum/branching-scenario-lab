@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { scenarios } from "@/lib/scenarios";
 import type { ApiResponse, BoundaryKind, Move, Turn } from "@/lib/types";
-import { BOUNDARY_MESSAGES, MAX_INPUT, detectPersonalInfo } from "@/lib/guardrails";
+import { BOUNDARY_MESSAGES, MAX_INPUT, TREE_FALLBACK, detectPersonalInfo } from "@/lib/guardrails";
 import { Scene } from "./Scene";
 import { PROVIDER_LABEL } from "@/lib/model-info";
 import { BranchMap } from "./BranchMap";
@@ -170,7 +170,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
 
   function addBoundary(kind: BoundaryKind, message: string, sentToModel: boolean) {
     setBoundaries((b) => [...b, { kind, nodeId, sentToModel }]);
-    setLog((l) => [...l, { kind: "boundary", text: message }]);
+    setLog((l) => [...l, { kind: "boundary", text: TREE_FALLBACK.includes(kind) ? `${message} You can also pick a scripted option.` : message }]);
   }
 
   async function submitFree() {

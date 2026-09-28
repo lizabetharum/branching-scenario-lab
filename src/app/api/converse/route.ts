@@ -3,7 +3,7 @@ import { z } from "zod";
 import { convoScenarios } from "@/lib/convo";
 import { BEHAVIORS, type Behavior, type Fact } from "@/lib/convo/types";
 import { endingFor, replay, step } from "@/lib/convo/engine";
-import { counterpartSystem, taggerSystem } from "@/lib/convo/prompts";
+import { LEAK_CHECK_RULES, counterpartSystem, leakCheckPrompt, taggerSystem } from "@/lib/convo/prompts";
 import { BOUNDARY_MESSAGES, MAX_INPUT, detectClinical, detectOverride, detectPersonalInfo, replyIsSafe } from "@/lib/guardrails";
 import { counterpartModel, model } from "@/lib/model";
 import { limited } from "@/lib/ratelimit";
@@ -117,8 +117,34 @@ export async function POST(req: Request) {
     const leaks = unreleased.some((f) => f.keywords.some((k) => lower.includes(k)));
     const missed = Boolean(fact) && !output?.conveyed_new_fact;
     if (r && replyIsSafe(r, "pharmacy") && !leaks && !missed) {
-      reply = r;
-      authoredReply = false;
+      // Meaning check: does the reply reveal or confirm a fact the learner hasn't earned?
+      // Only a clear "no" lets the model's line through. Errors fall back to the authored line.
+      let revealed = true;
+      // Optional context and generic surface ideas are low stakes. Check the facts that matter.
+      const guarded = unreleased.filter((f) => !f.optional);
+      if (guarded.length === 0) {
+        revealed = false;
+      } else {
+        try {
+          const check = await generateText({
+            model: model(),
+            output: Output.object({ schema: z.object({ reveals: z.boolean(), fact_id: z.string(), quote: z.string() }) }),
+            system: LEAK_CHECK_RULES,
+            prompt: leakCheckPrompt(guarded, input, r),
+            abortSignal: AbortSignal.timeout(8_000),
+            maxRetries: 0,
+          });
+          const o = check.output;
+          // A reveal only counts if it names a hidden fact and quotes words that are really in the line.
+          revealed = Boolean(o?.reveals && guarded.some((f) => f.id === o.fact_id) && o.quote.trim().length > 2 && lower.includes(o.quote.trim().toLowerCase()));
+        } catch {
+          revealed = true;
+        }
+      }
+      if (!revealed) {
+        reply = r;
+        authoredReply = false;
+      }
     }
   } catch (err) {
     console.error("converse: counterpart failed", err instanceof Error ? err.name : "unknown");

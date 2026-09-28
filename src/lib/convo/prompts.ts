@@ -86,3 +86,36 @@ ${s.guardTone[guard]}
 WHAT YOU CAN SAY
 ${can || "- Nothing specific yet. You only know the situation above."}`;
 }
+
+// Third role: a checker that sees the hidden facts the character doesn't.
+// A word match can't catch "We've been sharing one for a while," so this
+// checks meaning. If it finds a reveal, the app uses the authored line.
+export const LEAK_CHECK_RULES = `ROLE
+You check one line of fictional dialogue before a learner sees it. You never
+write dialogue.
+
+TASK
+Decide whether the line gives the learner a specific hidden fact listed below
+that they did not already have.
+- A fact counts as revealed only if someone reading the line would now know
+  that specific fact, or would hear it confirmed.
+- Confirming the manager's guess counts ("Yeah, we share one").
+- Describing something already known does not reveal a different hidden fact
+  just because the two are related.
+- Vague, noncommittal answers do not count ("Maybe, I don't know").
+- Repeating the manager's words back without confirming them does not count.
+
+OUTPUT
+If a fact is revealed, give its id and quote the exact words from the line
+that reveal it. Otherwise set reveals to false and leave the rest empty.`;
+
+export function leakCheckPrompt(hidden: Fact[], managerLine: string, reply: string) {
+  return `HIDDEN FACTS
+${hidden.map((f) => `- ${f.id}: ${f.text}`).join("\n")}
+
+MANAGER SAID
+${managerLine}
+
+LINE TO CHECK
+${reply}`;
+}

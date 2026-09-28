@@ -1,0 +1,32 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # The build runs the map, engine and review-link checks before next build.
+      - run: npm run build
+
+      # AI and guardrail tests. Runs only if the repository has an ANTHROPIC_API_KEY secret.
+      - name: AI tests
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "No ANTHROPIC_API_KEY secret. Skipping AI tests."
+            exit 0
+          fi
+          npx next start -p 3199 &
+          for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:3199 && break; sleep 1; done
+          node scripts/guardrail-tests.mjs http://localhost:3199

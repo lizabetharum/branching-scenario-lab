@@ -44,6 +44,6 @@ export function applyInterruption(results: CriterionResult[], interrupted: boole
   return results.map((r) =>
     r.status === "demonstrated" || r.status === "recognized"
       ? r
-      : { ...r, status: "not_evaluable", support: "n/a", evidence: `Not evaluable. A system failure turned off free-text replies during this attempt. ${r.evidence}` },
+      : { ...r, status: "not_evaluable", support: "n/a", evidence: `Not evaluable. A system failure interrupted this attempt. ${r.evidence}` },
   );
 }

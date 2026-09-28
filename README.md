@@ -20,10 +20,18 @@ Live: https://branching-scenario-lab.vercel.app · Design notes: https://branchi
 
 ```bash
 npm run dev
-npx tsx scripts/check-maps.ts                    # tree reachability, scoring regressions, fact-packet engine rules
+npm run check      # tree reachability, scoring regressions, fact-packet engine rules, review-link round trip
+npm run build      # runs the checks first, then next build. A broken rule fails the build.
+npm run test:ai -- <url> [--write]   # 23 AI and guardrail cases, leak cases repeated three times
+npm run release    # lint, build, AI tests on the local production build, deploy, AI tests on the live site
 node scripts/convo-sim.mjs <url> labels "line 1" "line 2"   # play a scripted conversation
-node scripts/guardrail-tests.mjs <url> [--write] # AI and guardrail test cases
 ```
+
+`.github/workflows/checks.yml` runs lint and the build on every push. It also runs the AI tests if the repository has an `ANTHROPIC_API_KEY` secret.
+
+**Case variants.** Each pharmacy persona has two cases (`labels`, `labels-b`, `pickup`, `pickup-b`) with the same skill and rules but different facts, so case B works as a new-task check.
+
+**Facilitator review.** After a conversation, a learner can make a review link. The attempt travels in the URL fragment, so no server stores it. `/review` lets a facilitator correct the AI's labels and see scores recompute.
 
 Models are set in `src/lib/model-info.ts` and `src/lib/model.ts` (Anthropic API, `ANTHROPIC_API_KEY`). Rerun the guardrail tests after any model or prompt change.
 

@@ -53,7 +53,7 @@ export default function Home() {
 
         <div className="mt-12 grid gap-8 lg:grid-cols-3">
           {[
-            ...Object.values(convoScenarios).map((c) => ({
+            ...Object.values(convoScenarios).filter((c) => c.caseLabel === "Case A").map((c) => ({
               id: c.id, title: c.title, domain: c.domain, tagline: c.tagline, format: "Open conversation · fact packet",
               who: c.who, scene: "pharmacy" as const, mood: "guarded" as const,
               play: `${c.persona.name}. ${c.persona.gap}`, talk: `${c.counterpart.name}, ${c.counterpart.role.split(",")[0].toLowerCase()}`,

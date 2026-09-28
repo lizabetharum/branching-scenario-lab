@@ -17,7 +17,8 @@ const GROW = {
 };
 export { GROW };
 
-function evaluate(turns: ConvoTurn[], released: string[]) {
+export function makeLabelsEvaluate(o: { name: string; cause: string; surface: string }) {
+  return function evaluate(turns: ConvoTurn[], released: string[]) {
   const firstInterp = turns.findIndex((t) => t.tags.some((x) => x === "interpretation" || x === "instruction" || x === "leading"));
   const opens = validOpenIdx(turns);
   const before = opens.filter((i) => firstInterp === -1 || i < firstInterp);
@@ -31,24 +32,24 @@ function evaluate(turns: ConvoTurn[], released: string[]) {
     before.length >= 2
       ? cr("P1", P1, "demonstrated", supportAt(turns, before[1]), `${before.length} open questions before any interpretation. ${q(turns[before[1]])}`, "Keep exploring before you name a cause.")
       : opens.length >= 2 || before.length === 1
-        ? cr("P1", P1, "partial", opens.length >= 2 ? "after_recovery" : supportAt(turns, before[0]), `${before.length} open question(s) came before your first interpretation. ${q(turns[firstInterp])}`, "Hold your interpretation until Sam has answered two open questions.")
-        : cr("P1", P1, "not_observed", "n/a", "No open question was left for Sam to answer.", "Start with a question Sam has to describe, such as what happens at the station.");
+        ? cr("P1", P1, "partial", opens.length >= 2 ? "after_recovery" : supportAt(turns, before[0]), `${before.length} open question(s) came before your first interpretation. ${q(turns[firstInterp])}`, `Hold your interpretation until ${o.name} has answered two open questions.`)
+        : cr("P1", P1, "not_observed", "n/a", `No open question was left for ${o.name} to answer.`, `Start with a question ${o.name} has to describe, such as what happens at the station.`);
 
   const p2 =
     leading === -1 && opens.length === 0
       ? cr("P2", "Asked no leading questions", "not_evaluable", "n/a", "No open questions were asked, so there was nothing to judge.", "Ask open questions. This criterion checks how you phrase them.")
       : leading === -1
-        ? cr("P2", "Asked no leading questions", "demonstrated", "independent", "No leading questions tagged.", "Keep phrasing questions so Sam supplies the answer.")
+        ? cr("P2", "Asked no leading questions", "demonstrated", "independent", "No leading questions tagged.", `Keep phrasing questions so ${o.name} supplies the answer.`)
         : cr("P2", "Asked no leading questions", "not_observed", "n/a", `Leading question tagged. ${q(turns[leading])}`, "Turn \"Is it because...?\" into \"What's happening when...?\"");
 
-  const P3 = "Sam generated the option, after the cause surfaced";
+  const P3 = `${o.name} generated the option, after the cause surfaced`;
   const ideaAt = turns.findIndex((t) => t.released.includes("idea"));
   const surfaceAt = turns.findIndex((t) => t.released.includes("surfaceIdea"));
   const p3 = released.includes("idea")
-    ? cr("P3", P3, "demonstrated", supportAt(turns, ideaAt), q(turns[ideaAt]), "Keep asking for Sam's ideas once the cause is clear.")
+    ? cr("P3", P3, "demonstrated", supportAt(turns, ideaAt), q(turns[ideaAt]), `Keep asking for ${o.name}'s ideas once the cause is clear.`)
     : released.includes("surfaceIdea")
-      ? cr("P3", P3, "partial", supportAt(turns, surfaceAt), `You asked for ideas before the shared tray came up, so Sam's idea targets rushing. ${q(turns[surfaceAt])}`, "Explore Reality further before asking for Options.")
-      : cr("P3", P3, "not_observed", "n/a", instr >= 0 ? `You supplied the plan. ${q(turns[instr])}` : "Options never came up.", "Ask \"What could you try?\" and wait for Sam's answer.");
+      ? cr("P3", P3, "partial", supportAt(turns, surfaceAt), `You asked for ideas before ${o.cause} came up, so ${o.name}'s idea targets ${o.surface}. ${q(turns[surfaceAt])}`, "Explore Reality further before asking for Options.")
+      : cr("P3", P3, "not_observed", "n/a", instr >= 0 ? `You supplied the plan. ${q(turns[instr])}` : "Options never came up.", `Ask "What could you try?" and wait for ${o.name}'s answer.`);
 
   const P4 = "Agreed on a specific next step and check-in";
   const p4 =
@@ -56,14 +57,17 @@ function evaluate(turns: ConvoTurn[], released: string[]) {
       ? cr("P4", P4, "demonstrated", supportAt(turns, Math.max(way, check)), q(turns[Math.max(way, check)]), "Keep closing with who does what, and when you'll check.")
       : way >= 0 || check >= 0
         ? cr("P4", P4, "partial", supportAt(turns, Math.max(way, check)), `${way >= 0 ? "A next step, but no check-in." : "A check-in, but no specific next step."} ${q(turns[Math.max(way, check)])}`, "Close with both: the first step and when you'll look at it together.")
-        : cr("P4", P4, "not_observed", "n/a", "The conversation ended without a next step or check-in.", "Ask what Sam will do first and when you'll follow up.");
+        : cr("P4", P4, "not_observed", "n/a", "The conversation ended without a next step or check-in.", `Ask what ${o.name} will do first and when you'll follow up.`);
 
   return [p1, p2, p3, p4];
+}
 }
 
 export const labels: ConvoScenario = {
   id: "labels",
   format: "conversation",
+  caseGroup: "marcus",
+  caseLabel: "Case A",
   title: "The Label Conversation",
   domain: "Healthcare · pharmacy leadership coaching",
   tagline: "You're Marcus. Coach a technician after a pattern of labeling errors. Open conversation, no scripted choices.",
@@ -185,6 +189,6 @@ export const labels: ConvoScenario = {
     { id: "P3", label: "Sam generated the option, after the cause surfaced", anchors: ["Marcus supplied the plan, or options never came up", "Asked for options before the cause surfaced, so Sam's idea targets the wrong thing", "Asked for options after the cause surfaced, and Sam proposed the fix"] },
     { id: "P4", label: "Agreed on a specific next step and check-in", anchors: ["No next step or check-in", "A next step or a check-in, not both", "A specific next step and a check-in"] },
   ],
-  evaluate,
+  evaluate: makeLabelsEvaluate({ name: "Sam", cause: "the shared tray", surface: "rushing" }),
   framework: GROW,
 };

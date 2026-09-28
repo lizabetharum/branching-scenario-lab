@@ -71,10 +71,13 @@ export interface ConvoEnding {
 export interface ConvoScenario {
   id: string;
   format: "conversation";
+  /** Cases in the same group practice the same skill with different facts. */
+  caseGroup: string;
+  caseLabel: string;
   title: string;
   domain: string;
   tagline: string;
-  who: "sam" | "dev";
+  who: "sam" | "dev" | "ana" | "luis";
   persona: LearnerPersona;
   counterpart: { name: string; role: string; goal: string; voice: string; boundaries: string[] };
   intake: { duration: string; situation: string; experience: string };
