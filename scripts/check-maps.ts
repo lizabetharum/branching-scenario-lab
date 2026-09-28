@@ -86,3 +86,32 @@ import { decodeAttempt, encodeAttempt, type SharedAttempt } from "../src/lib/con
     console.log(`${ok ? "✓" : "✗"} review link round-trips (${code.length} characters, URL-safe)`);
   });
 }
+
+// Tree trade-off paths: scoring must reflect each cost.
+{
+  const s = scenarios.jordan;
+  const walk = (ids: string[]) => {
+    const h: Turn[] = []; let cur = s.start;
+    for (const id of ids) {
+      const m = s.nodes[cur].moves.find((x) => x.id === id);
+      if (!m) throw new Error(`${id} not available at ${cur}`);
+      const prior = h.some((t) => s.nodes[t.nodeId].moves.find((x) => x.id === t.moveId)?.quality === "poor");
+      h.push({ nodeId: cur, moveId: id, mode: "free", learnerText: m.label, counterpartText: m.reply, hintBefore: false, afterRecovery: prior });
+      cur = m.next;
+    }
+    return { end: cur, r: Object.fromEntries(s.evaluate(h).map((c) => [c.id, c.status])) };
+  };
+  const cases: [string, string[], (x: ReturnType<typeof walk>) => boolean][] = [
+    ["leaving Jordan with no next step costs T3 (partial)", ["D1.diagnose", "D2.scaffold", "P1.leave", "R2.simplify", "D3.verify"], (x) => x.end === "E1" && x.r.T3 === "partial"],
+    ["making Maya wait still lets Jordan do the work (T3 demonstrated)", ["D1.diagnose", "D2.scaffold", "P1.wait", "D3.verify"], (x) => x.end === "E1" && x.r.T3 === "demonstrated"],
+    ["reverting everything then testing one change recovers T2", ["D1.diagnose", "D2.revertAll", "R2b.oneAtATime", "D3.verify"], (x) => x.end === "E1" && x.r.T2 === "demonstrated"],
+    ["reverting everything and sending Jordan off ends partial with no bounded step", ["D1.diagnose", "D2.revertAll", "R2b.go"], (x) => x.end === "E3" && x.r.T2 === "not_observed"],
+    ["the sensor lead costs time but can recover", ["D1.sensors", "D1b.diagnose", "D2.scaffold", "P1.triage", "D3.verify"], (x) => x.end === "E1" && x.r.T1 === "demonstrated"],
+    ["takeover without repair fails T3", ["D1.takeover", "R1.continue"], (x) => x.end === "E2" && x.r.T3 === "not_observed"],
+  ];
+  for (const [name, ids, ok] of cases) {
+    const x = walk(ids); const pass = ok(x);
+    if (!pass) process.exitCode = 1;
+    console.log(`${pass ? "✓" : "✗"} tree: ${name} (end=${x.end} ${JSON.stringify(x.r)})`);
+  }
+}

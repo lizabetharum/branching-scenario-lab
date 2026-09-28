@@ -45,10 +45,10 @@
       <article class="bsl-card bsl-card--mustard">
         <div class="bsl-label">Fixed branching tree</div>
         <h2 class="bsl-card-title">Can You Just Fix It?</h2>
-        <p>A student asks a teacher to fix a broken project with ten minutes left. The tree follows Christy Tucker&rsquo;s sequence: write the ideal path first, then play each mistake through to its consequence, with a way to recover.</p>
+        <p>A student&rsquo;s micro:bit robot drives off the line after three changes, minutes before the qualifying run, while a second student waits for help. The tree follows Christy Tucker&rsquo;s sequence: write the ideal path first, then play each mistake through to its consequence, with a way to recover.</p>
         <ul class="bsl-features">
-          <li>Recovery paths that stay on the record</li>
-          <li>Choosing the right option scores as recognition, not execution</li>
+          <li>A plausible wrong lead and a student who wants to revert everything</li>
+          <li>Trade-off costs listed in the debrief, apart from the scores</li>
           <li>Wording practice afterward, with optional voice input</li>
         </ul>
         <a class="bsl-cta bsl-cta--ink" href="https://branching-scenario-lab.vercel.app/scenario/jordan" target="_blank" rel="noopener">Open the scenario <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
@@ -61,7 +61,7 @@
       <div class="bsl-stat"><span class="bsl-stat-num">3</span><span class="bsl-stat-label">Scenarios</span></div>
       <div class="bsl-stat"><span class="bsl-stat-num">2</span><span class="bsl-stat-label">Formats</span></div>
       <div class="bsl-stat"><span class="bsl-stat-num">23</span><span class="bsl-stat-label">AI Test Cases</span></div>
-      <div class="bsl-stat"><span class="bsl-stat-num">15</span><span class="bsl-stat-label">Logged Revisions</span></div>
+      <div class="bsl-stat"><span class="bsl-stat-num">16</span><span class="bsl-stat-label">Logged Revisions</span></div>
     </div>
   </section>
 
@@ -76,7 +76,7 @@
         <p>The pharmacy scenarios contain no clinical content by design: no drugs, no doses, no patients. Clinical facts would need clinician approval before any learner saw them.</p>
 
         <h3 class="bsl-heading">What Testing Caught</h3>
-        <p>The test set covers 23 AI cases (prompt injection, personal information, off-topic chat, clinical questions and guesses at hidden facts), plus 18 rule checks and a mobile layout check that run before every release. Testing changed the design more than once. An early test marked a leak as a pass because it looked for the word &ldquo;tray,&rdquo; while the character had confirmed the guess in other words: &ldquo;We&rsquo;ve been sharing one for a while.&rdquo; The meaning-based leak check that fixed it then blocked about half of all correct replies, until it had to quote its evidence. Later, the release gate stopped a deploy on its own: a character rule to &ldquo;go along with&rdquo; a suggested cause meant a right guess got confirmed. Fifteen revisions like these are logged, with evidence, on the <a href="https://branching-scenario-lab.vercel.app/design#revisions" target="_blank" rel="noopener">design page</a>.</p>
+        <p>The test set covers 23 AI cases (prompt injection, personal information, off-topic chat, clinical questions and guesses at hidden facts), plus 24 rule checks and a mobile layout check that run before every release. Testing changed the design more than once. An early test marked a leak as a pass because it looked for the word &ldquo;tray,&rdquo; while the character had confirmed the guess in other words: &ldquo;We&rsquo;ve been sharing one for a while.&rdquo; The meaning-based leak check that fixed it then blocked about half of all correct replies, until it had to quote its evidence. Later, the release gate stopped a deploy on its own: a character rule to &ldquo;go along with&rdquo; a suggested cause meant a right guess got confirmed. Sixteen revisions like these are logged, with evidence, on the <a href="https://branching-scenario-lab.vercel.app/design#revisions" target="_blank" rel="noopener">design page</a>.</p>
 
         <h3 class="bsl-heading">What This Does Not Show Yet</h3>
         <p>No learner has used it. Every scenario, rubric and fact packet is a design specification, not a validated intervention, and a self-review against the scenario-design rubric sets the release decision at &ldquo;revise before learner use.&rdquo; The next evidence to collect: think-aloud sessions with pharmacy leaders and teachers, a pharmacist&rsquo;s review of both pharmacy cases, and human ratings of the AI&rsquo;s behavior labels. The built-in facilitator review page is designed to collect that last one.</p>

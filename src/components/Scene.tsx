@@ -127,11 +127,20 @@ function Classroom({ mood, cue }: { mood: Mood; cue?: string }) {
       <circle cx={70} cy={70} r={12} fill="#f4d58d" />
       {/* whiteboard */}
       <rect x={410} y={34} width={196} height={116} rx={4} fill="#fbfbf8" stroke="#9aa3b2" strokeWidth={3} />
-      <g stroke="#3b6f8f" strokeWidth={3} strokeLinecap="round" fill="none">
-        <path d="M430 64h60M430 84h40M430 104h70" />
-        <path d="M520 70l24 0m-8 -8l8 8l-8 8" />
-        <circle cx={572} cy={90} r={18} />
-      </g>
+      {cue === "track" ? (
+        <g className="cue">
+          <rect x={430} y={52} width={156} height={80} rx={40} fill="none" stroke={INK} strokeWidth={7} />
+          <rect x={560} y={50} width={22} height={14} rx={3} fill="#0f766e" transform="rotate(-12 571 57)" />
+          <path d="M574 57 l26 -10" stroke="#c2412d" strokeWidth={2.5} strokeDasharray="4 3" fill="none" />
+          <text x={508} y={98} textAnchor="middle" fontSize={11} fontWeight={700} fill={INK} fontFamily="var(--font-sans)">the track</text>
+        </g>
+      ) : (
+        <g stroke="#3b6f8f" strokeWidth={3} strokeLinecap="round" fill="none">
+          <path d="M430 64h60M430 84h40M430 104h70" />
+          <path d="M520 70l24 0m-8 -8l8 8l-8 8" />
+          <circle cx={572} cy={90} r={18} />
+        </g>
+      )}
       {/* Jordan */}
       <Person x={340} y={96} mood={mood} skin="#b9825a" hair="#2b1d16" shirt="#e0704f" hairStyle="curly" />
       {/* desk */}
@@ -143,11 +152,11 @@ function Classroom({ mood, cue }: { mood: Mood; cue?: string }) {
         <rect width={120} height={72} rx={6} fill="#2b3446" />
         <rect x={6} y={6} width={108} height={60} rx={3} fill={cue === "working" ? "#e6f4ea" : "#fdf1ee"} />
         {cue === "versions" || cue === "working" ? (
-          <g fontSize={9} fontFamily="var(--font-sans)" fontWeight={700}>
-            {["v1", "v2", "v3"].map((v, i) => (
-              <g key={v} transform={`translate(${12 + i * 34} 14)`}>
-                <rect width={28} height={16} rx={3} fill={i === 2 ? "#e3a83b" : "#fff"} stroke={INK} strokeWidth={1} />
-                <text x={14} y={11.5} textAnchor="middle" fill={INK}>{v}</text>
+          <g fontSize={8.5} fontFamily="var(--font-sans)" fontWeight={700} fill={INK}>
+            {["speed 40 → 70", "bracket raised", "names cleaned"].map((t, i) => (
+              <g key={t} transform={`translate(10 ${10 + i * 16})`}>
+                <rect width={72} height={13} rx={2} fill={cue === "working" && i === 0 ? "#e3a83b" : "#fff"} stroke={INK} strokeWidth={0.8} />
+                <text x={4} y={9.5}>{t}</text>
               </g>
             ))}
           </g>
@@ -157,9 +166,9 @@ function Classroom({ mood, cue }: { mood: Mood; cue?: string }) {
           </g>
         )}
         {cue === "working" ? (
-          <path d="M46 44l10 10l20 -22" stroke="#1d7a46" strokeWidth={5} fill="none" strokeLinecap="round" />
+          <path d="M88 32l6 6l12 -14" stroke="#1d7a46" strokeWidth={4} fill="none" strokeLinecap="round" />
         ) : (
-          <path d={cue === "versions" ? "M50 40l16 16m0 -16l-16 16" : "M84 38l14 14m0 -14l-14 14"} stroke="#c2412d" strokeWidth={4} strokeLinecap="round" />
+          <path d={cue === "versions" ? "M90 24l12 12m0 -12l-12 12" : "M84 38l14 14m0 -14l-14 14"} stroke="#c2412d" strokeWidth={4} strokeLinecap="round" />
         )}
         <rect x={-10} y={72} width={140} height={8} rx={3} fill="#4a5568" />
       </g>
@@ -171,6 +180,15 @@ function Classroom({ mood, cue }: { mood: Mood; cue?: string }) {
         <circle cx={56} cy={34} r={8} fill={INK} />
         <path d="M35 -14 q10 -20 26 -18" stroke="#e3a83b" strokeWidth={3} fill="none" />
       </g>
+      {cue === "waiting" && (
+        <g transform="translate(590 168)" className="cue">
+          <path d="M-26 70 q0 -40 26 -42 q26 2 26 42z" fill="#7a5ea8" />
+          <path d="M16 36 q14 -30 8 -58" stroke="#7a5ea8" strokeWidth={9} strokeLinecap="round" fill="none" />
+          <circle cx={24} cy={-26} r={6} fill="#c68a62" />
+          <circle cx={0} cy={12} r={17} fill="#c68a62" />
+          <path d="M-17 8 q2 -22 17 -22 q15 0 17 22 q-6 -12 -17 -12 q-11 0 -17 12z" fill="#2b1d16" />
+        </g>
+      )}
       <Learner x={96} color="#3b5b92" hair="#5a3b2a" />
     </>
   );

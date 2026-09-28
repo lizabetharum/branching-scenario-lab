@@ -91,6 +91,8 @@ export function Player({ scenarioId }: { scenarioId: string }) {
     const t = history[history.length - 1];
     if (!t) return node.mood;
     const m = Object.values(s.nodes).flatMap((n) => n.moves).find((mv) => mv.id === t.moveId);
+    // A node that opens with a new line from the character sets the mood for that line.
+    if (node.opener && m?.next === node.id && t.nodeId !== node.id) return node.mood;
     return m?.mood ?? node.mood;
   }, [history, node, ending, s.nodes]);
 
@@ -141,7 +143,11 @@ export function Player({ scenarioId }: { scenarioId: string }) {
       return;
     }
     const next = s.nodes[move.next];
-    if (move.next !== nodeId) entries.push({ kind: "situation", text: next.situation });
+    if (move.next !== nodeId) {
+      entries.push({ kind: "situation", text: next.situation });
+      // Some nodes open with a new line from the character (for example, Jordan's frustration at D2).
+      if (next.opener) entries.push({ kind: "counterpart", text: next.opener });
+    }
     // Proactive support: learners who need scaffolding see the hint after a weaker move.
     if (persona.support === "proactive" && move.quality !== "good") {
       entries.push({ kind: "hint", text: next.hint, auto: true });

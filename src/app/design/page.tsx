@@ -104,7 +104,7 @@ export default function Design() {
           </tbody>
         </table>
         <p>
-          All three need consequences that depend on earlier moves. Sam only mentions the shared tray after a second open question. Dev only mentions the drive-through after Priya names the concern and asks twice without supplying the answer. Jordan only explains after a focused question. If earlier moves didn&apos;t matter, a short case and a discussion would do the job with less upkeep.
+          All three need consequences that depend on earlier moves. Sam only mentions the shared tray after a second open question. Dev only mentions the drive-through after Priya names the concern and asks twice without supplying the answer. Jordan only lists the three changes after a focused question. If earlier moves didn&apos;t matter, a short case and a discussion would do the job with less upkeep.
         </p>
 
         <h2 id="intake">Intake before build</h2>
@@ -241,7 +241,9 @@ export default function Design() {
         <h3>{jordan.title}</h3>
         <div className="card mt-3 !p-4"><BranchMap scenario={jordan} path={[]} mode="author" /></div>
         <ul>
-          <li><b>Not always three options.</b> D1b and every recovery node have two. The guide warns against forcing a fixed count or an obviously bad answer.</li>
+          <li><b>Not always three options.</b> D1 has four, P1 and D3 have three, and D1b and every recovery node have two. The guide warns against forcing a fixed count or an obviously bad answer.</li>
+          <li><b>A concrete case.</b> Jordan&apos;s project is a micro:bit line-following robot that drives off the tape at the first curve after three changes: speed, sensor bracket height and variable names. Specific evidence makes the teacher&apos;s questions specific, and makes a generic option easy to spot as generic.</li>
+          <li><b>Pressure creates trade-offs.</b> A plausible wrong lead (&ldquo;check the sensors&rdquo;), a frustrated student who wants to revert everything, a second student waiting and the end of class. Several choices cost something whichever way you go. The debrief lists those costs in a separate &ldquo;Trade-offs you made&rdquo; section. They aren&apos;t scored, because the criteria measure Jordan&apos;s learning, not how the teacher balanced Maya&apos;s. That is a real limit of this rubric.</li>
           <li><b>Option order is shuffled per node</b> so the strongest option is never always first.</li>
           <li><b>Recovery is real but recorded.</b> Reaching E1 after R1 is reported as &ldquo;after a recovery.&rdquo; It is not treated as the same as getting it right the first time.</li>
           <li><b>Endings are not scores.</b> A working project or an agreed plan can coexist with a missed objective. In the pharmacy scenarios, you can reach an agreed plan after a leading question, and the debrief still marks &ldquo;no leading questions&rdquo; as not demonstrated.</li>
@@ -258,7 +260,7 @@ export default function Design() {
         <table>
           <thead><tr><th>State</th><th>In this app</th><th>Response</th></tr></thead>
           <tbody>
-            <tr><td>Recoverable error</td><td>Tree: R1, R2. Conversation: rising guard.</td><td>The consequence plays out. A repair is possible: a repair node, or an acknowledgment that lowers guard.</td></tr>
+            <tr><td>Recoverable error</td><td>Tree: R1, R2, R2b. Conversation: rising guard.</td><td>The consequence plays out. A repair is possible: a repair node, or an acknowledgment that lowers guard.</td></tr>
             <tr><td>Partial achievement</td><td>E3, or criteria marked partial</td><td>The debrief names what wasn&apos;t verified and gives one next step.</td></tr>
             <tr><td>Terminal instructional failure</td><td>Tree: E2. Conversation: closed without a plan, or out of time.</td><td>Explains the causal sequence. You can retry from the start or step back one decision.</td></tr>
             <tr><td>Safety or privacy boundary</td><td>Guardrail messages</td><td>Interrupts outside the story. The turn is not scored and the node does not change.</td></tr>

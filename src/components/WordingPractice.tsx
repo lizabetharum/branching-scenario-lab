@@ -149,7 +149,7 @@ export function WordingPractice({ scenarioId }: { scenarioId: string }) {
           {drill.stage && <p className="eyebrow">GROW · {drill.stage}</p>}
           <div className="mt-2 flex">
             <div className="bubble-them">
-              <span className="block text-xs font-bold text-teal-dark">{s.counterpart.name}</span>
+              <span className="block text-xs font-bold text-teal-dark">{drill.speaker ?? s.counterpart.name}</span>
               {drill.line}
             </div>
           </div>

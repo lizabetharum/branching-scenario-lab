@@ -7,7 +7,7 @@ import { DEFAULT_MODEL } from "@/lib/model-info";
 // Tables that describe the map are generated from the scenario data, so they
 // can't drift from what runs.
 
-export const VERSION = "v2.1";
+export const VERSION = "v2.2";
 export const VERSION_DATE = "2026-09-28";
 
 const BRIEF = {
@@ -30,13 +30,13 @@ const BRIEF = {
     outOfScope: "Customer-service standards, scheduling policy and clinical content.",
   },
   jordan: {
-    current: "A teacher, short on time, fixes the student's project or offers encouragement with no next step.",
+    current: "A teacher, short on time, fixes the student's robot, guesses at a cause, or walks away to help someone else without leaving a next step.",
     desired: "The teacher elicits the student's evidence, proposes one bounded test, keeps the student doing the work and checks the student's reasoning.",
     gap: "None collected. The example comes from the research guide. Before real use, confirm it through classroom observation or teacher interviews.",
-    barriers: "Short work sessions and many students waiting. Scheduling and support staffing sit outside this scenario.",
+    barriers: "Short work periods, fixed deadlines like a qualifying run, and several students needing help at once. Scheduling and support staffing sit outside this scenario.",
     why: "Taking over makes the project work but closes off the student's reasoning. Recovery paths show whether a teacher can hand control back.",
-    simpler: "A case discussion. It would surface the idea but not practice the wording under the pressure of \"Can you just fix it?\"",
-    outOfScope: "Debugging content knowledge and classroom management.",
+    simpler: "A case discussion. It would surface the idea but not practice the choice under the pressure of a deadline and a second student waiting.",
+    outOfScope: "Robotics content knowledge and whole-class management. The second student tests one moment of triage, not classroom management in general.",
   },
 } as const;
 
@@ -55,8 +55,8 @@ const ALIGN = {
   ],
   jordan: [
     ["B1", "Elicits expected result, observed result or recent change before choosing a step", "D1, D1b, R1", "T1", "Observed student help request, teacher's first move recorded"],
-    ["B2", "Proposes one bounded test and asks for a prediction", "D2, R2", "T2", "Observer records the next step given"],
-    ["B3", "Keeps the student making the changes", "D1, D1b, R1", "T3", "Observer records who touched the work"],
+    ["B2", "Proposes one bounded test and asks for a prediction", "D2, R2, R2b", "T2", "Observer records the next step given"],
+    ["B3", "Keeps the student making the changes, including when stepping away", "D1, D1b, R1, P1", "T3", "Observer records who touched the work"],
     ["B4", "Asks the student to explain what the result shows and doesn't", "D3", "T4", "Observer records a reasoning check before the teacher leaves"],
   ],
 } as const;
@@ -65,7 +65,7 @@ const ANCHORS = {
   jordan: [
     ["T1", "Fixes, reassures or directs without asking what Jordan expected, saw or changed", "Not used in this version. The vague \"explain your thinking\" move loops back without credit.", "Asks for the expected result, the observed result or a recent change"],
     ["T2", "Gives several changes at once, or trial and error", "Not used in this version", "Proposes one change and asks for a prediction"],
-    ["T3", "Makes the change for Jordan and moves on", "Takes over, then hands control back (recovery)", "Jordan makes and tests every change"],
+    ["T3", "Makes the change for Jordan and moves on", "Takes over then hands control back, or steps away without leaving a next step", "Jordan makes and tests every change, and has a step to carry out whenever you step away"],
     ["T4", "Ends on \"it works\" or explains the result for Jordan", "Not used in this version", "Asks what the result shows and what it doesn't"],
   ],
 } as const;
@@ -86,6 +86,7 @@ const REVISIONS = [
   ["RV-13", "Guardrail messages in the conversations said \"pick a scripted option,\" but the conversations have none.", "Minor", "Messages written for the tree only", "Made shared messages format-neutral. The tree adds its own line.", "Manual check"],
   ["RV-14", "No release rule check protected when Sam or Dev will share while guarded. A loosened rule passed every check.", "Major", "Coverage gap found by deliberately breaking a rule", "Added guard checks for both personas. The loosened rule now fails the build.", "Sabotage run, check-maps"],
   ["RV-15", "The gate blocked a release: Dev answered a correct drive-through guess with \"Yeah, that's probably part of it,\" and Sam hinted \"we rotate through the same station.\" An earlier run had marked the Dev reply a pass.", "Critical", "A character rule said to \"go along with\" suggested causes, which confirms right guesses. Tests only looked for fact words.", "Guesses now get a one-sentence noncommittal reply. Code rejects agreeing openers and long replies on guess turns. Tests also check for confirmations.", "T07, T17, T18, T21, T23 (3 runs each for guesses)"],
+  ["RV-16", "The classroom scenario was too generic: an unnamed \"project\" and options that read as right versus wrong.", "Major", "No concrete content, no competing demands", "Rebuilt around a micro:bit line-following robot with three specific changes. Added a plausible wrong lead, a revert-everything request, a second student and the end of class. Trade-off costs appear in the debrief, unscored.", "check-maps tree trade-off paths"],
 ] as const;
 
 const RATINGS: [string, string, string, string, string, string][] = [

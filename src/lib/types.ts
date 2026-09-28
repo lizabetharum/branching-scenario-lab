@@ -20,7 +20,9 @@ export type MoveTag =
   | "employeeOptions" // asks the employee to generate options
   | "managerOptions" // manager supplies the plan
   | "wayForward" // specific next step plus check-in
-  | "unfocused"; // vague prompt with no focus
+  | "unfocused" // vague prompt with no focus
+  | "triage" // handles an interruption while leaving the learner a next step
+  | "noStep"; // walks away without leaving the learner a next step
 
 export interface Move {
   id: string;
@@ -36,6 +38,8 @@ export interface Move {
   reply: string;
   mood: Mood;
   next: string;
+  /** What this choice cost, shown in the debrief apart from the scores. */
+  tradeoff?: string;
 }
 
 export interface ScenarioNode {
@@ -108,6 +112,8 @@ export interface Counterpart {
 
 export interface Drill {
   nodeId: string;
+  /** Who says the line, if not the scenario's main counterpart. */
+  speaker?: string;
   /** Framework stage shown as a label, if the scenario uses one. */
   stage?: string;
   /** The character line the learner responds to. */

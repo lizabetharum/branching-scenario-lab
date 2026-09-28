@@ -133,6 +133,20 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
             </ul>
             <p className="mt-3 text-xs text-ink/65">A recovery counts. It is reported separately from getting it right the first time.</p>
           </div>
+          {summary.history.some((t) => allMoves.find((x) => x.id === t.moveId)?.tradeoff) && (
+            <div className="card">
+              <h2 className="h2">Trade-offs you made</h2>
+              <p className="mt-1 text-sm text-ink/70">These aren&apos;t scored. The criteria measure Jordan&apos;s learning. They don&apos;t measure how you balanced other demands, so the costs are listed here instead.</p>
+              <ul className="mt-3 space-y-2 text-sm">
+                {summary.history.map((t, i) => {
+                  const m = allMoves.find((x) => x.id === t.moveId);
+                  return m?.tradeoff ? (
+                    <li key={i} className="rounded-lg bg-paper p-3"><b>{s.nodes[t.nodeId].title}.</b> {m.tradeoff}</li>
+                  ) : null;
+                })}
+              </ul>
+            </div>
+          )}
           <div className="card border-l-8 border-l-teal">
             <h2 className="h2">Take it back to work</h2>
             <p className="mt-2 text-ink/85">{TRANSFER[s.id]}</p>
