@@ -23,7 +23,8 @@ npm run dev
 npm run check      # tree reachability, scoring regressions, fact-packet engine rules, review-link round trip
 npm run build      # runs the checks first, then next build. A broken rule fails the build.
 npm run test:ai -- <url> [--write]   # 23 AI and guardrail cases, leak cases repeated three times
-npm run release    # lint, build, AI tests on the local production build, deploy, AI tests on the live site
+node scripts/mobile-check.mjs <url>  # 390 px width, mobile menu, scroll reset and heading focus
+npm run release    # lint, build, mobile checks, AI tests on the local production build, deploy, AI tests on the live site
 node scripts/convo-sim.mjs <url> labels "line 1" "line 2"   # play a scripted conversation
 ```
 

@@ -9,6 +9,7 @@ import type { RunSummary } from "./Player";
 import { Scene } from "./Scene";
 import { BranchMap } from "./BranchMap";
 import { WordingPractice } from "./WordingPractice";
+import { useViewReset } from "./useViewReset";
 
 const STATUS: Record<CriterionStatus, { icon: string; text: string; score: string; cls: string }> = {
   demonstrated: { icon: "✓", text: "Demonstrated", score: "2", cls: "bg-teal/15 text-teal-dark border-teal" },
@@ -35,6 +36,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
   const persona = s.learnerPersonas.find((p) => p.id === summary.personaId)!;
   const results = applyInterruption(s.evaluate(summary.history), summary.interrupted);
   const selectedOnly = summary.history.length > 0 && summary.history.every((t) => t.mode === "choice");
+  const heading = useViewReset<HTMLHeadingElement>("debrief", false);
   const [reflection, setReflection] = useState("");
   const [copied, setCopied] = useState(false);
   const allMoves = Object.values(s.nodes).flatMap((n) => n.moves);
@@ -50,7 +52,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
   return (
     <section className="mx-auto max-w-5xl px-5 py-10">
       <p className="eyebrow">Debrief · {persona.name}</p>
-      <h1 className="mt-1 text-4xl font-extrabold text-ink">{ending.title}</h1>
+      <h1 ref={heading} tabIndex={-1} className="mt-1 text-4xl font-extrabold text-ink">{ending.title}</h1>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <Scene scene={s.scene} mood={ending.mood} label={`${s.counterpart.name} at the end of the conversation.`} />
@@ -85,7 +87,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
                 <span className={`inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-sm font-bold ${STATUS[r.status].cls}`}>
                   <span aria-hidden>{STATUS[r.status].icon}</span>
                   {STATUS[r.status].text}
-                  <span className="text-xs font-semibold opacity-70">({STATUS[r.status].score})</span>
+                  <span className="text-xs font-semibold">({STATUS[r.status].score})</span>
                 </span>
                 {VIA[r.via] && <p className="mt-1 text-xs text-ink/65">{VIA[r.via]}</p>}
                 {SUPPORT[r.support] && <p className="text-xs text-ink/65">{SUPPORT[r.support]}</p>}
@@ -165,7 +167,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
         </button>
         <Link href="/design" className="btn-ghost">How this was designed</Link>
       </div>
-      <p className="mt-3 text-xs text-ink/60">Nothing on this page is saved. Copying is the only way it leaves this tab, and you choose where it goes.</p>
+      <p className="mt-3 text-xs text-ink/70">Nothing on this page is saved. Copying is the only way it leaves this tab, and you choose where it goes.</p>
     </section>
   );
 }

@@ -48,3 +48,11 @@ body { font-family: var(--font-sans); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Wide design-page tables scroll inside their own box on small screens instead of widening the page. */
+@media (max-width: 767px) {
+  .prose-d table { display: block; overflow-x: auto; }
+}
+
+/* Headings receive focus after a view change so screen readers announce them. No ring needed. */
+h1[tabindex="-1"]:focus { outline: none; }

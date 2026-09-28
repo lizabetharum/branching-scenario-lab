@@ -30,7 +30,7 @@ export default function Home() {
               Design demonstration. Not yet approved for learner use.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/scenario/labels" className="btn-primary">Start a pharmacy conversation</Link>
+              <Link href="#scenarios" className="btn-primary">Choose a scenario</Link>
               <Link href="/design" className="btn-ghost !px-6 !py-3 !text-base">See how it was designed</Link>
             </div>
           </div>
@@ -49,9 +49,9 @@ export default function Home() {
         <blockquote className="mx-auto max-w-3xl text-center text-2xl font-bold leading-snug text-ink">
           Success means a change in what people do after the scenario, not finishing it.
         </blockquote>
-        <p className="mt-3 text-center text-sm text-ink/60">The design standard for both scenarios, from the research guide behind this app.</p>
+        <p className="mt-3 text-center text-sm text-ink/70">The design standard for both scenarios, from the research guide behind this app.</p>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
+        <div id="scenarios" className="mt-12 grid scroll-mt-6 gap-8 lg:grid-cols-3">
           {[
             ...Object.values(convoScenarios).filter((c) => c.caseLabel === "Case A").map((c) => ({
               id: c.id, title: c.title, domain: c.domain, tagline: c.tagline, format: "Open conversation · fact packet",

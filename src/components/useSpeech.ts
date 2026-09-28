@@ -50,6 +50,3 @@ export function useSpeech(onText: (t: string) => void) {
 
   return { supported, enabled, enable: () => setEnabled(true), listening, toggle, error, stop: () => rec.current?.abort?.() };
 }
-
-export const VOICE_NOTICE =
-  "If you turn on voice input, your browser's speech service turns your voice into text. In Chrome that service is Google's, and in Safari it is Apple's, so your audio may leave your device. This app never receives audio. It receives only the text, which you can edit before sending.";

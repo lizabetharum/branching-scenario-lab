@@ -13,7 +13,8 @@ import { applyInterruption } from "@/lib/eval-helpers";
 import { PROVIDER_LABEL } from "@/lib/model-info";
 import type { CriterionStatus, Support } from "@/lib/types";
 import { Scene } from "./Scene";
-import { useSpeech, VOICE_NOTICE } from "./useSpeech";
+import { useSpeech } from "./useSpeech";
+import { useViewReset } from "./useViewReset";
 
 type Entry =
   | { kind: "setting" | "system" | "boundary"; text: string }
@@ -56,6 +57,8 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
   const [shareLink, setShareLink] = useState<string | null>(null);
   const speech = useSpeech(setDraft);
   const logRef = useRef<HTMLDivElement>(null);
+  const [attempt, setAttempt] = useState(0);
+  const heading = useViewReset<HTMLHeadingElement>(`${phase}-${attempt}`);
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
@@ -82,6 +85,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
       { kind: "them", text: s.opener },
     ]);
     setPhase("play");
+    setAttempt((n) => n + 1);
   }
 
   async function send() {
@@ -153,7 +157,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
     return (
       <section className="mx-auto max-w-5xl px-5 py-10">
         <p className="eyebrow">{s.domain} · open conversation</p>
-        <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{s.title}</h1>
+        <h1 ref={heading} tabIndex={-1} className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{s.title}</h1>
         <p className="mt-3 max-w-2xl text-lg text-ink/80">{s.tagline}</p>
         <nav aria-label="Cases for this skill" className="mt-5 flex flex-wrap items-center gap-2 text-sm">
           <span className="font-semibold text-ink/70">Cases:</span>
@@ -162,7 +166,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
               {c.caseLabel}: {c.counterpart.name}
             </Link>
           ))}
-          <span className="text-ink/60">Same skill, different facts. A second case shows whether the skill carries over.</span>
+          <span className="text-ink/70">Same skill, different facts. A second case shows whether the skill carries over.</span>
         </nav>
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
           <div className="card">
@@ -193,7 +197,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
         {s.framework && (
           <details className="card mt-6" open={p.support === "proactive"}>
             <summary className="cursor-pointer text-xl font-extrabold">
-              What is {s.framework.name}? <span className="text-sm font-semibold text-ink/60">({p.support === "proactive" ? "recommended" : "optional"} for {p.name})</span>
+              What is {s.framework.name}? <span className="text-sm font-semibold text-ink/70">({p.support === "proactive" ? "recommended" : "optional"} for {p.name})</span>
             </summary>
             <p className="mt-3 text-ink/80">{s.framework.summary}</p>
             <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -234,7 +238,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
     return (
       <section className="mx-auto max-w-5xl px-5 py-10">
         <p className="eyebrow">Debrief · {p.name}</p>
-        <h1 className="mt-1 text-4xl font-extrabold">{e.title}</h1>
+        <h1 ref={heading} tabIndex={-1} className="mt-1 text-4xl font-extrabold">{e.title}</h1>
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <Scene scene="pharmacy" who={s.who} mood={ending === "plan_key" ? "proud" : "neutral"} label={`${name} at the end of the conversation.`} />
           <div className="card">
@@ -253,7 +257,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
               <li key={r.id} className="grid gap-3 border-b border-ink/10 pb-4 last:border-0 sm:grid-cols-[180px_1fr]">
                 <div>
                   <span className={`inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-sm font-bold ${STATUS[r.status].cls}`}>
-                    <span aria-hidden>{STATUS[r.status].icon}</span>{STATUS[r.status].text} <span className="text-xs opacity-70">({STATUS[r.status].score})</span>
+                    <span aria-hidden>{STATUS[r.status].icon}</span>{STATUS[r.status].text} <span className="text-xs">({STATUS[r.status].score})</span>
                   </span>
                   {SUPPORT[r.support] && <p className="mt-1 text-xs text-ink/65">{SUPPORT[r.support]}</p>}
                 </div>
@@ -293,7 +297,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
                   <p className="mt-1 flex flex-wrap gap-1">
                     {t.tags.length ? t.tags.map((x) => (
                       <span key={x} className={`rounded-full px-2 py-0.5 text-xs font-bold ${WEAK.includes(x) ? "bg-mustard/25" : "bg-teal/15"}`}>{TAG_LABEL[x]}</span>
-                    )) : <span className="text-xs text-ink/60">No behaviors tagged</span>}
+                    )) : <span className="text-xs text-ink/70">No behaviors tagged</span>}
                   </p>
                   <button className="link mt-1 text-xs" aria-pressed={flagged.includes(i)} onClick={() => setFlagged((f) => (f.includes(i) ? f.filter((x) => x !== i) : [...f, i]))}>
                     {flagged.includes(i) ? "Flagged for review" : "Disagree? Flag it"}
@@ -356,7 +360,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           </button>
           <Link href="/design#convo" className="btn-ghost">How this was designed</Link>
         </div>
-        <p className="mt-3 text-xs text-ink/60">Nothing on this page is saved. Copying is the only way it leaves this tab.</p>
+        <p className="mt-3 text-xs text-ink/70">Nothing on this page is saved. Copying is the only way it leaves this tab.</p>
       </section>
     );
   }
@@ -366,7 +370,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="eyebrow">{s.domain} · playing as {p.name}</p>
-          <h1 className="text-2xl font-extrabold">{s.title}</h1>
+          <h1 ref={heading} tabIndex={-1} className="text-2xl font-extrabold">{s.title}</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <button className="btn-ghost" onClick={() => setPaused(true)}>Pause</button>
@@ -380,10 +384,10 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           <div className="card !p-4">
             <div className="flex items-baseline justify-between">
               <h2 className="text-sm font-bold uppercase tracking-wider text-ink/70">What {name} has told you</h2>
-              <span className="text-xs text-ink/60">Turn {Math.min(st.turns + 1, s.maxTurns)} of {s.maxTurns}</span>
+              <span className="text-xs text-ink/70">Turn {Math.min(st.turns + 1, s.maxTurns)} of {s.maxTurns}</span>
             </div>
             {st.released.length === 0 ? (
-              <p className="mt-2 text-sm text-ink/60">Nothing yet beyond what you could already see.</p>
+              <p className="mt-2 text-sm text-ink/70">Nothing yet beyond what you could already see.</p>
             ) : (
               <ul className="mt-2 space-y-1.5 text-sm">
                 {st.released.map((id) => (
@@ -411,7 +415,7 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
                 <p key={i} className="rounded-lg bg-ink/5 px-3 py-2 text-sm"><b>System:</b> {e.text}</p>
               ),
             )}
-            {busy && <p className="text-sm italic text-ink/60">{name} is thinking...</p>}
+            {busy && <p className="text-sm italic text-ink/70">{name} is thinking...</p>}
           </div>
 
           {ending ? (
@@ -422,10 +426,9 @@ export function ConversationPlayer({ scenarioId }: { scenarioId: string }) {
           ) : (
             <div className="card mt-4 !p-4">
               {speech.supported && !speech.enabled && (
-                <div className="mb-3 rounded-xl bg-paper p-3 text-xs text-ink/80">
-                  <b>Voice input is off.</b> {VOICE_NOTICE}{" "}
-                  <button className="link" onClick={speech.enable}>Turn on voice input</button>
-                </div>
+                <p className="mb-2 text-xs text-ink/80">
+                  <button className="link" onClick={speech.enable}>Turn on voice input</button> · audio may go to your browser&apos;s speech service. <Link href="/design#privacy" className="link">How voice works</Link>
+                </p>
               )}
               <form onSubmit={(ev) => { ev.preventDefault(); send(); }}>
                 <label htmlFor="reply" className="text-sm font-semibold">What do you say to {name}?</label>

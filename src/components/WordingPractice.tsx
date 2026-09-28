@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { scenarios } from "@/lib/scenarios";
 import type { ApiResponse } from "@/lib/types";
 import { BOUNDARY_MESSAGES, MAX_INPUT, detectPersonalInfo } from "@/lib/guardrails";
@@ -155,10 +156,9 @@ export function WordingPractice({ scenarioId }: { scenarioId: string }) {
           <p className="mt-3 text-sm text-ink/80"><b>Your aim:</b> {drill.goal}</p>
 
           {voiceSupported && !voiceOn && (
-            <div className="mt-4 rounded-xl bg-paper p-4 text-sm">
-              <p><b>Voice input is off.</b> If you turn it on, your browser&apos;s speech service turns your voice into text. In Chrome that service is Google&apos;s, and in Safari it is Apple&apos;s, so your audio may leave your device. This app never receives audio. It receives only the text, which you can edit before sending.</p>
-              <button className="btn-ghost mt-3" onClick={() => setVoiceOn(true)}>Turn on voice input</button>
-            </div>
+            <p className="mt-4 text-xs text-ink/80">
+              <button className="link" onClick={() => setVoiceOn(true)}>Turn on voice input</button> · audio may go to your browser&apos;s speech service. <Link href="/design#privacy" className="link">How voice works</Link>
+            </p>
           )}
           {!voiceSupported && <p className="mt-4 text-sm text-ink/65">Voice input isn&apos;t available in this browser. Type your reply instead, as you would say it.</p>}
 
@@ -180,18 +180,18 @@ export function WordingPractice({ scenarioId }: { scenarioId: string }) {
               )}
             </div>
             {error && <p role="alert" className="mt-2 text-sm text-coral-dark">{error}</p>}
-            {showExample && <p className="mt-3 rounded-lg bg-teal/10 p-3 text-sm">&ldquo;{target.label}&rdquo; <span className="text-ink/60">Other wording that does the same thing counts.</span></p>}
+            {showExample && <p className="mt-3 rounded-lg bg-teal/10 p-3 text-sm">&ldquo;{target.label}&rdquo; <span className="text-ink/70">Other wording that does the same thing counts.</span></p>}
           </form>
         </div>
 
         <div aria-live="polite">
           {tries.length === 0 ? (
-            <p className="rounded-xl border-2 border-dashed border-ink/15 p-5 text-sm text-ink/60">Your attempts appear here. The example stays hidden until you have tried once.</p>
+            <p className="rounded-xl border-2 border-dashed border-ink/15 p-5 text-sm text-ink/70">Your attempts appear here. The example stays hidden until you have tried once.</p>
           ) : (
             <ol className="space-y-3">
               {tries.map((r, k) => (
                 <li key={k} className={`rounded-xl border-2 p-4 text-sm ${r.on ? "border-teal bg-teal/5" : "border-mustard bg-mustard/10"}`}>
-                  <p className="font-bold">{r.on ? "✓ On target" : "Not yet"} <span className="font-normal text-ink/60">· attempt {k + 1}</span></p>
+                  <p className="font-bold">{r.on ? "✓ On target" : "Not yet"} <span className="font-normal text-ink/70">· attempt {k + 1}</span></p>
                   <p className="mt-1">You said: &ldquo;{r.text}&rdquo;</p>
                   {r.reply && <p className="mt-1 text-ink/75">{s.counterpart.name}: &ldquo;{r.reply}&rdquo;</p>}
                   <p className="mt-2 text-ink/85">{r.feedback}</p>

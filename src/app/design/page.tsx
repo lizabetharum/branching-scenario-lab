@@ -78,7 +78,7 @@ export default function Design() {
         </div>
       </nav>
 
-      <article className="prose-d max-w-3xl">
+      <article className="prose-d min-w-0 max-w-3xl">
         <p className="eyebrow">Design notes</p>
         <h1 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">How these scenarios were designed</h1>
         <p className="!text-lg">

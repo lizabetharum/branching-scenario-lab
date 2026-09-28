@@ -9,6 +9,7 @@ import { Scene } from "./Scene";
 import { PROVIDER_LABEL } from "@/lib/model-info";
 import { BranchMap } from "./BranchMap";
 import { Debrief } from "./Debrief";
+import { useViewReset } from "./useViewReset";
 
 type LogEntry =
   | { kind: "situation"; text: string }
@@ -77,6 +78,8 @@ export function Player({ scenarioId }: { scenarioId: string }) {
   const [paused, setPaused] = useState(false);
 
   const logRef = useRef<HTMLDivElement>(null);
+  const [attempt, setAttempt] = useState(0);
+  const heading = useViewReset<HTMLHeadingElement>(`${phase}-${attempt}`);
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [log]);
@@ -112,6 +115,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
       ...(first.opener ? [{ kind: "counterpart" as const, text: first.opener }] : []),
     ]);
     setPhase("play");
+    setAttempt((n) => n + 1);
   }
 
   function applyMove(move: Move, mode: "choice" | "free", learnerText: string, counterpartText: string, aiVaried: boolean) {
@@ -224,7 +228,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
     return (
       <section className="mx-auto max-w-5xl px-5 py-10">
         <p className="eyebrow">{s.domain}</p>
-        <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{s.title}</h1>
+        <h1 ref={heading} tabIndex={-1} className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{s.title}</h1>
         <p className="mt-3 max-w-2xl text-lg text-ink/80">{s.tagline}</p>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
@@ -245,20 +249,31 @@ export function Player({ scenarioId }: { scenarioId: string }) {
             </dl>
           </div>
           <div className="card">
-            <h2 className="h2">Who are you in this scenario?</h2>
-            <fieldset className="mt-3 space-y-3">
-              <legend className="sr-only">Choose a learner persona</legend>
-              {s.learnerPersonas.map((p) => (
-                <label key={p.id} className={`block cursor-pointer rounded-xl border-2 p-4 ${p.id === personaId ? "border-ink bg-paper" : "border-ink/15"}`}>
-                  <input type="radio" name="persona" value={p.id} checked={p.id === personaId} onChange={() => setPersonaId(p.id)} className="mr-2 accent-ink" />
-                  <span className="font-bold">{p.name}</span>
-                  <span className="mt-1 block text-sm text-ink/75">{p.summary}</span>
-                  <span className="mt-1 block text-sm text-ink/75"><b>Gap:</b> {p.gap}</span>
-                  <span className="mt-1 block text-sm text-ink/75"><b>Support:</b> {p.support === "proactive" ? "Framework cues at each decision and a hint after weaker moves." : "No framework cues. Hints only if you ask."}</span>
-                </label>
-              ))}
-            </fieldset>
-            <h3 className="mt-5 font-bold">Objective for {persona.name}</h3>
+            {s.learnerPersonas.length === 1 ? (
+              <>
+                <h2 className="h2">Your role: {persona.name}</h2>
+                <p className="mt-2 text-sm text-ink/80">{persona.summary}</p>
+                <p className="mt-2 text-sm text-ink/80"><b>Gap:</b> {persona.gap}</p>
+                <p className="mt-2 text-sm text-ink/80"><b>Support:</b> {persona.support === "proactive" ? "Framework cues at each decision and a hint after weaker moves. Hints are recorded." : "Hints only if you ask. Hints are recorded."}</p>
+              </>
+            ) : (
+              <>
+                <h2 className="h2">Who are you in this scenario?</h2>
+                <fieldset className="mt-3 space-y-3">
+                  <legend className="sr-only">Choose a learner persona</legend>
+                  {s.learnerPersonas.map((p) => (
+                    <label key={p.id} className={`block cursor-pointer rounded-xl border-2 p-4 ${p.id === personaId ? "border-ink bg-paper" : "border-ink/15"}`}>
+                      <input type="radio" name="persona" value={p.id} checked={p.id === personaId} onChange={() => setPersonaId(p.id)} className="mr-2 accent-ink" />
+                      <span className="font-bold">{p.name}</span>
+                      <span className="mt-1 block text-sm text-ink/75">{p.summary}</span>
+                      <span className="mt-1 block text-sm text-ink/75"><b>Gap:</b> {p.gap}</span>
+                      <span className="mt-1 block text-sm text-ink/75"><b>Support:</b> {p.support === "proactive" ? "Framework cues at each decision and a hint after weaker moves." : "No framework cues. Hints only if you ask."}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              </>
+            )}
+            <h3 className="mt-5 font-bold">Objective</h3>
             <p className="mt-1 text-sm text-ink/80">{persona.objective}</p>
           </div>
         </div>
@@ -266,7 +281,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
         {s.framework && (
           <details className="card mt-6" open={persona.support === "proactive"}>
             <summary className="cursor-pointer text-xl font-extrabold text-ink">
-              What is {s.framework.name}? <span className="text-sm font-semibold text-ink/60">({persona.support === "proactive" ? `recommended for ${persona.name}` : `optional for ${persona.name}`})</span>
+              What is {s.framework.name}? <span className="text-sm font-semibold text-ink/70">({persona.support === "proactive" ? `recommended for ${persona.name}` : `optional for ${persona.name}`})</span>
             </summary>
             <p className="mt-3 text-ink/80">{s.framework.summary}</p>
             <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -300,7 +315,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
   }
 
   if (phase === "debrief" && summary) {
-    return <Debrief scenarioId={s.id} summary={summary} onRetry={start} onStepBack={() => { stepBack(); setPhase("play"); }} />;
+    return <Debrief scenarioId={s.id} summary={summary} onRetry={start} onStepBack={() => { stepBack(); setPhase("play"); setAttempt((n) => n + 1); }} />;
   }
 
   const sceneLabel = `${s.counterpart.name} looks ${lastMood}. ${node.cue ? `Visual cue: ${node.cue}.` : ""}`;
@@ -310,7 +325,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="eyebrow">{s.domain} · playing as {persona.name}</p>
-          <h1 className="text-2xl font-extrabold text-ink">{s.title}</h1>
+          <h1 ref={heading} tabIndex={-1} className="text-2xl font-extrabold text-ink">{s.title}</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <button className="btn-ghost" onClick={() => setPaused(true)}>Pause</button>
@@ -336,7 +351,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
             {log.map((e, i) => (
               <LogItem key={i} e={e} name={s.counterpart.name} flagged={"turn" in e && flagged.includes(e.turn)} onFlag={(t) => setFlagged((f) => (f.includes(t) ? f.filter((x) => x !== t) : [...f, t]))} />
             ))}
-            {busy && <p className="text-sm italic text-ink/60">{s.counterpart.name} is thinking...</p>}
+            {busy && <p className="text-sm italic text-ink/70">{s.counterpart.name} is thinking...</p>}
           </div>
 
           {ending ? (

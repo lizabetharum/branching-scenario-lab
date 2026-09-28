@@ -17,6 +17,11 @@ jobs:
       - run: npm run lint
       # The build runs the map, engine and review-link checks before next build.
       - run: npm run build
+      - name: Mobile layout checks
+        run: |
+          npx next start -p 3198 &
+          for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:3198 && break; sleep 1; done
+          node scripts/mobile-check.mjs http://localhost:3198
 
       # AI and guardrail tests. Runs only if the repository has an ANTHROPIC_API_KEY secret.
       - name: AI tests

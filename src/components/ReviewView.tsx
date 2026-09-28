@@ -104,7 +104,7 @@ export function ReviewView() {
             const flagged = attempt.flagged.includes(i);
             return (
               <li key={i} className={`card !p-4 ${flagged ? "border-2 border-coral" : ""}`}>
-                <p className="text-xs font-bold text-ink/60">Turn {i + 1}{flagged ? " · flagged by the learner" : ""}{t.hintBefore ? " · after a hint" : ""}</p>
+                <p className="text-xs font-bold text-ink/70">Turn {i + 1}{flagged ? " · flagged by the learner" : ""}{t.hintBefore ? " · after a hint" : ""}</p>
                 <p className="mt-1"><b>Learner:</b> {t.learner}</p>
                 <p className="mt-1 text-ink/75"><b>{s.counterpart.name}:</b> {t.reply}</p>
                 {t.released.length > 0 && <p className="mt-1 text-xs text-teal-dark">Revealed: {t.released.map((id) => s.facts.find((f) => f.id === id)?.label ?? id).join("; ")}</p>}
@@ -135,12 +135,12 @@ export function ReviewView() {
           <div className="card !p-4">
             <h2 className="h2">Scores</h2>
             <table className="mt-2 w-full text-sm">
-              <thead><tr className="text-left text-xs text-ink/60"><th className="py-1">Criterion</th><th>AI labels</th><th>Your labels</th></tr></thead>
+              <thead><tr className="text-left text-xs text-ink/70"><th className="py-1">Criterion</th><th>AI labels</th><th>Your labels</th></tr></thead>
               <tbody>
                 {corrected.map((c, i) => (
                   <tr key={c.id} className="border-t border-ink/10 align-top">
                     <td className="py-1.5 pr-2"><b>{c.id}</b> {c.label}</td>
-                    <td className="py-1.5">{SCORE[original[i].status]} <span className="text-xs text-ink/60">{WORD[original[i].status]}</span></td>
+                    <td className="py-1.5">{SCORE[original[i].status]} <span className="text-xs text-ink/70">{WORD[original[i].status]}</span></td>
                     <td className={`py-1.5 ${c.status !== original[i].status ? "font-bold text-coral-dark" : ""}`}>{SCORE[c.status]} <span className="text-xs">{WORD[c.status]}</span></td>
                   </tr>
                 ))}
@@ -160,7 +160,7 @@ export function ReviewView() {
             </div>
           )}
           <button className="btn-primary w-full" onClick={async () => { await navigator.clipboard.writeText(summary); setCopied(true); }}>{copied ? "Copied" : "Copy review summary"}</button>
-          <p className="text-xs text-ink/60">Nothing on this page is saved. <Link href="/design#review-route" className="link">How review works</Link></p>
+          <p className="text-xs text-ink/70">Nothing on this page is saved. <Link href="/design#review-route" className="link">How review works</Link></p>
         </aside>
       </div>
     </section>
