@@ -32,10 +32,10 @@ export const conversationRun = {
       },
       "note": "Every criterion quotes a completed behavior, including Sam's proposal and the confirmation.",
       "transcript": [
-        "Thanks for coming in. Walk me through what's been happening at your station when these mix-ups happen. → [open, acknowledge] released pattern",
+        "Thanks for coming in. Walk me through what's been happening at your station when these mix-ups happen. → [open, namesConcern] released pattern",
         "What happens to the label you were working on when you get called to the register? → [open] released tray",
         "That makes sense. What do you think would help? → [acknowledge, askOptions] released idea",
-        "Let's try it. What will you do first, and when should we check how it's going? → [confirms, wayForward, checkin] released commit",
+        "Let's try it. What will you do first, and when should we check how it's going? → [acknowledge, wayForward, checkin] released commit",
         "Friday works. Let's do it. → [confirms]"
       ],
       "pass": true
@@ -70,8 +70,8 @@ export const conversationRun = {
       "note": "Pins the reviewer's finding: no plan ending, and no P4 credit for asking. P3 varies between runs (not observed, or partial when the question draws out Sam's surface idea), so either is accepted.",
       "transcript": [
         "You need to slow down and double-check every label. → [instruction]",
-        "Sorry, I jumped ahead. What's actually happening at your station when these come up? → [acknowledge, open] released pattern",
-        "What will you do first, and when should we check how it is working? → [wayForward] released surfaceIdea"
+        "Sorry, I jumped ahead. What's actually happening at your station when these come up? → [open, acknowledge] released pattern",
+        "What will you do first, and when should we check how it is working? → [open, wayForward, checkin] released surfaceIdea"
       ],
       "pass": true
     },
@@ -100,7 +100,7 @@ export const conversationRun = {
       "note": "Asked before the cause surfaced. No step and time is proposed or confirmed, so nothing is agreed (P4 partial). P3 is partial when the question draws out Sam's surface idea, otherwise not observed. P3 was first written as not_observed only, then widened when a next-step question began drawing out the character's idea.",
       "transcript": [
         "Walk me through what's been happening at your station when these mix-ups happen. → [open] released pattern",
-        "Okay. What will you do first, and when do we check in? → [open, askOptions, wayForward, checkin] released surfaceIdea"
+        "Okay. What will you do first, and when do we check in? → [wayForward, checkin] released surfaceIdea"
       ],
       "pass": true
     },
@@ -158,7 +158,7 @@ export const conversationRun = {
       },
       "note": "The ending must acknowledge the diagnosis (the form layout) and name the missing agreement, not say nothing targeted the cause.",
       "transcript": [
-        "Walk me through how these wrong numbers end up in the system. → [open, namesConcern] released pattern",
+        "Walk me through how these wrong numbers end up in the system. → [open] released pattern",
         "When you're typing a number in, what are you looking at on the screen? → [open] released form"
       ],
       "pass": true
@@ -192,10 +192,10 @@ export const conversationRun = {
       },
       "note": "Q4 needs Dev's own idea, Dev's proposal and Priya's confirmation.",
       "transcript": [
-        "Thanks for coming in. A customer said yesterday they felt rushed at pickup, and I've noticed a couple of quick handoffs this week. What's been going on? → [open, namesConcern] released busier",
+        "Thanks for coming in. A customer said yesterday they felt rushed at pickup, and I've noticed a couple of quick handoffs this week. What's been going on? → [namesConcern, open] released busier",
         "What's different about how the afternoons run now? → [open] released drive",
         "I didn't know that. What do you think would help? → [acknowledge, askOptions] released idea",
-        "Let's try that. What's the first step, and when should we check in? → [confirms, wayForward] released commit",
+        "Let's try that. What's the first step, and when should we check in? → [wayForward, checkin] released commit",
         "Friday it is. Thanks, Dev. → [confirms, closes]"
       ],
       "pass": true
