@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lizabeth Arum | AI Learning Experience Design</title>
+<meta name="description" content="Work samples from Lizabeth Arum: a pharmacy coaching AI role-play prototype, a Storyline branching scenario, and a live AI coach.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--slate:#2B2D42;--red:#EF233C;--ice:#EDF2F4;--steel:#8D99AE;--redtext:#C8102E}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Montserrat,system-ui,sans-serif;color:var(--slate);background:var(--ice);line-height:1.6;font-size:17px}
+  a{color:var(--slate)}
+  a:focus-visible,.btn:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+  .skip{position:absolute;left:-999px}.skip:focus{left:16px;top:16px;background:#fff;padding:8px 12px;z-index:9}
+  header{background:var(--slate);color:#fff;padding:56px 16px 48px;border-bottom:6px solid var(--red)}
+  .wrap{max-width:880px;margin:0 auto}
+  h1{font-weight:800;font-size:clamp(2rem,5vw,2.8rem);margin:0 0 6px;letter-spacing:-.01em}
+  .role{font-weight:600;font-size:1.1rem;margin:0 0 18px;color:var(--ice)}
+  header p.intro{max-width:680px;margin:0 0 20px}
+  header nav a{color:#fff;font-weight:600;margin-right:18px}
+  main{padding:40px 16px 56px}
+  h2{font-weight:800;font-size:1.35rem;margin:0 0 20px}
+  .card{background:#fff;border-radius:10px;padding:28px;margin-bottom:24px;border-left:6px solid var(--red);box-shadow:0 1px 3px rgba(43,45,66,.12)}
+  .tag{display:inline-block;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--redtext);margin-bottom:6px}
+  .card h3{margin:0 0 10px;font-size:1.25rem;font-weight:800}
+  .card p{margin:0 0 12px}
+  .card ul{margin:0 0 18px;padding-left:20px}
+  .card li{margin-bottom:6px}
+  .try{background:var(--ice);border-radius:6px;padding:12px 14px;margin:0 0 18px;font-size:.95rem}
+  .try strong{font-weight:600}
+  .btn{display:inline-block;background:var(--slate);color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:6px}
+  .btn:hover{background:#1b1c2b}
+  .btn span{font-weight:400;font-size:.85rem;opacity:.85}
+  footer{padding:0 16px 48px;font-size:.9rem;color:#4a4d63}
+  @media (max-width:520px){.card{padding:20px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#work">Skip to work samples</a>
+<header>
+  <div class="wrap">
+    <h1>Lizabeth Arum</h1>
+    <p class="role">AI Learning Experience Designer</p>
+    <p class="intro">I build practice where people rehearse hard conversations and get feedback on what they said. I work across instructional design, facilitation, Product, and Engineering. Each sample below opens directly, with no sign-up.</p>
+    <nav aria-label="Contact">
+      <a href="mailto:lizarum@gmail.com">lizarum@gmail.com</a>
+      <a href="https://www.linkedin.com/in/lizabeth-arum/">LinkedIn</a>
+    </nav>
+  </div>
+</header>
+
+<main id="work">
+  <div class="wrap">
+    <h2>Three work samples</h2>
+
+    <article class="card">
+      <span class="tag">AI role-play simulation · Prototype</span>
+      <h3>Pharmacy Coaching Role-Play</h3>
+      <p>A working prototype built in Next.js on the Anthropic API. Pharmacy managers coach an AI technician who knows why a performance problem happened and shares each fact only when the manager asks a good question.</p>
+      <ul>
+        <li>Leading questions or a handed-over fix make the technician more guarded. Open questions and recovered missteps open the conversation back up.</li>
+        <li>Five defined failure states, from mistakes the learner can repair to full system failure.</li>
+        <li>Feedback quotes the manager's own words and gives one next step per skill. Learners can flag any label the AI assigns.</li>
+        <li>Code controls transitions and scoring. Layered guardrails block personal information, clinical questions, off-topic chat, and prompt injection.</li>
+        <li>A release gate of 23 risk-based test cases runs before every deploy.</li>
+      </ul>
+      <p class="try"><strong>Try this:</strong> start with a leading question, then switch to an open one, and compare what the technician tells you.</p>
+      <a class="btn" href="https://branching-scenario-lab.vercel.app/">Open the role-play <span>(new site)</span></a>
+    </article>
+
+    <article class="card">
+      <span class="tag">Storyline branching scenario</span>
+      <h3>Design Without Delay</h3>
+      <p>An Articulate Storyline branching scenario where educators launch a 45-minute station rotation under time pressure. Vague directions leave students confused and behind on their work. Clear structure lets students work on their own.</p>
+      <p class="try"><strong>Try this:</strong> take the vague option first to see how the consequences play out, then replay with clear structure.</p>
+      <a class="btn" href="https://samplefilesarum.s3.us-east-1.amazonaws.com/backwards_design_tab_interaction/story.html">Open the scenario <span>(Storyline)</span></a>
+    </article>
+
+    <article class="card">
+      <span class="tag">Live AI coach · Playlab</span>
+      <h3>RoboTrig Facilitator Coach</h3>
+      <p>One of four AI coaches that ran live in NYC FIRST pilot classrooms, built on Playlab, an AI app-building platform. The coach helps instructors plan lessons and make teaching decisions during class.</p>
+      <ul>
+        <li>Wrote the system prompts and configuration.</li>
+        <li>Grounded the coach in the RoboTrig curriculum.</li>
+        <li>Built English and Spanish versions of the student-facing coaches.</li>
+      </ul>
+      <p class="try"><strong>Try this:</strong> ask it to help you plan a lesson or handle a problem that came up during class.</p>
+      <a class="btn" href="https://www.playlab.ai/project/cmmieggya0qgok40w3o0bqxp2">Open the coach <span>(Playlab)</span></a>
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">Lizabeth Arum · Brooklyn, NY · <a href="mailto:lizarum@gmail.com">lizarum@gmail.com</a></div>
+</footer>
+</body>
+</html>
