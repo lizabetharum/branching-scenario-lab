@@ -419,6 +419,7 @@ export const jordan: Scenario = {
   title: "Can You Just Fix It?",
   domain: "Education · teacher professional development",
   tagline: "A student's line-following robot broke before the qualifying run. Help them find the cause without taking over, while another student waits.",
+  learnerGoal: "Help Jordan find what broke the robot without doing the work for Jordan.",
   scene: "classroom",
   intake: {
     duration: "10 to 15 minutes. That's enough time for one skill: responding to a request for a fix without taking over, under time pressure.",
@@ -465,7 +466,7 @@ export const jordan: Scenario = {
     {
       id: "teacher",
       name: "Classroom teacher",
-      summary: "Helps students debug one-on-one. Takes over when time is short.",
+      summary: "Teaches a robotics class where students build and program micro:bit robots.",
       gap: "Execution under time pressure. Defaults to fixing it when the clock is running.",
       objective:
         "Help Jordan find what broke the robot and get ready for the run, with Jordan doing the work, even when another student needs you.",

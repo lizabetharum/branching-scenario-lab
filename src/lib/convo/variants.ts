@@ -16,6 +16,7 @@ export const labelsB: ConvoScenario = {
   caseLabel: "Case B",
   title: "The Phone Number Conversation",
   tagline: "You're Marcus again. A different technician, a different error pattern. Same skill: explore before you interpret.",
+  learnerGoal: "Find out what's behind Ana's wrong phone numbers before you decide what they mean.",
   who: "ana",
   counterpart: {
     name: "Ana",
@@ -134,6 +135,7 @@ export const pickupB: ConvoScenario = {
   caseLabel: "Case B",
   title: "The Missed Huddles",
   tagline: "You're Priya again. A different technician, a different change in behavior. Same idea: asking finds what watching can't.",
+  learnerGoal: "Tell Luis you've noticed he's missing huddles, then find out why before you decide what it means.",
   who: "luis",
   counterpart: {
     name: "Luis",

@@ -134,6 +134,8 @@ export interface Scenario {
   title: string;
   domain: string;
   tagline: string;
+  /** One plain line for the learner on the intro screen. The formal objective and gap are designer notes. */
+  learnerGoal: string;
   scene: "classroom" | "pharmacy";
   intake: { duration: string; situation: string; experience: string };
   objective: string;

@@ -69,6 +69,7 @@ export function buildScenario(p: AuthoredPacket): ConvoScenario {
     title: p.title,
     domain: "Your scenario · draft",
     tagline: `You're ${p.learner.name}. Find out what's behind the pattern before you decide what it means.`,
+    learnerGoal: `Find out what's behind the pattern with ${n} before you decide what it means.`,
     who: "sam",
     persona: {
       id: "author",

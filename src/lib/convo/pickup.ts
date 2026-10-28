@@ -69,12 +69,13 @@ export const pickup: ConvoScenario = {
   title: "The Pickup Counter",
   domain: "Healthcare · pharmacy leadership coaching",
   tagline: "You're Priya, a new manager. A technician has been rushing customers. Find out why before you decide what it means.",
+  learnerGoal: "Tell Dev what you've noticed at pickup, then find out why before you decide what it means.",
   who: "dev",
   persona: {
     id: "priya",
     name: "Priya Nair",
-    summary: "Reluctant first-time manager. Doesn't believe she has permission to ask without knowing the answer first.",
-    gap: "Conceptual. She hasn't built the mental model that asking is the work.",
+    summary: "First-time pharmacy manager at Gilbert's.",
+    gap: "Conceptual. She hasn't built the mental model that asking is the work, and doesn't believe she has permission to ask without knowing the answer first.",
     objective:
       "After completing the module, explain in a written reflection why asking an open GROW question, rather than telling the employee what to do, surfaces information that observation alone cannot provide, using at least one specific example from her own team.",
     support: "proactive",

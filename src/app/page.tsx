@@ -57,7 +57,7 @@ export default function Home() {
             ...Object.values(convoScenarios).filter((c) => c.caseLabel === "Case A").map((c) => ({
               id: c.id, title: c.title, domain: c.domain, tagline: c.tagline, format: "Open conversation · fact packet",
               who: c.who, scene: "pharmacy" as const, mood: "guarded" as const,
-              play: `${c.persona.name}. ${c.persona.gap}`, talk: `${c.counterpart.name}, ${c.counterpart.role.charAt(0).toLowerCase() + c.counterpart.role.split(",")[0].slice(1)}`,
+              play: c.persona.name, talk: `${c.counterpart.name}, ${c.counterpart.role.charAt(0).toLowerCase() + c.counterpart.role.split(",")[0].slice(1)}`,
             })),
             ...Object.values(scenarios).map((t) => ({
               id: t.id, title: t.title, domain: t.domain, tagline: t.tagline, format: "Fixed branching tree",
@@ -72,7 +72,7 @@ export default function Home() {
                 <h2 className="mt-2 text-2xl font-extrabold">{c.title}</h2>
                 <p className="mt-2 inline-block self-start rounded-full bg-ink px-3 py-1 text-xs font-bold text-white">{c.format}</p>
                 <p className="mt-3 text-ink/80">{c.tagline}</p>
-                <p className="mt-3 text-sm text-ink/70"><b>You play:</b> {c.play} <b>You talk with:</b> {c.talk}.</p>
+                <p className="mt-3 text-sm text-ink/70"><b>You play:</b> {c.play}. <b>You talk with:</b> {c.talk}.</p>
                 <div className="mt-auto pt-5">
                   <Link href={`/scenario/${c.id}`} className="btn-primary">Start</Link>
                 </div>

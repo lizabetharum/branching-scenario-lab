@@ -100,6 +100,8 @@ export interface ConvoScenario {
   title: string;
   domain: string;
   tagline: string;
+  /** One plain line for the learner on the intro screen. The formal objective and gap are designer notes. */
+  learnerGoal: string;
   who: "sam" | "dev" | "ana" | "luis";
   persona: LearnerPersona;
   counterpart: { name: string; role: string; goal: string; voice: string; boundaries: string[] };

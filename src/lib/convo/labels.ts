@@ -79,12 +79,13 @@ export const labels: ConvoScenario = {
   title: "The Label Conversation",
   domain: "Healthcare · pharmacy leadership coaching",
   tagline: "You're Marcus. Coach a technician after a pattern of labeling errors. Open conversation, no scripted choices.",
+  learnerGoal: "Find out what's behind Sam's errors before you decide what they mean.",
   who: "sam",
   persona: {
     id: "marcus",
     name: "Marcus Delgado",
-    summary: "Confident pharmacy manager. Already runs coaching conversations but cuts corners on exploration.",
-    gap: "Execution. He tells instead of asks.",
+    summary: "Pharmacy manager at Gilbert's. Already runs coaching conversations with the team.",
+    gap: "Execution. Confident, but he tells instead of asks and cuts corners on exploration.",
     objective:
       "Given a pharmacy performance scenario involving a technician error pattern, investigate by posing at least two open, exploratory questions before stating any interpretation, with zero leading questions, scored on a GROW investigation rubric.",
     support: "on_request",

@@ -161,6 +161,7 @@ export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string;
   if (phase === "intake") {
     return (
       <section className="mx-auto max-w-5xl px-5 py-10">
+        {designer && <p className="mb-3 inline-block rounded-full bg-teal/15 px-3 py-1 text-xs font-bold text-teal-dark">Designer view is on</p>}
         <p className="eyebrow">{s.domain} · open conversation</p>
         <h1 ref={heading} tabIndex={-1} className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">{s.title}</h1>
         <p className="mt-3 max-w-2xl text-lg text-ink/80">{s.tagline}</p>
@@ -177,10 +178,9 @@ export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string;
           <div className="card">
             <h2 className="h2">You are {p.name}</h2>
             <p className="mt-2 text-sm text-ink/80">{p.summary}</p>
-            <p className="mt-2 text-sm text-ink/80"><b>Gap:</b> {p.gap}</p>
             <p className="mt-2 text-sm text-ink/80"><b>Support:</b> {p.support === "proactive" ? "A hint appears after moves that don't help. Hints are recorded." : "Hints only if you ask. Hints are recorded."}</p>
-            <h3 className="mt-4 font-bold">Objective</h3>
-            <p className="mt-1 text-sm text-ink/80">{p.objective}</p>
+            <h3 className="mt-4 font-bold">Your goal</h3>
+            <p className="mt-1 text-sm text-ink/80">{s.learnerGoal}</p>
           </div>
         </div>
         {s.framework && (
@@ -214,8 +214,13 @@ export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string;
 
         {designer && (
         <details className="mt-6 rounded-2xl border border-ink/15 bg-white/60 p-5">
-          <summary className="cursor-pointer font-bold text-ink/80">For designers: how this scenario was scoped</summary>
-          <p className="mt-3 text-sm text-ink/80">Three questions came before any dialogue: how long the practice should take, the moment the skill breaks down on the job, and what learners already know. Each answer set a limit on what the scenario tries to do.</p>
+          <summary className="cursor-pointer font-bold text-ink/80">Designer notes</summary>
+          <dl className="mt-4 space-y-4">
+            <div><dt className="font-bold text-ink">Gap</dt><dd className="mt-1 text-ink/80">{p.gap}</dd></div>
+            <div><dt className="font-bold text-ink">Objective</dt><dd className="mt-1 text-ink/80">{p.objective}</dd></div>
+          </dl>
+          <h3 className="mt-6 font-bold text-ink">How this scenario was scoped</h3>
+          <p className="mt-2 text-sm text-ink/80">Three questions came before any dialogue: how long the practice should take, the moment the skill breaks down on the job, and what learners already know. Each answer set a limit on what the scenario tries to do.</p>
           <dl className="mt-4 space-y-4">
               {[
                 ["How long should this be?", s.intake.duration],
