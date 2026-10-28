@@ -40,6 +40,8 @@ export interface Move {
   next: string;
   /** What this choice cost, shown in the debrief apart from the scores. */
   tradeoff?: string;
+  /** A cost that carries into the story's ending, such as lost time. Added to the ending text. */
+  endingNote?: string;
 }
 
 export interface ScenarioNode {

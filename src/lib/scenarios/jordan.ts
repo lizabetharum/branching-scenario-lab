@@ -41,6 +41,7 @@ const nodes: Scenario["nodes"] = {
         mood: "frustrated",
         next: "D1b",
         tradeoff: "A reasonable hunch. It cost two minutes before you knew what had changed. Asking first would have pointed straight at the three changes.",
+        endingNote: "Checking the sensors first cost two minutes before anyone asked what had changed.",
       },
       {
         id: "D1.takeover",
@@ -180,16 +181,62 @@ const nodes: Scenario["nodes"] = {
         quality: "partial",
         tags: ["unfocused"],
         reply: "I don't know! That's why I called you. The run's in eight minutes.",
-        consequence: "Jordan's answer is incomplete, and the clock is running.",
+        consequence: "Jordan has no answer, and a minute is gone.",
         mood: "frustrated",
-        next: "D2",
+        next: "D2b",
+        tradeoff: "An open question with no focus gave Jordan nowhere to start. It cost a minute you didn't have before anyone tested anything.",
+        endingNote: "The open question at the second decision cost a minute, so Jordan got to the track last in line.",
+      },
+    ],
+  },
+  D2b: {
+    id: "D2b",
+    title: "D2b: \"I don't know\"",
+    situation: "Seven minutes to the run. Jordan doesn't know what's wrong and is waiting for you to say something useful.",
+    mood: "frustrated",
+    hint: "Jordan can't explain the whole problem. Jordan can pick one of the three changes and predict what testing it will show.",
+    pos: [2, 0],
+    moves: [
+      {
+        id: "D2b.narrow",
+        label: "Fair. Pick one of your three changes to test. What do you expect if that's the one?",
+        category: "Narrows the question to one change Jordan can test and asks Jordan for a prediction.",
+        quality: "good",
+        tags: ["bounded", "repair"],
+        reply: "The speed, I guess. If it's the speed, putting it back to 40 should make the curve even with the bracket up. If it still drives off, it's the bracket.",
+        consequence: "Jordan picks one change, makes a prediction and sets up the run.",
+        mood: "engaged",
+        next: "P1",
+      },
+      {
+        id: "D2b.revertAll",
+        label: "Okay. Put all three back so you're ready for the run.",
+        category: "Agrees to undo all the changes at once so the robot works, without isolating which change mattered.",
+        quality: "partial",
+        tags: [],
+        reply: "(Jordan reverts everything. It makes the curve.) Okay, it works. But I still don't know which one broke it.",
+        consequence: "The robot is ready for the run. No one knows which change mattered.",
+        mood: "neutral",
+        next: "R2b",
+        tradeoff: "Reverting guaranteed a working robot for the run. It also erased the evidence of which change broke it, so learning anything took another test.",
+      },
+      {
+        id: "D2b.overload",
+        label: "Then set the speed to 50, lower the bracket halfway and recalibrate the sensors.",
+        category: "Gives several changes or steps at once without isolating one.",
+        quality: "poor",
+        tags: ["overload"],
+        reply: "Okay, I did all that. Now it wobbles along the straight part and still misses the curve. Which one did what?",
+        consequence: "Three more changes. The result can't tell anyone which one mattered.",
+        mood: "frustrated",
+        next: "R2",
       },
     ],
   },
   R2b: {
     id: "R2b",
     title: "R2b: It works, but which one?",
-    situation: "Seven minutes left. The robot works because everything is back the way it was.",
+    situation: "Six minutes left. The robot works because everything is back the way it was.",
     mood: "neutral",
     hint: "There's time for one test run. Which change could Jordan put back alone?",
     pos: [3, 0],
@@ -342,7 +389,7 @@ const nodes: Scenario["nodes"] = {
   },
 };
 
-const CUES: Record<string, string> = { D1: "track", D1b: "track", D2: "versions", R2b: "working", P1: "waiting", R2: "versions", D3: "working" };
+const CUES: Record<string, string> = { D1: "track", D1b: "track", D2: "versions", D2b: "versions", R2b: "working", P1: "waiting", R2: "versions", D3: "working" };
 for (const [id, cue] of Object.entries(CUES)) nodes[id].cue = cue;
 
 const endings: Scenario["endings"] = {
@@ -376,6 +423,8 @@ const tagIndex = new Map<string, MoveTag[]>(
   Object.values(nodes).flatMap((n) => n.moves.map((m) => [m.id, m.tags] as [string, MoveTag[]])),
 );
 
+const endingNotes = new Set(Object.values(nodes).flatMap((n) => n.moves.filter((m) => m.endingNote).map((m) => m.id)));
+
 function evaluate(history: Turn[]) {
   const elicit = firstWith(history, ["elicit"], tagIndex);
   const bounded = firstWith(history, ["bounded"], tagIndex);
@@ -385,6 +434,19 @@ function evaluate(history: Turn[]) {
   const verify = firstWith(history, ["verify"], tagIndex);
   const triage = firstWith(history, ["triage"], tagIndex);
   const noStep = firstWith(history, ["noStep"], tagIndex);
+
+  // A choice that cost time at the same decision (one with an ending note) comes before the behavior.
+  // The behavior still counts, but not as a first-try success.
+  const detourBefore = (target: Turn | undefined, nodeIds: string[]) =>
+    target ? history.slice(0, history.indexOf(target)).find((t) => nodeIds.includes(t.nodeId) && endingNotes.has(t.moveId)) : undefined;
+  const withDetour = (target: Turn, detour: Turn | undefined, lead: string) => ({
+    support: detour && supportOf(target) === "independent" ? ("after_recovery" as const) : supportOf(target),
+    evidence: detour ? `${lead} ${quote(detour)} Then: ${quote(target).replace("You said: ", "")}` : quote(target),
+  });
+  const elicitDetour = detourBefore(elicit, ["D1"]);
+  const boundedDetour = detourBefore(bounded, ["D2"]);
+  const t1 = elicit && withDetour(elicit, elicitDetour, "You got there after checking a hunch first cost two minutes.");
+  const t2 = bounded && withDetour(bounded, boundedDetour, "You got there after a question with no focus cost time.");
 
   const T3 = "Kept Jordan doing the work";
   const t3 =
@@ -402,10 +464,10 @@ function evaluate(history: Turn[]) {
 
   return [
     elicit
-      ? result("T1", "Elicited Jordan's explanation and evidence", "demonstrated", supportOf(elicit), quote(elicit), "Keep asking what it did before, what it does now and what changed.", elicit)
+      ? result("T1", "Elicited Jordan's explanation and evidence", "demonstrated", t1!.support, t1!.evidence, elicitDetour ? "Ask what changed before you test a hunch. The answer points to what to test." : "Keep asking what it did before, what it does now and what changed.", elicit)
       : result("T1", "Elicited Jordan's explanation and evidence", "not_observed", "n/a", "No question asked what the robot did before, what it does now, or what changed.", "On the retry, ask what changed since yesterday before choosing a next step."),
     bounded
-      ? result("T2", "Chose one bounded next step based on that evidence", "demonstrated", supportOf(bounded), quote(bounded), "Keep each test to one change with a prediction.", bounded)
+      ? result("T2", "Chose one bounded next step based on that evidence", "demonstrated", t2!.support, t2!.evidence, boundedDetour ? "When a student says \"I don't know,\" go straight to one change and a prediction." : "Keep each test to one change with a prediction.", bounded)
       : result("T2", "Chose one bounded next step based on that evidence", "not_observed", "n/a", overload ? `You gave several changes at once. ${quote(overload)}` : "No single-change test was proposed.", "Ask Jordan to change one thing and predict the result before running it."),
     t3,
     verify

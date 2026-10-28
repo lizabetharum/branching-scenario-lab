@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { scenarios } from "@/lib/scenarios";
+import { endingText, scenarios } from "@/lib/scenarios";
 import type { ApiResponse, BoundaryKind, Move, Turn } from "@/lib/types";
 import { BOUNDARY_MESSAGES, MAX_INPUT, TREE_FALLBACK, detectPersonalInfo } from "@/lib/guardrails";
 import { Scene } from "./Scene";
@@ -140,7 +140,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
     if (move.next in s.endings) {
       setEndingId(move.next);
       setPath((p) => [...p, move.next]);
-      entries.push({ kind: "situation", text: s.endings[move.next].text });
+      entries.push({ kind: "situation", text: endingText(s, move.next, [...history, turn]) });
       setLog((l) => [...l, ...entries]);
       return;
     }

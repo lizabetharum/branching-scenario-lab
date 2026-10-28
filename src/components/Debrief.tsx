@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { scenarios } from "@/lib/scenarios";
+import { endingText, scenarios } from "@/lib/scenarios";
 import type { CriterionStatus, Support } from "@/lib/types";
 import { applyInterruption } from "@/lib/eval-helpers";
 import type { RunSummary } from "./Player";
@@ -67,7 +67,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
         <Scene scene={s.scene} mood={ending.mood} label={`${s.counterpart.name} at the end of the conversation.`} />
         <div className="card">
           <h2 className="h2">What happened</h2>
-          <p className="mt-2 text-ink/85">{ending.text}</p>
+          <p className="mt-2 text-ink/85">{endingText(s, ending.id, summary.history)}</p>
           <p className="mt-4 text-sm text-ink/70">
             The ending shows the consequence inside the story. The criteria below show what you did. Code scores them from your path. When you typed, the AI decided which response your words counted as, so its reading shapes the score. Each typed turn shows that reading and can be flagged.
           </p>
@@ -145,7 +145,7 @@ export function Debrief({ scenarioId, summary, onRetry, onStepBack }: { scenario
           {summary.history.some((t) => allMoves.find((x) => x.id === t.moveId)?.tradeoff) && (
             <div className="card">
               <h2 className="h2">Trade-offs you made</h2>
-              <p className="mt-1 text-sm text-ink/70">These aren&apos;t scored. The criteria measure Jordan&apos;s learning. They don&apos;t measure how you balanced other demands, so the costs are listed here instead.</p>
+              <p className="mt-1 text-sm text-ink/70">Some of these also changed a rating above. A detour that cost time marks that skill &quot;After a recovery.&quot; Costs to other demands, such as Maya&apos;s wait, aren&apos;t scored. The criteria measure Jordan&apos;s learning, so those costs are listed here instead.</p>
               <ul className="mt-3 space-y-2 text-sm">
                 {summary.history.map((t, i) => {
                   const m = allMoves.find((x) => x.id === t.moveId);

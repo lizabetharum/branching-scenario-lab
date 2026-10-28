@@ -1,6 +1,6 @@
 // Graph and state test: every node reachable, every edge valid, no dead ends,
 // every ending reachable. Also plays the ideal path and checks all criteria pass.
-import { scenarios } from "../src/lib/scenarios";
+import { scenarios, endingText as scenarioEndingText } from "../src/lib/scenarios";
 import type { Turn } from "../src/lib/types";
 let failures = 0;
 for (const s of Object.values(scenarios)) {
@@ -9,6 +9,8 @@ for (const s of Object.values(scenarios)) {
   while (q.length) { const n = s.nodes[q.shift()!]; if (!n) continue;
     if (!n.moves.length) { console.log(`✗ ${s.id} ${n.id}: dead end`); failures++; }
     for (const m of n.moves) { if (!ids.has(m.next)) { console.log(`✗ ${s.id} ${m.id} -> missing ${m.next}`); failures++; }
+      // A failed choice must not return the learner to the same options.
+      if (m.next === n.id) { console.log(`✗ ${s.id} ${m.id} loops back to ${n.id} with the same options`); failures++; }
       if (!seen.has(m.next)) { seen.add(m.next); q.push(m.next); } } }
   for (const id of ids) if (!seen.has(id)) { console.log(`✗ ${s.id} ${id} unreachable`); failures++; }
   // ideal path: always pick the first "good" move
@@ -148,7 +150,9 @@ import { decodeAttempt, encodeAttempt, type SharedAttempt } from "../src/lib/con
     ["reverting everything then testing one change recovers T2", ["D1.diagnose", "D2.revertAll", "R2b.oneAtATime", "D3.verify"], (x) => x.end === "E1" && x.r.T2 === "demonstrated"],
     ["reverting everything and sending Jordan off ends partial with no bounded step", ["D1.diagnose", "D2.revertAll", "R2b.go"], (x) => x.end === "E3" && x.r.T2 === "not_observed"],
     ["the sensor lead costs time but can recover", ["D1.sensors", "D1b.diagnose", "D2.scaffold", "P1.triage", "D3.verify"], (x) => x.end === "E1" && x.r.T1 === "demonstrated"],
+    ["both detours on one path still reach E1", ["D1.sensors", "D1b.diagnose", "D2.unfocused", "D2b.narrow", "P1.triage", "D3.verify"], (x) => x.end === "E1" && x.r.T1 === "demonstrated" && x.r.T2 === "demonstrated"],
     ["takeover without repair fails T3", ["D1.takeover", "R1.continue"], (x) => x.end === "E2" && x.r.T3 === "not_observed"],
+    ["the open question at D2 leads to a new node and still reaches E1", ["D1.diagnose", "D2.unfocused", "D2b.narrow", "P1.triage", "D3.verify"], (x) => x.end === "E1" && x.r.T2 === "demonstrated"],
   ];
   let bad = 0;
   for (const [name, ids, ok] of cases) {
@@ -161,6 +165,30 @@ import { decodeAttempt, encodeAttempt, type SharedAttempt } from "../src/lib/con
   }
   if (bad) process.exitCode = 1;
   console.log(`${bad ? "✗" : "✓"} evidence: every "demonstrated" tree rating quotes the learner (${bad} violations)`);
+
+  // Each time-costing detour must cost something: it shows in the ending, and only the criterion
+  // at that decision drops to after-recovery. The failed D2 option must not repeat.
+  const play = (ids: string[]) => {
+    const h: Turn[] = []; let at = s.start;
+    for (const id of ids) {
+      const m = s.nodes[at].moves.find((y) => y.id === id)!;
+      h.push({ nodeId: at, moveId: id, mode: "free", learnerText: m.label, counterpartText: m.reply, hintBefore: false, afterRecovery: false }); at = m.next;
+    }
+    return { end: at, h, sup: Object.fromEntries(s.evaluate(h).map((c) => [c.id, c.support])) };
+  };
+  const direct = play(["D1.diagnose", "D2.scaffold", "P1.triage", "D3.verify"]);
+  const noRepeat = !s.nodes.D2b.moves.some((m) => m.label === s.nodes.D2.moves.find((y) => y.id === "D2.unfocused")!.label);
+  const detours: [string, string[], string, string, RegExp][] = [
+    ["open question at D2", ["D1.diagnose", "D2.unfocused", "D2b.narrow", "P1.triage", "D3.verify"], "T2", "T1", /cost a minute/],
+    ["sensor hunch at D1", ["D1.sensors", "D1b.diagnose", "D2.scaffold", "P1.triage", "D3.verify"], "T1", "T2", /cost two minutes/],
+  ];
+  for (const [name, ids, hit, spared, note] of detours) {
+    const x = play(ids);
+    const ok = noRepeat && direct.sup[hit] === "independent" && x.sup[hit] === "after_recovery" && x.sup[spared] === "independent"
+      && note.test(scenarioEndingText(s, x.end, x.h)) && !note.test(scenarioEndingText(s, x.end, direct.h));
+    if (!ok) process.exitCode = 1;
+    console.log(`${ok ? "✓" : "✗"} tree: the ${name} shows in the ending and marks ${hit} after recovery, not ${spared} (${JSON.stringify(x.sup)})`);
+  }
 }
 
 // Authoring kit: the example draft must validate and pass every authoring check.
