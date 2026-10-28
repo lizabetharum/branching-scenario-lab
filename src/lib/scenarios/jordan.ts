@@ -21,7 +21,7 @@ const nodes: Scenario["nodes"] = {
     moves: [
       {
         id: "D1.diagnose",
-        label: "What did it do yesterday, what does it do now, and what have you changed since then?",
+        label: "What did it do yesterday, and what have you changed since?",
         category: "Asks a focused diagnostic question about the expected behavior, the observed behavior, recent changes, or asks to see the code or robot as tested.",
         quality: "good",
         tags: ["elicit"],
@@ -32,7 +32,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "D1.sensors",
-        label: "Line followers usually fail because of the sensors. Check your sensor readings first.",
+        label: "Line followers usually fail at the sensors. Hold it over the tape and check the readings.",
         category: "Proposes a specific cause, such as the sensors, for Jordan to check, without first asking what changed.",
         quality: "partial",
         tags: ["interpretation"],
@@ -44,7 +44,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "D1.takeover",
-        label: "Let me see your code. I'll find it.",
+        label: "Let me see your code. I'll find what's wrong so you can get to the track.",
         category: "Takes over the code or robot, supplies a fix, or tells Jordan exactly what to change without asking anything first.",
         quality: "poor",
         tags: ["takeover"],
@@ -76,7 +76,7 @@ const nodes: Scenario["nodes"] = {
     moves: [
       {
         id: "D1b.diagnose",
-        label: "Walk me through it. What's different between yesterday's robot and today's?",
+        label: "What's different between yesterday's robot and today's?",
         category: "Asks a focused diagnostic question about recent changes or the difference between the working and broken versions.",
         quality: "good",
         tags: ["elicit"],
@@ -87,7 +87,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "D1b.takeover",
-        label: "Fine, hand it over. I'll get it working for your run.",
+        label: "Fine, hand it over. I'll fix it for your run.",
         category: "Takes over the code or robot, or supplies a fix.",
         quality: "poor",
         tags: ["takeover"],
@@ -108,7 +108,7 @@ const nodes: Scenario["nodes"] = {
     moves: [
       {
         id: "R1.repair",
-        label: "I jumped in too fast. Before your run: what had you changed, and which one do you think broke it?",
+        label: "I jumped in too fast. What had you changed, and which one broke it?",
         category: "Recognizes the takeover, returns control to Jordan, and asks for Jordan's changes, evidence or explanation.",
         quality: "good",
         tags: ["repair", "elicit"],
@@ -119,7 +119,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "R1.continue",
-        label: "Great, it works. Go get in line for the track.",
+        label: "Great, it works. Get in line for the track, and keep the speed at 40 next time.",
         category: "Accepts the working robot and sends Jordan on without checking understanding.",
         quality: "poor",
         tags: ["takeover"],
@@ -141,7 +141,7 @@ const nodes: Scenario["nodes"] = {
     moves: [
       {
         id: "D2.scaffold",
-        label: "Put only the speed back to 40 and leave the rest. What do you predict will happen?",
+        label: "Put only the speed back to 40 and leave the rest. What do you predict?",
         category: "Proposes one bounded comparison or single-change test and asks Jordan for a prediction.",
         quality: "good",
         tags: ["bounded"],
@@ -152,7 +152,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "D2.revertAll",
-        label: "Sure. Put all three back so you're ready for the run.",
+        label: "Sure. Put all three back so you're ready, and we'll find which one it was later.",
         category: "Agrees to undo all the changes at once so the robot works, without isolating which change mattered.",
         quality: "partial",
         tags: [],
@@ -175,7 +175,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "D2.unfocused",
-        label: "So what do you think is wrong? Explain your thinking.",
+        label: "Before you change anything, explain to me what you think is wrong.",
         category: "Asks Jordan to explain in general terms with no focus on a specific change, comparison or prediction.",
         quality: "partial",
         tags: ["unfocused"],
@@ -196,7 +196,7 @@ const nodes: Scenario["nodes"] = {
     moves: [
       {
         id: "R2b.oneAtATime",
-        label: "You have time for one test. Put just the speed back up to 70 and run it. What do you expect?",
+        label: "Put just the speed back up to 70 and run it. What do you expect?",
         category: "Uses the working version to test one change at a time and asks for a prediction.",
         quality: "good",
         tags: ["bounded", "repair"],
@@ -207,7 +207,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "R2b.go",
-        label: "It works. That's what matters for today. Go get in line.",
+        label: "It works. That's what matters today. Go get in line.",
         category: "Accepts the working robot and ends without isolating the cause or checking reasoning.",
         quality: "partial",
         tags: [],
@@ -229,7 +229,7 @@ const nodes: Scenario["nodes"] = {
     moves: [
       {
         id: "P1.triage",
-        label: "Maya, I'll be there in two minutes. Unplug the cable and try once more. Jordan, run your test and tell me what happens.",
+        label: "Maya, unplug the cable and retry. Jordan, run your test and tell me what happens.",
         category: "Handles the second student briefly while leaving Jordan a specific next step to carry out alone.",
         quality: "good",
         tags: ["triage"],
@@ -241,7 +241,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "P1.leave",
-        label: "Jordan, keep at it. I'll be right back. (You go to Maya.)",
+        label: "Jordan, keep working on it while I help Maya. I'll be back in a couple of minutes.",
         category: "Leaves Jordan to help the other student without giving Jordan a specific next step.",
         quality: "partial",
         tags: ["noStep"],
@@ -253,7 +253,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "P1.wait",
-        label: "Maya, you'll have to wait. Jordan, go ahead and run it.",
+        label: "Maya, you'll have to wait a few minutes. Jordan, go ahead and run it.",
         category: "Stays with Jordan and asks the other student to wait.",
         quality: "partial",
         tags: [],
@@ -275,7 +275,7 @@ const nodes: Scenario["nodes"] = {
     moves: [
       {
         id: "R2.simplify",
-        label: "Let's go back to yesterday's code, then change only the speed to 70. What do you predict?",
+        label: "Back to yesterday's code, then only the speed to 70. What do you predict?",
         category: "Returns to a known working version and a single comparison, and asks for a prediction.",
         quality: "good",
         tags: ["bounded", "repair"],
@@ -286,7 +286,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "R2.continue",
-        label: "Keep adjusting things until it works.",
+        label: "Keep adjusting things until it makes the curve.",
         category: "Continues trial and error without isolating evidence.",
         quality: "poor",
         tags: ["overload"],
@@ -318,7 +318,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "D3.stop",
-        label: "Nice! Go get in line for the track.",
+        label: "Nice work! It makes the curve, so go get in line for the track.",
         category: "Praises the working result and ends without checking Jordan's reasoning.",
         quality: "partial",
         tags: [],
@@ -329,7 +329,7 @@ const nodes: Scenario["nodes"] = {
       },
       {
         id: "D3.explainForJordan",
-        label: "See? At 70 it's too fast to turn in time. Keep it at 40.",
+        label: "See? At 70 it's too fast to turn in time, so keep it at 40 for the run.",
         category: "States the conclusion for Jordan instead of asking Jordan to explain it.",
         quality: "partial",
         tags: ["interpretation"],
@@ -466,9 +466,9 @@ export const jordan: Scenario = {
       id: "teacher",
       name: "Classroom teacher",
       summary: "Helps students debug one-on-one. Takes over when time is short.",
-      gap: "Execution under time pressure. Knows asking matters, but defaults to fixing.",
+      gap: "Execution under time pressure. Defaults to fixing it when the clock is running.",
       objective:
-        "Elicit the student's evidence before choosing a next step, then have the student predict, test and explain, including when another student needs you.",
+        "Help Jordan find what broke the robot and get ready for the run, with Jordan doing the work, even when another student needs you.",
       support: "on_request",
     },
   ],
