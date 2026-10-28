@@ -28,7 +28,7 @@ export default function Home() {
               Three practice conversations in two formats. In the pharmacy scenarios you talk freely, and the character only tells you what your questions earn. In the classroom scenario you move through a fixed branching tree. Every debrief scores what you did, not whether you reached the last screen.
             </p>
             <p className="mt-4 inline-block rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-ink/80 ring-1 ring-ink/10">
-              Design demonstration. Not yet approved for learner use.
+              Design demonstration. All people and cases are fictional.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href="#scenarios" className="btn-primary">Choose a scenario</Link>
@@ -57,7 +57,7 @@ export default function Home() {
             ...Object.values(convoScenarios).filter((c) => c.caseLabel === "Case A").map((c) => ({
               id: c.id, title: c.title, domain: c.domain, tagline: c.tagline, format: "Open conversation · fact packet",
               who: c.who, scene: "pharmacy" as const, mood: "guarded" as const,
-              play: `${c.persona.name}. ${c.persona.gap}`, talk: `${c.counterpart.name}, ${c.counterpart.role.split(",")[0].toLowerCase()}`,
+              play: `${c.persona.name}. ${c.persona.gap}`, talk: `${c.counterpart.name}, ${c.counterpart.role.charAt(0).toLowerCase() + c.counterpart.role.split(",")[0].slice(1)}`,
             })),
             ...Object.values(scenarios).map((t) => ({
               id: t.id, title: t.title, domain: t.domain, tagline: t.tagline, format: "Fixed branching tree",

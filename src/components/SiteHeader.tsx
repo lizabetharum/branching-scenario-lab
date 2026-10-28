@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDesignerView } from "./useDesignerView";
 
 const LINKS = [
   { href: "/scenario/labels", label: "The Label Conversation" },
@@ -29,6 +30,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const button = useRef<HTMLButtonElement>(null);
+  const [designer, setDesigner] = useDesignerView();
 
   // Close the menu after navigating.
   useEffect(() => {
@@ -51,6 +53,21 @@ export function SiteHeader() {
   const linkClass = (href: string) =>
     `hover:text-teal-dark ${pathname === href ? "text-teal-dark underline decoration-2 underline-offset-4" : ""}`;
 
+  const toggle = (extra: string) => (
+    <button
+      type="button"
+      aria-pressed={designer}
+      onClick={() => setDesigner(!designer)}
+      title="Show or hide notes on how each scenario was scoped"
+      className={`inline-flex items-center gap-2 whitespace-nowrap font-bold text-ink/70 hover:text-teal-dark ${extra}`}
+    >
+      <span aria-hidden className={`relative h-4 w-7 rounded-full transition ${designer ? "bg-teal" : "bg-ink/25"}`}>
+        <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${designer ? "left-3.5" : "left-0.5"}`} />
+      </span>
+      Designer view
+    </button>
+  );
+
   return (
     <header className="border-b border-ink/10 bg-cream/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3.5">
@@ -59,12 +76,13 @@ export function SiteHeader() {
           <span className="truncate">Branching Scenario Lab</span>
         </Link>
         <nav aria-label="Main" className="hidden xl:block">
-          <ul className="flex gap-6 text-sm font-bold">
+          <ul className="flex gap-5 whitespace-nowrap text-sm font-bold">
             {LINKS.map((l) => (
               <li key={l.href}>
                 <Link href={l.href} aria-current={pathname === l.href ? "page" : undefined} className={linkClass(l.href)}>{l.label}</Link>
               </li>
             ))}
+            <li className="border-l border-ink/15 pl-5">{toggle("")}</li>
           </ul>
         </nav>
         <button
@@ -86,6 +104,7 @@ export function SiteHeader() {
                 <Link href={l.href} aria-current={pathname === l.href ? "page" : undefined} className={`block py-3 text-base font-bold ${linkClass(l.href)}`}>{l.label}</Link>
               </li>
             ))}
+            <li className="border-t border-ink/10">{toggle("py-3 text-base")}</li>
           </ul>
         </nav>
       )}

@@ -17,6 +17,7 @@ import type { CriterionStatus, Support } from "@/lib/types";
 import { Scene } from "./Scene";
 import { useSpeech } from "./useSpeech";
 import { useViewReset } from "./useViewReset";
+import { useDesignerView } from "./useDesignerView";
 import { TransferCard } from "./TransferCard";
 
 type Entry =
@@ -42,6 +43,7 @@ export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string;
   const name = s.counterpart.name;
 
   const [phase, setPhase] = useState<"intake" | "play" | "debrief">("intake");
+  const [designer] = useDesignerView();
   const [turns, setTurns] = useState<ConvoTurn[]>([]);
   const [log, setLog] = useState<Entry[]>([]);
   const [ending, setEnding] = useState<ConvoEnding["id"] | null>(null);
@@ -210,6 +212,7 @@ export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string;
           <button onClick={start} className="btn-primary mt-6">Start the conversation</button>
         </div>
 
+        {designer && (
         <details className="mt-6 rounded-2xl border border-ink/15 bg-white/60 p-5">
           <summary className="cursor-pointer font-bold text-ink/80">For designers: how this scenario was scoped</summary>
           <p className="mt-3 text-sm text-ink/80">Three questions came before any dialogue: how long the practice should take, the moment the skill breaks down on the job, and what learners already know. Each answer set a limit on what the scenario tries to do.</p>
@@ -226,6 +229,7 @@ export function ConversationPlayer({ scenarioId, custom }: { scenarioId: string;
               ))}
             </dl>
         </details>
+        )}
       </section>
     );
   }

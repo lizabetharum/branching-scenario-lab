@@ -10,6 +10,7 @@ import { PROVIDER_LABEL } from "@/lib/model-info";
 import { BranchMap } from "./BranchMap";
 import { Debrief } from "./Debrief";
 import { useViewReset } from "./useViewReset";
+import { useDesignerView } from "./useDesignerView";
 
 type LogEntry =
   | { kind: "situation"; text: string }
@@ -54,6 +55,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
   const s = scenarios[scenarioId];
   const [phase, setPhase] = useState<"intake" | "play" | "debrief">("intake");
   const [personaId, setPersonaId] = useState(s.learnerPersonas[0].id);
+  const [designer] = useDesignerView();
   const persona = s.learnerPersonas.find((p) => p.id === personaId)!;
 
   const [nodeId, setNodeId] = useState(s.start);
@@ -301,6 +303,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
           <button onClick={start} className="btn-primary mt-6">Start the scenario</button>
         </div>
 
+        {designer && (
         <details className="mt-6 rounded-2xl border border-ink/15 bg-white/60 p-5">
           <summary className="cursor-pointer font-bold text-ink/80">For designers: how this scenario was scoped</summary>
           <p className="mt-3 text-sm text-ink/80">Three questions came before any dialogue: how long the practice should take, the moment the skill breaks down on the job, and what learners already know. Each answer set a limit on what the scenario tries to do.</p>
@@ -317,6 +320,7 @@ export function Player({ scenarioId }: { scenarioId: string }) {
               ))}
             </dl>
         </details>
+        )}
       </section>
     );
   }
